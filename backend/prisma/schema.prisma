@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String?
+  name          String?
+  userType      String    @default("client") // "client" or "producer"
+  oauthProvider String?   // "google", "facebook", "pinterest"
+  oauthId       String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  bodyMeasurements BodyMeasurement?
+  orders        Order[]
+  products      Product[] // Relacja do produktów dla producentów
+}
+
+model BodyMeasurement {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  height        Float
+  chest         Float
+  waist         Float
+  hips          Float
+  shoulders     Float
+  inseam        Float?
+  bodyType      String?   // "hourglass", "pear", "rectangle", "inverted triangle", "apple"
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Product {
+  id            String    @id @default(uuid())
+  sellerId      String
+  seller        User      @relation(fields: [sellerId], references: [id])
+  name          String
+  description   String?
+  basePrice     Float
+  category      String    // "jacket", "pants", "skirt", "vest"
+  availableStyles ProductStyle[]
+  availableMaterials ProductMaterial[]
+  availableFinishes ProductFinish[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  orderItems    OrderItem[]
+}
+
+model ProductStyle {
+  id            String    @id @default(uuid())
+  productId     String
+  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?
+  imageUrl      String?
+  additionalPrice Float    @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  orderItems    OrderItem[]
+}
+
+model ProductMaterial {
+  id            String    @id @default(uuid())
+  productId     String
+  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?
+  imageUrl      String?
+  additionalPrice Float    @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  orderItems    OrderItem[]
+}
+
+model ProductFinish {
+  id            String    @id @default(uuid())
+  productId     String
+  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?
+  imageUrl      String?
+  additionalPrice Float    @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  orderItems    OrderItem[]
+}
+
+model Order {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status        String    // "draft", "submitted", "processing", "completed", "cancelled"
+  totalPrice    Float
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  items         OrderItem[]
+}
+
+model OrderItem {
+  id            String    @id @default(uuid())
+  orderId       String
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product   @relation(fields: [productId], references: [id])
+  styleId       String?
+  style         ProductStyle? @relation(fields: [styleId], references: [id])
+  materialId    String?
+  material      ProductMaterial? @relation(fields: [materialId], references: [id])
+  finishId      String?
+  finish        ProductFinish? @relation(fields: [finishId], references: [id])
+  quantity      Int       @default(1)
+  price         Float
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}

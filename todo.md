@@ -1,0 +1,11 @@
+- [x] Usuń plik `ziLadsoM`
+- [x] Zainstaluj brakujące pakiety `react-native-web` i `@expo/metro-runtime`
+- [x] Popraw zależności w `package.json` (frontend i backend)
+- [x] Dodaj przykładowy plik `.png` o nazwie `placeholder.png`
+- [x] Napraw błąd składni w `ProducerEditProductScreen.tsx` (linia 6)
+- [x] Przenieś komponenty z `components/ui` do `components` i zaktualizuj ścieżki importu we wszystkich plikach ekranów
+- [x] Zaktualizuj ścieżki odwołań do `designTokens`
+- [x] Zintegruj frontend z backendem (użyj rzeczywistych endpointów zamiast mocków)
+- [x] Dodaj skrypt do seedowania bazy danych
+- [ ] Zweryfikuj działanie aplikacji z nowymi zmianami
+
