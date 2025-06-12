@@ -1,11 +1,14 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import { PrismaClient } from '@prisma/client';
 import authRoutes from './routes/auth.routes';
 import productRoutes from './routes/product.routes';
 import userRoutes from './routes/user.routes';
 import seedRoutes from './routes/seed.routes';
+import filesRoutes from './routes/files.routes';
+import producerRoutes from './routes/producer.routes';
 import config from './config/config';
 
 // Inicjalizacja zmiennych środowiskowych
@@ -23,6 +26,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serwowanie plików statycznych z katalogu uploads
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
 // Logowanie żądań
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
@@ -34,6 +40,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/seed', seedRoutes);
+app.use('/api/files', filesRoutes);
+app.use('/api/producer', producerRoutes);
 
 // Endpoint testowy
 app.get('/', (req, res) => {

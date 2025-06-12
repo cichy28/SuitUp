@@ -10,6 +10,8 @@ async function main() {
   console.log('🧹 Czyszczenie istniejących danych...');
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
+  await prisma.productVariantImage.deleteMany();
+  await prisma.productVariant.deleteMany();
   await prisma.productFinish.deleteMany();
   await prisma.productMaterial.deleteMany();
   await prisma.productStyle.deleteMany();
@@ -55,6 +57,138 @@ async function main() {
     },
   });
 
+  // Tworzenie właściwości produktu zarządzanych przez producenta
+  console.log('🎨 Tworzenie właściwości produktu...');
+  
+  // Style
+  const styles = await Promise.all([
+    prisma.productStyle.create({
+      data: {
+        producerId: producerUser.id,
+        name: 'Klasyczny',
+        description: 'Tradycyjny, ponadczasowy krój',
+        imageUrl: `/uploads/${producerUser.id}/styles/classic.jpg`,
+        additionalPrice: 0.00,
+      },
+    }),
+    prisma.productStyle.create({
+      data: {
+        producerId: producerUser.id,
+        name: 'Slim fit',
+        description: 'Dopasowany, nowoczesny krój',
+        imageUrl: `/uploads/${producerUser.id}/styles/slim.jpg`,
+        additionalPrice: 50.00,
+      },
+    }),
+    prisma.productStyle.create({
+      data: {
+        producerId: producerUser.id,
+        name: 'Oversize',
+        description: 'Luźny, komfortowy krój',
+        imageUrl: `/uploads/${producerUser.id}/styles/oversize.jpg`,
+        additionalPrice: 30.00,
+      },
+    }),
+    prisma.productStyle.create({
+      data: {
+        producerId: producerUser.id,
+        name: 'Wysoki stan',
+        description: 'Podwyższona talia',
+        imageUrl: `/uploads/${producerUser.id}/styles/high-waist.jpg`,
+        additionalPrice: 25.00,
+      },
+    }),
+  ]);
+
+  // Materiały
+  const materials = await Promise.all([
+    prisma.productMaterial.create({
+      data: {
+        producerId: producerUser.id,
+        name: 'Wełna 100%',
+        description: 'Naturalna wełna najwyższej jakości',
+        imageUrl: `/uploads/${producerUser.id}/materials/wool_texture.jpg`,
+        additionalPrice: 100.00,
+      },
+    }),
+    prisma.productMaterial.create({
+      data: {
+        producerId: producerUser.id,
+        name: 'Wełna z poliestrem',
+        description: 'Mieszanka wełny z poliestrem',
+        imageUrl: `/uploads/${producerUser.id}/materials/wool_knit.jpg`,
+        additionalPrice: 0.00,
+      },
+    }),
+    prisma.productMaterial.create({
+      data: {
+        producerId: producerUser.id,
+        name: 'Bawełna',
+        description: 'Naturalna bawełna organiczna',
+        imageUrl: `/uploads/${producerUser.id}/materials/cotton_texture.jpg`,
+        additionalPrice: 50.00,
+      },
+    }),
+    prisma.productMaterial.create({
+      data: {
+        producerId: producerUser.id,
+        name: 'Len',
+        description: 'Naturalny len wysokiej jakości',
+        imageUrl: `/uploads/${producerUser.id}/materials/linen.jpg`,
+        additionalPrice: 80.00,
+      },
+    }),
+    prisma.productMaterial.create({
+      data: {
+        producerId: producerUser.id,
+        name: 'Jedwab',
+        description: 'Naturalny jedwab premium',
+        imageUrl: `/uploads/${producerUser.id}/materials/silk.jpg`,
+        additionalPrice: 150.00,
+      },
+    }),
+  ]);
+
+  // Wykończenia
+  const finishes = await Promise.all([
+    prisma.productFinish.create({
+      data: {
+        producerId: producerUser.id,
+        name: 'Standardowe',
+        description: 'Standardowe wykończenie',
+        imageUrl: `/uploads/${producerUser.id}/finishes/standard.jpg`,
+        additionalPrice: 0.00,
+      },
+    }),
+    prisma.productFinish.create({
+      data: {
+        producerId: producerUser.id,
+        name: 'Premium',
+        description: 'Wykończenie premium z dodatkowymi detalami',
+        imageUrl: `/uploads/${producerUser.id}/finishes/premium.jpg`,
+        additionalPrice: 100.00,
+      },
+    }),
+    prisma.productFinish.create({
+      data: {
+        producerId: producerUser.id,
+        name: 'Guziki złote',
+        description: 'Złote guziki premium',
+        imageUrl: `/uploads/${producerUser.id}/finishes/gold_buttons.jpg`,
+        additionalPrice: 75.00,
+      },
+    }),
+    prisma.productFinish.create({
+      data: {
+        producerId: producerUser.id,
+        name: 'Guziki czarne',
+        description: 'Eleganckie czarne guziki',
+        imageUrl: `/uploads/${producerUser.id}/finishes/black_buttons.jpg`,
+        additionalPrice: 25.00,
+      },
+    }),
+  ]);
+
   // Tworzenie produktów
   console.log('👗 Tworzenie produktów...');
   
@@ -98,156 +232,137 @@ async function main() {
     },
   });
 
-  // Dodawanie stylów do produktów
-  console.log('🎨 Dodawanie stylów...');
+  // Generowanie wariantów produktu
+  console.log('🔄 Generowanie wariantów produktu...');
   
-  // Style dla marynarki
-  await prisma.productStyle.createMany({
-    data: [
-      { productId: jacket.id, name: 'Klasyczny', additionalPrice: 0.00 },
-      { productId: jacket.id, name: 'Slim fit', additionalPrice: 50.00 },
-      { productId: jacket.id, name: 'Oversize', additionalPrice: 30.00 },
-    ],
-  });
+  const products = [jacket, pants, vest, skirt];
+  const allVariants = [];
 
-  // Style dla spodni
-  await prisma.productStyle.createMany({
-    data: [
-      { productId: pants.id, name: 'Klasyczny', additionalPrice: 0.00 },
-      { productId: pants.id, name: 'Slim fit', additionalPrice: 40.00 },
-    ],
-  });
+  for (const product of products) {
+    // Wybieramy odpowiednie style dla każdego produktu
+    let productStyles: any[] = [];
+    if (product.category === 'jacket' || product.category === 'vest') {
+      productStyles = [styles[0], styles[1], styles[2]]; // Klasyczny, Slim fit, Oversize
+    } else if (product.category === 'pants') {
+      productStyles = [styles[0], styles[1]]; // Klasyczny, Slim fit
+    } else if (product.category === 'skirt') {
+      productStyles = [styles[0], styles[3]]; // Klasyczny, Wysoki stan
+    }
 
-  // Style dla kamizelki
-  await prisma.productStyle.create({
-    data: { productId: vest.id, name: 'Klasyczny', additionalPrice: 0.00 },
-  });
+    // Wybieramy materiały (wszystkie dla każdego produktu)
+    const productMaterials = materials.slice(0, 3); // Wełna 100%, Wełna z poliestrem, Bawełna
 
-  // Style dla spódnicy
-  await prisma.productStyle.createMany({
-    data: [
-      { productId: skirt.id, name: 'Klasyczny', additionalPrice: 0.00 },
-      { productId: skirt.id, name: 'Wysoki stan', additionalPrice: 25.00 },
-    ],
-  });
+    // Wybieramy wykończenia
+    const productFinishes = finishes.slice(0, 2); // Standardowe, Premium
 
-  // Dodawanie materiałów
-  console.log('🧵 Dodawanie materiałów...');
+    // Generujemy warianty
+    for (const style of productStyles) {
+      for (const material of productMaterials) {
+        for (const finish of productFinishes) {
+          const price = product.basePrice + style.additionalPrice + material.additionalPrice + finish.additionalPrice;
+          
+          const variant = await prisma.productVariant.create({
+            data: {
+              productId: product.id,
+              styleId: style.id,
+              materialId: material.id,
+              finishId: finish.id,
+              sku: `${product.category.toUpperCase()}-${style.name.replace(/\s+/g, '')}-${material.name.replace(/\s+/g, '')}-${finish.name.replace(/\s+/g, '')}`,
+              price: price,
+              isActive: true,
+            },
+          });
+          
+          allVariants.push(variant);
+        }
+      }
+    }
+  }
+
+  // Dodawanie obrazków do wariantów
+  console.log('🖼️ Dodawanie obrazków do wariantów...');
   
-  const materials = [
-    { name: 'Wełna 100%', additionalPrice: 100.00 },
-    { name: 'Wełna z poliestrem', additionalPrice: 0.00 },
-    { name: 'Bawełna', additionalPrice: 50.00 },
-    { name: 'Len', additionalPrice: 80.00 },
-    { name: 'Jedwab', additionalPrice: 150.00 },
-  ];
-
-  for (const product of [jacket, pants, vest, skirt]) {
-    for (const material of materials) {
-      await prisma.productMaterial.create({
+  for (const variant of allVariants.slice(0, 6)) { // Dodajemy obrazki tylko do pierwszych 6 wariantów dla przykładu
+    const viewTypes = ['front', 'left', 'right'];
+    
+    for (const viewType of viewTypes) {
+      await prisma.productVariantImage.create({
         data: {
-          productId: product.id,
-          name: material.name,
-          additionalPrice: material.additionalPrice,
+          variantId: variant.id,
+          imageUrl: `https://example.com/images/variant-${variant.id}-${viewType}.jpg`,
+          viewType: viewType,
         },
       });
     }
   }
 
-  // Dodawanie wykończeń
-  console.log('✨ Dodawanie wykończeń...');
-  
-  const finishes = [
-    { name: 'Standardowe', additionalPrice: 0.00 },
-    { name: 'Premium', additionalPrice: 100.00 },
-  ];
-
-  for (const product of [jacket, pants, vest, skirt]) {
-    for (const finish of finishes) {
-      await prisma.productFinish.create({
-        data: {
-          productId: product.id,
-          name: finish.name,
-          additionalPrice: finish.additionalPrice,
-        },
-      });
-    }
-  }
-
-  // Tworzenie przykładowych zamówień
+  // Tworzenie przykładowych zamówień z wariantami
   console.log('📦 Tworzenie przykładowych zamówień...');
   
-  const jacketStyle = await prisma.productStyle.findFirst({
-    where: { productId: jacket.id, name: 'Slim fit' },
-  });
+  // Znajdź pierwszy wariant marynarki
+  const jacketVariant = allVariants.find(v => v.productId === jacket.id);
   
-  const jacketMaterial = await prisma.productMaterial.findFirst({
-    where: { productId: jacket.id, name: 'Wełna 100%' },
-  });
+  if (jacketVariant) {
+    const order1 = await prisma.order.create({
+      data: {
+        userId: clientUser.id,
+        status: 'submitted',
+        totalPrice: jacketVariant.price,
+      },
+    });
+
+    await prisma.orderItem.create({
+      data: {
+        orderId: order1.id,
+        productId: jacket.id,
+        variantId: jacketVariant.id,
+        quantity: 1,
+        price: jacketVariant.price,
+      },
+    });
+  }
+
+  // Znajdź pierwszy wariant spodni
+  const pantsVariant = allVariants.find(v => v.productId === pants.id);
   
-  const jacketFinish = await prisma.productFinish.findFirst({
-    where: { productId: jacket.id, name: 'Premium' },
-  });
+  if (pantsVariant) {
+    const order2 = await prisma.order.create({
+      data: {
+        userId: clientUser.id,
+        status: 'processing',
+        totalPrice: pantsVariant.price,
+      },
+    });
 
-  const order1 = await prisma.order.create({
-    data: {
-      userId: clientUser.id,
-      status: 'submitted',
-      totalPrice: 849.00, // 599 + 50 + 100 + 100
-    },
-  });
-
-  await prisma.orderItem.create({
-    data: {
-      orderId: order1.id,
-      productId: jacket.id,
-      styleId: jacketStyle?.id,
-      materialId: jacketMaterial?.id,
-      finishId: jacketFinish?.id,
-      quantity: 1,
-      price: 849.00,
-    },
-  });
-
-  const pantsStyle = await prisma.productStyle.findFirst({
-    where: { productId: pants.id, name: 'Klasyczny' },
-  });
-  
-  const pantsMaterial = await prisma.productMaterial.findFirst({
-    where: { productId: pants.id, name: 'Bawełna' },
-  });
-  
-  const pantsFinish = await prisma.productFinish.findFirst({
-    where: { productId: pants.id, name: 'Standardowe' },
-  });
-
-  const order2 = await prisma.order.create({
-    data: {
-      userId: clientUser.id,
-      status: 'processing',
-      totalPrice: 399.00, // 349 + 0 + 50 + 0
-    },
-  });
-
-  await prisma.orderItem.create({
-    data: {
-      orderId: order2.id,
-      productId: pants.id,
-      styleId: pantsStyle?.id,
-      materialId: pantsMaterial?.id,
-      finishId: pantsFinish?.id,
-      quantity: 1,
-      price: 399.00,
-    },
-  });
+    await prisma.orderItem.create({
+      data: {
+        orderId: order2.id,
+        productId: pants.id,
+        variantId: pantsVariant.id,
+        quantity: 1,
+        price: pantsVariant.price,
+      },
+    });
+  }
 
   console.log('✅ Seedowanie zakończone pomyślnie!');
   console.log('');
   console.log('📋 Utworzone dane testowe:');
   console.log('👤 Klient: klient@example.com / password123');
   console.log('🏭 Producent: producent@example.com / password123');
-  console.log('📦 Produkty: 4 (marynarka, spodnie, kamizelka, spódnica)');
-  console.log('🛍️ Zamówienia: 2 przykładowe zamówienia');
+  console.log(`🎨 Style: ${styles.length}`);
+  console.log(`🧵 Materiały: ${materials.length}`);
+  console.log(`✨ Wykończenia: ${finishes.length}`);
+  console.log(`📦 Produkty: ${products.length}`);
+  console.log(`🔄 Warianty: ${allVariants.length}`);
+  console.log(`🖼️ Obrazki wariantów: ${allVariants.slice(0, 6).length * 3}`);
+  console.log('🛍️ Zamówienia: 2 przykładowe zamówienia z wariantami');
+  console.log('');
+  console.log('🔗 Przykładowe URL obrazków:');
+  console.log('• Style: https://example.com/images/style-*.jpg');
+  console.log('• Materiały: https://example.com/images/material-*.jpg');
+  console.log('• Wykończenia: https://example.com/images/finish-*.jpg');
+  console.log('• Warianty: https://example.com/images/variant-*-[front|left|right].jpg');
   console.log('');
 }
 
@@ -259,4 +374,7 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+
+export { main };
 

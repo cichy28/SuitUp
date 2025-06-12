@@ -1,13 +1,15 @@
 import { Request, Response } from 'express';
-import { seedDatabase } from '../utils/seed';
 
 export const seedDatabaseWithTestData = async (req: Request, res: Response) => {
   try {
-    const sellerId = (req as any).user.id;
+    // Import dynamiczny aby uniknąć problemów z circular dependencies
+    const { main } = await import('../utils/seed');
     
-    const result = await seedDatabase(sellerId);
+    await main();
     
-    return res.status(200).json(result);
+    return res.status(200).json({ 
+      message: 'Baza danych została pomyślnie zainicjalizowana danymi testowymi' 
+    });
   } catch (error) {
     console.error('Błąd podczas seedowania bazy danych:', error);
     return res.status(500).json({ 

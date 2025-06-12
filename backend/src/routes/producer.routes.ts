@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import * as ProducerController from '../controllers/producer.controller';
-import { authenticate } from '../middleware/auth.middleware';
+import { authenticateJWT } from '../middleware/auth.middleware';
 import { isProducer } from '../middleware/producer.middleware';
 
 const router = Router();
 
 // Wszystkie endpointy wymagają autentykacji i roli producenta
-router.use(authenticate);
+router.use(authenticateJWT);
 router.use(isProducer);
 
 // Zarządzanie produktami
@@ -16,13 +16,28 @@ router.post('/products', ProducerController.createProduct);
 router.put('/products/:productId', ProducerController.updateProduct);
 router.delete('/products/:productId', ProducerController.deleteProduct);
 
-// Zarządzanie stylami produktów
+// NOWE ENDPOINTY - Zarządzanie właściwościami produktu przez producenta
+
+// Zarządzanie stylami
+router.get('/styles', ProducerController.getProducerStyles);
+router.post('/styles', ProducerController.addProducerStyle);
+
+// Zarządzanie materiałami
+router.get('/materials', ProducerController.getProducerMaterials);
+router.post('/materials', ProducerController.addProducerMaterial);
+
+// Zarządzanie wykończeniami
+router.get('/finishes', ProducerController.getProducerFinishes);
+router.post('/finishes', ProducerController.addProducerFinish);
+
+// Zarządzanie wariantami produktu
+router.get('/products/:productId/variants', ProducerController.getVariants);
+router.post('/products/:productId/variants/generate', ProducerController.generateVariants);
+router.put('/variants/:variantId/images', ProducerController.updateVariantImage);
+
+// STARE ENDPOINTY - zachowane dla kompatybilności wstecznej (przestarzałe)
 router.post('/products/:productId/styles', ProducerController.addProductStyle);
-
-// Zarządzanie materiałami produktów
 router.post('/products/:productId/materials', ProducerController.addProductMaterial);
-
-// Zarządzanie wykończeniami produktów
 router.post('/products/:productId/finishes', ProducerController.addProductFinish);
 
 // Zarządzanie zamówieniami

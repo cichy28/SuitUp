@@ -6,6 +6,7 @@ interface AuthRequest extends Request {
   user?: {
     id: string;
     email: string;
+    userType: string;
   };
 }
 
@@ -20,7 +21,7 @@ export const authenticateJWT = (req: AuthRequest, res: Response, next: NextFunct
         return res.status(403).json({ message: 'Nieprawidłowy token' });
       }
 
-      req.user = user as { id: string; email: string };
+      req.user = user as { id: string; email: string; userType: string };
       next();
     });
   } else {

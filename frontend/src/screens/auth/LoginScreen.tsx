@@ -3,8 +3,8 @@ import { View, Text, ScrollView, StyleSheet, Alert } from "react-native";
 import { useFormik } from "formik";
 import { useAuth } from "../../services/auth";
 import { authAPI } from "../../services/api";
-import { loginSchema, LoginFormData } from "../../app-model";
-import { createZodValidation } from "../../utils/validation";
+import { loginSchema, LoginFormData } from "shared/app-model/auth.validators";
+import { createZodValidation } from "shared/app-model/validation";
 
 // Import reusable UI components
 import Button from "../../components/Button";
