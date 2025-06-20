@@ -1,121 +1,91 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, StyleSheet, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import StyledButton from "../components/StyledButton";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../navigation/AppNavigator";
 import { useDesign } from "../context/DesignContext";
-import StyledButton from "../components/StyledButton";
-import { BodyShape, StylePreference } from "../../../shared/enums";
+
+// Definicja typów dla stacku nawigacji, jeśli jeszcze nie masz
+type RootStackParamList = {
+	Welcome: undefined;
+	Brief: undefined;
+	Configurator: undefined; // Dodajemy ekran Configurator do typów
+	// Dodaj inne ekrany, jeśli są potrzebne
+};
 
 type BriefScreenNavigationProp = StackNavigationProp<RootStackParamList, "Brief">;
 
-// Prosty komponent Checkbox
-const Checkbox = ({
-	label,
-	value,
-	onValueChange,
-}: {
-	label: string;
-	value: boolean;
-	onValueChange: (val: boolean) => void;
-}) => (
-	<TouchableOpacity style={styles.checkboxContainer} onPress={() => onValueChange(!value)}>
-		<View style={[styles.checkbox, value && styles.checkboxChecked]}>
-			{value && <Text style={styles.checkmark}>✓</Text>}
-		</View>
-		<Text style={styles.checkboxLabel}>{label}</Text>
-	</TouchableOpacity>
-);
-
 const BriefScreen = () => {
+	// --- POCZĄTEK ZMIANY ---
+	// Pobieramy cały obiekt navigation
 	const navigation = useNavigation<BriefScreenNavigationProp>();
-	const { dispatch } = useDesign();
+	// --- KONIEC ZMIANY ---
 
-	const [selectedShape, setSelectedShape] = useState<BodyShape | null>(null);
-	const [preferences, setPreferences] = useState<StylePreference[]>([]);
-
-	const togglePreference = (pref: StylePreference) => {
-		setPreferences((prev) => (prev.includes(pref) ? prev.filter((p) => p !== pref) : [...prev, pref]));
-	};
+	const [brief, setBrief] = useState("");
+	const { goToNextStep } = useDesign();
 
 	const handleFinish = () => {
-		if (selectedShape) {
-			dispatch({ type: "SET_BRIEF", payload: { bodyShape: selectedShape, preferences: preferences } });
-			navigation.navigate("Recommendation");
-		} else {
-			alert("Please select your body type.");
-		}
+		console.log("Brief:", brief);
+		// goToNextStep(); // Ta funkcja z kontekstu zarządza krokami, a nie nawigacją
+
+		// --- POCZĄTEK ZMIANY ---
+		// Używamy navigation.navigate do przejścia do następnego ekranu
+		navigation.navigate("Configurator");
+		// --- KONIEC ZMIANY ---
 	};
 
 	return (
-		<View style={styles.container}>
-			{/* Tutaj powinien być ProgressBar */}
-			<Text style={styles.header}>BRIEF</Text>
-
-			<Text style={styles.title}>SELECT YOUR BODY TYPE</Text>
-			{/* Tutaj powinny być ikony - uproszczone do tekstu */}
-			<View style={styles.shapeSelector}>
-				{(["INVERTED_TRIANGLE", "TRIANGLE", "HOURGLASS", "OVAL", "RECTANGLE"] as BodyShape[]).map((shape) => (
-					<TouchableOpacity
-						key={shape}
-						style={[styles.shapeButton, selectedShape === shape && styles.shapeSelected]}
-						onPress={() => setSelectedShape(shape)}
-					>
-						{/* TODO: Zastąpić ikonami */}
-						<Text>{shape.substring(0, 1)}</Text>
-					</TouchableOpacity>
-				))}
-			</View>
-
-			<Text style={styles.title}>I LIKE</Text>
-			<View style={styles.prefsContainer}>
-				<Checkbox
-					label="FITTED WEAR"
-					value={preferences.includes("FITTED_WEAR")}
-					onValueChange={() => togglePreference("FITTED_WEAR")}
+		<SafeAreaView style={styles.container}>
+			<ScrollView contentContainerStyle={styles.scrollContent}>
+				<Text style={styles.title}>Opisz nam swoje potrzeby</Text>
+				<Text style={styles.subtitle}>
+					Opisz, jakiego ubrania potrzebujesz, na jaką okazję, w jakim stylu. Im więcej szczegółów, tym lepsze
+					rekomendacje będziemy mogli Ci dać.
+				</Text>
+				<TextInput
+					style={styles.input}
+					multiline
+					placeholder="Np. Potrzebuję garnituru na ślub kolegi, który odbędzie się latem. Lubię styl klasyczny, ale z nowoczesnym twistem. Kolor granatowy lub szary."
+					value={brief}
+					onChangeText={setBrief}
 				/>
-				<Checkbox
-					label="OVERSIZE WEAR"
-					value={preferences.includes("OVERSIZE_WEAR")}
-					onValueChange={() => togglePreference("OVERSIZE_WEAR")}
-				/>
-				<Checkbox
-					label="RETRO SHAPES"
-					value={preferences.includes("RETRO_SHAPES")}
-					onValueChange={() => togglePreference("RETRO_SHAPES")}
-				/>
-				<Checkbox
-					label="MASCULINE SHAPES"
-					value={preferences.includes("MASCULINE_SHAPES")}
-					onValueChange={() => togglePreference("MASCULINE_SHAPES")}
-				/>
-			</View>
-
-			<StyledButton title="FINISH" onPress={handleFinish} variant="secondary" />
-		</View>
+			</ScrollView>
+			<StyledButton title="Zakończ" onPress={handleFinish} />
+		</SafeAreaView>
 	);
 };
 
 const styles = StyleSheet.create({
-	container: { flex: 1, padding: 20, backgroundColor: "#FCFBF8" },
-	header: { fontSize: 18, fontWeight: "bold", color: "#333", marginBottom: 20 },
-	title: { fontSize: 16, color: "#555", marginVertical: 20 },
-	shapeSelector: { flexDirection: "row", justifyContent: "space-around", marginBottom: 30 },
-	shapeButton: {
-		width: 50,
-		height: 80,
-		borderWidth: 2,
-		borderColor: "#D3B89A",
-		justifyContent: "center",
-		alignItems: "center",
+	container: {
+		flex: 1,
+		backgroundColor: "#fff",
+		padding: 20,
 	},
-	shapeSelected: { borderColor: "#82D4D4", backgroundColor: "rgba(130, 212, 212, 0.2)" },
-	prefsContainer: { marginBottom: 40 },
-	checkboxContainer: { flexDirection: "row", alignItems: "center", marginVertical: 10 },
-	checkbox: { width: 24, height: 24, borderWidth: 2, borderColor: "#82D4D4", marginRight: 10 },
-	checkboxChecked: { backgroundColor: "#82D4D4" },
-	checkmark: { color: "white", textAlign: "center" },
-	checkboxLabel: { fontSize: 16, color: "#333" },
+	scrollContent: {
+		flexGrow: 1,
+	},
+	title: {
+		fontSize: 24,
+		fontWeight: "bold",
+		marginBottom: 10,
+		textAlign: "center",
+	},
+	subtitle: {
+		fontSize: 16,
+		color: "#666",
+		textAlign: "center",
+		marginBottom: 20,
+	},
+	input: {
+		borderWidth: 1,
+		borderColor: "#ddd",
+		borderRadius: 10,
+		padding: 15,
+		fontSize: 16,
+		minHeight: 200,
+		textAlignVertical: "top", // Zapewnia, że tekst w multiline input zaczyna się od góry
+	},
 });
 
 export default BriefScreen;

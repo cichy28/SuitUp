@@ -1,14 +1,27 @@
+import "react-native-gesture-handler";
 import React from "react";
-import { DesignProvider } from "./src/context/DesignContext";
-import AppNavigator from "./src/navigation/AppNavigator";
 import { NavigationContainer } from "@react-navigation/native";
+import AppNavigator from "./src/navigation/AppNavigator";
+import { DesignProvider } from "./src/context/DesignContext";
 
-export default function App() {
+// --- POCZĄTEK ZMIANY ---
+// Importujemy brakujący SafeAreaProvider
+import { SafeAreaProvider } from "react-native-safe-area-context";
+// --- KONIEC ZMIANY ---
+
+const App = () => {
 	return (
-		<DesignProvider>
+		// --- POCZĄTEK ZMIANY ---
+		// Opakowujemy całą aplikację w SafeAreaProvider
+		<SafeAreaProvider>
 			<NavigationContainer>
-				<AppNavigator />
+				<DesignProvider>
+					<AppNavigator />
+				</DesignProvider>
 			</NavigationContainer>
-		</DesignProvider>
+		</SafeAreaProvider>
+		// --- KONIEC ZMIANY ---
 	);
-}
+};
+
+export default App;
