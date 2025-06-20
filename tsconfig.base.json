@@ -8,7 +8,7 @@
 		"skipLibCheck": true,
 		"baseUrl": ".",
 		"paths": {
-			"@app-model/*": ["./shared/app-model/*"],
+			"@validators/*": ["./shared/validators/*"],
 			"@uploads/*": ["./uploads/*"]
 		}
 	}

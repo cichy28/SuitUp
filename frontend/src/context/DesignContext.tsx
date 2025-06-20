@@ -1,73 +1,61 @@
-import React, { createContext, useContext, useReducer, ReactNode } from "react";
-import { DesignCustomization, BodyShape, StylePreference } from "../../../shared/types";
+import React, { createContext, useState, ReactNode, useContext } from "react";
 
-// Definicja stanu i akcji dla reducera
-interface DesignState extends DesignCustomization {
-	bodyShape: BodyShape | null;
-	stylePreferences: StylePreference[];
+// Definicja kształtu wartości kontekstu
+interface DesignContextType {
+	currentStep: number;
+	totalSteps: number;
+	selectedVariables: { [key: string]: string };
+	handleVariableChange: (propertyId: string, value: string) => void;
+	goToNextStep: () => void;
+	goToPreviousStep: () => void;
 }
 
-type Action =
-	| { type: "SET_DESIGN_NAME"; payload: string }
-	| { type: "SET_BRIEF"; payload: { bodyShape: BodyShape; preferences: StylePreference[] } }
-	| { type: "SELECT_BASE_PRODUCT"; payload: string }
-	| { type: "SELECT_VARIANT"; payload: { propertyId: string; variantId: string } }
-	| { type: "SET_MEASUREMENT"; payload: { name: string; value: number } }
-	| { type: "RESET_DESIGN" };
+// Stworzenie kontekstu z początkową wartością undefined
+export const DesignContext = createContext<DesignContextType | undefined>(undefined);
 
-const initialState: DesignState = {
-	designName: null,
-	bodyShape: null,
-	stylePreferences: [],
-	baseProductId: null,
-	selectedVariants: {},
-	measurements: {},
-};
-
-const DesignContext = createContext<
-	| {
-			state: DesignState;
-			dispatch: React.Dispatch<Action>;
-	  }
-	| undefined
->(undefined);
-
-function designReducer(state: DesignState, action: Action): DesignState {
-	switch (action.type) {
-		case "SET_DESIGN_NAME":
-			return { ...state, designName: action.payload };
-		case "SET_BRIEF":
-			return { ...state, bodyShape: action.payload.bodyShape, stylePreferences: action.payload.preferences };
-		case "SELECT_BASE_PRODUCT":
-			return { ...state, baseProductId: action.payload };
-		case "SELECT_VARIANT":
-			return {
-				...state,
-				selectedVariants: {
-					...state.selectedVariants,
-					[action.payload.propertyId]: action.payload.variantId,
-				},
-			};
-		case "SET_MEASUREMENT":
-			return {
-				...state,
-				measurements: {
-					...state.measurements,
-					[action.payload.name]: action.payload.value,
-				},
-			};
-		case "RESET_DESIGN":
-			return initialState;
-		default:
-			return state;
-	}
+// Definicja propsów dla komponentu providera
+interface DesignProviderProps {
+	children: ReactNode;
 }
 
-export const DesignProvider = ({ children }: { children: ReactNode }) => {
-	const [state, dispatch] = useReducer(designReducer, initialState);
-	return <DesignContext.Provider value={{ state, dispatch }}>{children}</DesignContext.Provider>;
+// Stworzenie komponentu providera
+export const DesignProvider: React.FC<DesignProviderProps> = ({ children }) => {
+	const [currentStep, setCurrentStep] = useState(1);
+	const [selectedVariables, setSelectedVariables] = useState<{
+		[key: string]: string;
+	}>({});
+	const totalSteps = 5; // Przykładowa liczba kroków
+
+	const handleVariableChange = (propertyId: string, value: string) => {
+		setSelectedVariables((prev) => ({ ...prev, [propertyId]: value }));
+	};
+
+	const goToNextStep = () => {
+		setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
+	};
+
+	const goToPreviousStep = () => {
+		setCurrentStep((prev) => Math.max(prev - 1, 1));
+	};
+
+	return (
+		<DesignContext.Provider
+			value={{
+				currentStep,
+				totalSteps,
+				selectedVariables,
+				handleVariableChange,
+				goToNextStep,
+				goToPreviousStep,
+			}}
+		>
+			{children}
+		</DesignContext.Provider>
+	);
 };
 
+// --- POCZĄTEK ZMIANY ---
+// Dodanie i wyeksportowanie customowego hooka do używania kontekstu
 export const useDesign = () => {
 	const context = useContext(DesignContext);
 	if (context === undefined) {
@@ -75,3 +63,4 @@ export const useDesign = () => {
 	}
 	return context;
 };
+// --- KONIEC ZMIANY ---

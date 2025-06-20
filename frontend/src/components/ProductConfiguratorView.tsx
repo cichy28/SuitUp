@@ -1,91 +1,126 @@
-import React from "react";
-import { View, ImageBackground, TouchableOpacity, StyleSheet, Image } from "react-native";
-import { Hotspot, SelectedVariants } from "../types/models";
+import { StatusBar } from "expo-status-bar";
+import { Image, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useContext } from "react";
 
-interface Props {
-	/** Obiekt produktu zawierający obrazek bazowy i listę hotspotów */
-	productImage: any; // np. require('../../assets/blazer-base.jpg')
-	/** Lista hotspotów do wyświetlenia na obrazku */
-	hotspots: Hotspot[];
-	/** ID aktualnie aktywnej/wybranej właściwości do podświetlenia kropki */
-	activePropertyId: string | null;
-	/** Obiekt przechowujący wybrane warianty dla każdej właściwości */
-	selectedVariants: SelectedVariants;
-	/** Funkcja zwrotna wywoływana po naciśnięciu kropki. Przekazuje ID powiązanej właściwości. */
-	onHotspotPress: (propertyId: string) => void;
-}
+import { HapticTab } from "@/components/HapticTab";
+import ProgressBar from "@/components/ProgressBar";
+import StyledButton from "@/components/StyledButton";
+import { DesignContext, DesignProvider } from "../context/DesignContext";
+import { Hotspot } from "shared/validators/hotspot"; // <<< POPRAWIONY IMPORT
 
-const ProductConfiguratorView = ({
-	productImage,
-	hotspots,
-	activePropertyId,
-	selectedVariants,
-	onHotspotPress,
-}: Props) => {
+// LOKALNA DEFINICJA TYPU Hotspot ZOSTAŁA USUNIĘTA
+
+type SelectedVariables = {
+	[key: string]: string;
+};
+
+// Zaktualizowano DUMMY_HOTSPOTS, aby pasował do pełnej definicji typu z walidatora
+const DUMMY_HOTSPOTS: Hotspot[] = [
+	{
+		id: "1",
+		x: 100,
+		y: 150,
+		propertyId: "clgwlt0v70002yenvm167i7e8",
+		productId: "clgwlssyq0000yenv25b3d7v4",
+		createdAt: new Date(),
+	},
+	{
+		id: "2",
+		x: 200,
+		y: 250,
+		propertyId: "clgwlt0va0004yenvggtu2n1y",
+		productId: "clgwlssyq0000yenv25b3d7v4",
+		createdAt: new Date(),
+	},
+];
+
+const ProductConfiguratorView = () => {
+	const context = useContext(DesignContext);
+	if (!context) {
+		return <Text>Loading...</Text>;
+	}
+	const { currentStep, totalSteps, handleVariableChange, goToNextStep, goToPreviousStep } = context;
+
 	return (
-		<View style={styles.container}>
-			<ImageBackground source={productImage} style={styles.image} resizeMode="contain">
-				{hotspots.map((hotspot) => {
-					const isActive = hotspot.propertyId === activePropertyId;
-					const isCompleted = !!selectedVariants[hotspot.propertyId];
+		<SafeAreaView style={styles.container}>
+			<ProgressBar progress={currentStep / totalSteps} />
+			<View style={styles.imageContainer}>
+				<Image
+					source={{ uri: "https://placehold.co/600x400/EEE/31343C" }}
+					style={styles.productImage}
+					resizeMode="contain"
+				/>
+				{DUMMY_HOTSPOTS.map((hotspot) => (
+					<View key={hotspot.id} style={[styles.hotspot, { left: hotspot.x, top: hotspot.y }]}>
+						<Text style={styles.hotspotText}>+</Text>
+					</View>
+				))}
+			</View>
+			<View style={styles.optionsContainer}>
+				<HapticTab
+					tabs={[
+						{ title: "Kieszenie", onPress: () => console.log("kieszenie") },
+						{ title: "Pagony", onPress: () => console.log("pagony") },
+						{ title: "Rozporek", onPress: () => console.log("rozporek") },
+					]}
+				/>
+			</View>
 
-					return (
-						<TouchableOpacity
-							key={hotspot.propertyId}
-							style={[
-								styles.hotspotBase,
-								{
-									left: `${hotspot.x}%`,
-									top: `${hotspot.y}%`,
-								},
-								// Jeśli kropka jest "aktywna", pokazujemy specjalne obramowanie
-								isActive && styles.hotspotActive,
-							]}
-							onPress={() => onHotspotPress(hotspot.propertyId)}
-						>
-							{/* Wewnętrzna kropka zmienia kolor, jeśli wariant został już wybrany */}
-							<View style={[styles.hotspotInner, isCompleted && styles.hotspotCompleted]} />
-						</TouchableOpacity>
-					);
-				})}
-			</ImageBackground>
-		</View>
+			<View style={styles.navigationButtons}>
+				<StyledButton title="Wstecz" onPress={goToPreviousStep} disabled={currentStep === 1} />
+				<StyledButton title="Dalej" onPress={goToNextStep} disabled={currentStep === totalSteps} />
+			</View>
+
+			<StatusBar style="auto" />
+		</SafeAreaView>
+	);
+};
+
+const ConfiguratorScreen = () => {
+	return (
+		<DesignProvider>
+			<ProductConfiguratorView />
+		</DesignProvider>
 	);
 };
 
 const styles = StyleSheet.create({
 	container: {
-		width: "100%",
-		aspectRatio: 1, // Utrzymuje kwadratowe proporcje, dostosuj wg potrzeb
+		flex: 1,
+		backgroundColor: "#fff",
 	},
-	image: {
+	imageContainer: {
+		flex: 1,
+		position: "relative",
+		alignItems: "center",
+		justifyContent: "center",
+	},
+	productImage: {
 		width: "100%",
 		height: "100%",
 	},
-	hotspotBase: {
+	hotspot: {
 		position: "absolute",
-		width: 32,
-		height: 32,
-		borderRadius: 16,
+		width: 30,
+		height: 30,
+		borderRadius: 15,
+		backgroundColor: "rgba(255, 0, 0, 0.5)",
 		justifyContent: "center",
 		alignItems: "center",
-		// Przesunięcie, aby środek kropki był w punkcie (x, y)
-		transform: [{ translateX: -16 }, { translateY: -16 }],
 	},
-	hotspotActive: {
-		borderWidth: 2,
-		borderColor: "#82D4D4", // Kolor turkusowy
-		borderStyle: "dashed",
+	hotspotText: {
+		color: "white",
+		fontWeight: "bold",
 	},
-	hotspotInner: {
-		width: 20,
-		height: 20,
-		borderRadius: 10,
-		backgroundColor: "#82D4D4", // Domyślny kolor turkusowy
+	optionsContainer: {
+		padding: 20,
 	},
-	hotspotCompleted: {
-		backgroundColor: "#C88F54", // Kolor brązowy dla "wypełnionej" kropki
+	navigationButtons: {
+		flexDirection: "row",
+		justifyContent: "space-around",
+		padding: 20,
 	},
 });
 
-export default ProductConfiguratorView;
+export default ConfiguratorScreen;
