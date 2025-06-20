@@ -13,7 +13,7 @@
 		"test": "jest",
 		"lint": "eslint . --ext .ts",
 		"format": "prettier --write \"src/**/*.ts\"",
-		"seed": "ts-node-dev --respawn --transpile-only src/utils/seed.ts"
+		"seed": "ts-node-dev --respawn --transpile-only prisma/seed.ts"
 	},
 	"keywords": [
 		"suit",
