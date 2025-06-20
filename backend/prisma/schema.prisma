@@ -1,172 +1,217 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  password      String?
-  name          String?
-  userType      String    @default("client") // "client" or "producer"
-  oauthProvider String?   // "google", "facebook", "pinterest"
-  oauthId       String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  bodyMeasurements BodyMeasurement?
-  orders        Order[]
-  products      Product[] // Relacja do produktów dla producentów
-  // Nowe relacje dla właściwości produktu zarządzanych przez producenta
-  productStyles ProductStyle[]
-  productMaterials ProductMaterial[]
-  productFinishes ProductFinish[]
+generator client {
+  provider = "prisma-client-js"
 }
 
-model BodyMeasurement {
-  id            String    @id @default(uuid())
-  userId        String    @unique
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  height        Float
-  chest         Float
-  waist         Float
-  hips          Float
-  shoulders     Float
-  inseam        Float?
-  bodyType      String?   // "hourglass", "pear", "rectangle", "inverted triangle", "apple"
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+// Enums for SQLite must be represented as String types in the models.
+// The values (ADMIN, PRODUCER, etc.) will be stored as strings in the database.
+
+// You will effectively treat these "enums" as String types in your application code
+// and ensure that only valid string values are used.
+
+model User {
+  id                 String      @id @default(cuid())
+  email              String?     @unique
+  password           String?
+  companyName        String?
+  companyData        String?     @map("companyDataJson")
+  // Changed UserRole enum to String for SQLite compatibility
+  role               String      @default("PRODUCER") // Default value must be a string
+  logoId             String?
+  startScreenImageId String?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  logo               Multimedia? @relation("UserLogo", fields: [logoId], references: [id], onDelete: SetNull)
+  startScreenImage   Multimedia? @relation("UserStartScreenImage", fields: [startScreenImageId], references: [id], onDelete: SetNull)
+  accounts           Account[]
+  multimedia         Multimedia[]
+  products           Product[]
+  properties         Property[]
+  orders             Order[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  // Removed @db.Text - String maps to TEXT in SQLite automatically
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Customer {
+  id      String  @id @default(cuid())
+  name    String?
+  email   String  @unique
+  phone   String?
+  address String? @map("addressJson")
+
+  orders Order[]
 }
 
 model Product {
-  id            String    @id @default(uuid())
-  sellerId      String
-  seller        User      @relation(fields: [sellerId], references: [id])
-  name          String
-  description   String?
-  basePrice     Float
-  category      String    // "jacket", "pants", "skirt", "vest"
-  // Usuwamy bezpośrednie relacje do właściwości - teraz będą zarządzane przez warianty
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  orderItems    OrderItem[]
-  variants      ProductVariant[]
+  id          String      @id @default(cuid())
+  name        String
+  basePrice   Float
+  isActive    Boolean     @default(true)
+  ownerId     String
+  mainImageId String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  owner       User        @relation(fields: [ownerId], references: [id])
+  mainImage   Multimedia? @relation(fields: [mainImageId], references: [id], onDelete: SetNull)
+
+  categories  ProductCategory[]
+  properties  ProductProperty[]
+  skus        ProductSku[]
 }
 
-// Nowy model dla właściwości stylu zarządzanych przez producenta
-model ProductStyle {
-  id            String    @id @default(uuid())
-  producerId    String
-  producer      User      @relation(fields: [producerId], references: [id], onDelete: Cascade)
-  name          String
-  description   String?
-  imageUrl      String?   // Obrazek dla właściwości stylu
-  additionalPrice Float    @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  variants      ProductVariant[]
-  orderItems    OrderItem[]
+model Category {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+  parentId    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parent      Category?         @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[]        @relation("CategoryHierarchy")
+  products    ProductCategory[]
 }
 
-// Nowy model dla właściwości materiału zarządzanych przez producenta
-model ProductMaterial {
-  id            String    @id @default(uuid())
-  producerId    String
-  producer      User      @relation(fields: [producerId], references: [id], onDelete: Cascade)
-  name          String
-  description   String?
-  imageUrl      String?   // Obrazek dla właściwości materiału
-  additionalPrice Float    @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  variants      ProductVariant[]
-  orderItems    OrderItem[]
+model ProductCategory {
+  productId  String
+  categoryId String
+  assignedAt DateTime @default(now())
+
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([productId, categoryId])
 }
 
-// Nowy model dla właściwości wykończenia zarządzanych przez producenta
-model ProductFinish {
-  id            String    @id @default(uuid())
-  producerId    String
-  producer      User      @relation(fields: [producerId], references: [id], onDelete: Cascade)
-  name          String
-  description   String?
-  imageUrl      String?   // Obrazek dla właściwości wykończenia
-  additionalPrice Float    @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  variants      ProductVariant[]
-  orderItems    OrderItem[]
+model Property {
+  id               String            @id @default(cuid())
+  name             String
+  isGlobal         Boolean           @default(false)
+  ownerId          String?
+  createdAt        DateTime          @default(now())
+
+  owner            User?             @relation(fields: [ownerId], references: [id])
+  propertyVariants PropertyVariant[]
+  products         ProductProperty[]
 }
 
-// Nowy model dla wariantów produktu
-model ProductVariant {
-  id            String    @id @default(uuid())
-  productId     String
-  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
-  styleId       String?
-  style         ProductStyle? @relation(fields: [styleId], references: [id])
-  materialId    String?
-  material      ProductMaterial? @relation(fields: [materialId], references: [id])
-  finishId      String?
-  finish        ProductFinish? @relation(fields: [finishId], references: [id])
-  sku           String?   // Unikalny kod wariantu
-  price         Float     // Obliczona cena wariantu (basePrice + dodatki)
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  images        ProductVariantImage[]
-  orderItems    OrderItem[]
-  
-  @@unique([productId, styleId, materialId, finishId])
+model ProductProperty {
+  productId  String
+  propertyId String
+
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@id([productId, propertyId])
 }
 
-// Nowy model dla obrazków wariantów produktu
-model ProductVariantImage {
-  id            String    @id @default(uuid())
-  variantId     String
-  variant       ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  imageUrl      String
-  viewType      String    // "front", "left", "right"
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
-  @@unique([variantId, viewType])
+model PropertyVariant {
+  id          String      @id @default(cuid())
+  name        String
+  propertyId  String
+  imageId     String?
+  createdAt   DateTime    @default(now())
+
+  property    Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  image       Multimedia? @relation(fields: [imageId], references: [id], onDelete: SetNull)
+
+  productSkus ProductSkuPropertyVariant[]
+}
+
+model ProductSku {
+  id               String                      @id @default(cuid())
+  productId        String
+  skuCode          String?                     @unique
+  price            Float?
+  stockQuantity    Int                         @default(0)
+  createdAt        DateTime                    @default(now())
+  updatedAt        DateTime                    @updatedAt
+
+  product          Product                     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  propertyVariants ProductSkuPropertyVariant[]
+  orderItems       OrderItem[]
+}
+
+model ProductSkuPropertyVariant {
+  productSkuId      String
+  propertyVariantId String
+
+  productSku        ProductSku      @relation(fields: [productSkuId], references: [id], onDelete: Cascade)
+  propertyVariant   PropertyVariant @relation(fields: [propertyVariantId], references: [id], onDelete: Cascade)
+
+  @@id([productSkuId, propertyVariantId])
 }
 
 model Order {
-  id            String    @id @default(uuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status        String    // "draft", "submitted", "processing", "completed", "cancelled"
-  totalPrice    Float
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  items         OrderItem[]
+  id                    String         @id @default(cuid())
+  orderDate             DateTime       @default(now())
+  // Changed OrderStatus enum to String for SQLite compatibility
+  status                String         @default("PENDING")
+  customerData          String?        @map("customerDataJson")
+  customerId            String?
+  producerId            String
+
+  // Changed ApprovalPolicy enum to String for SQLite compatibility
+  approvalPolicy        String         @default("AUTOMATIC")
+  // Changed HandlingMethod enum to String for SQLite compatibility
+  handlingMethod        String         @default("EMAIL")
+  confirmationMessage   String?
+  handlingEmail         String?
+  handlingEmailTemplate String?
+  handlingApiUrl        String?
+
+  customer              Customer?      @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  producer              User           @relation(fields: [producerId], references: [id])
+  items                 OrderItem[]
 }
 
 model OrderItem {
-  id            String    @id @default(uuid())
-  orderId       String
-  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId     String
-  product       Product   @relation(fields: [productId], references: [id])
-  variantId     String?
-  variant       ProductVariant? @relation(fields: [variantId], references: [id])
-  // Zachowujemy bezpośrednie relacje dla kompatybilności wstecznej
-  styleId       String?
-  style         ProductStyle? @relation(fields: [styleId], references: [id])
-  materialId    String?
-  material      ProductMaterial? @relation(fields: [materialId], references: [id])
-  finishId      String?
-  finish        ProductFinish? @relation(fields: [finishId], references: [id])
-  quantity      Int       @default(1)
-  price         Float
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                  String   @id @default(cuid())
+  orderId             String
+  productSkuId        String
+  quantity            Int
+  pricePerUnitAtOrder Float
+
+  order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productSku          ProductSku @relation(fields: [productSkuId], references: [id], onDelete: Restrict)
+}
+
+model Multimedia {
+  id             String            @id @default(cuid())
+  url            String
+  // Changed FileType enum to String for SQLite compatibility
+  fileType       String
+  altText        String?
+  ownerId        String
+  createdAt      DateTime          @default(now())
+
+  owner          User              @relation(fields: [ownerId], references: [id])
+  usedAsLogo     User[]            @relation("UserLogo")
+  usedAsStartImg User[]            @relation("UserStartScreenImage")
+  usedInProducts Product[]
+  usedInVariants PropertyVariant[]
 }

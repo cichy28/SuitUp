@@ -1,70 +1,52 @@
 import express from 'express';
-import cors from 'cors';
 import dotenv from 'dotenv';
-import path from 'path';
-import { PrismaClient } from '@prisma/client';
-import authRoutes from './routes/auth.routes';
-import productRoutes from './routes/product.routes';
-import userRoutes from './routes/user.routes';
-import seedRoutes from './routes/seed.routes';
-import filesRoutes from './routes/files.routes';
-import producerRoutes from './routes/producer.routes';
-import config from './config/config';
+// The PrismaClient import might not be directly used here in index.ts,
+// but is good practice to show it's part of the project dependencies.
+// import { PrismaClient } from '@prisma/client';
 
-// Inicjalizacja zmiennych środowiskowych
+import { router as customerRoutes } from './routes/customers';
+import { router as userRoutes } from './routes/users';
+import { router as productRoutes } from './routes/products';
+import { router as categoryRoutes } from './routes/categories';
+import { router as orderRoutes } from './routes/orders';
+import { router as multimediaRoutes } from './routes/multimedia';
+import { router as propertyRoutes } from './routes/properties';
+import { router as productSkuRoutes } from './routes/productSkus';
+import { router as propertyVariantRoutes } from './routes/propertyVariants'; // Import propertyVariant routes
+
+
 dotenv.config();
 
-// Inicjalizacja Prisma
-const prisma = new PrismaClient();
-
-// Inicjalizacja Express
 const app = express();
-const PORT = config.port;
+const port = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // Parse JSON request bodies
 
-// Serwowanie plików statycznych z katalogu uploads
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
-
-// Logowanie żądań
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-  next();
-});
-
-// Routing
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
+// Routes
+app.use('/api/customers', customerRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/seed', seedRoutes);
-app.use('/api/files', filesRoutes);
-app.use('/api/producer', producerRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/multimedia', multimediaRoutes);
+app.use('/api/properties', propertyRoutes);
+app.use('/api/product-skus', productSkuRoutes);
+app.use('/api/property-variants', propertyVariantRoutes); // Use propertyVariant routes
 
-// Endpoint testowy
+
+// Simple root route
 app.get('/', (req, res) => {
-  res.json({ message: 'API Suit Creator działa poprawnie!' });
+  res.send('Backend is running!');
 });
 
-// Obsługa błędów
+// Error handling middleware (optional, but good practice)
+// It's important that this middleware is defined last
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error(err.stack);
-  res.status(500).json({
-    message: 'Wystąpił błąd serwera',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
+  res.status(500).send('Something broke!');
 });
 
-// Uruchomienie serwera
-app.listen(PORT, () => {
-  console.log(`Serwer działa na porcie ${PORT}`);
-});
-
-// Obsługa zamknięcia
-process.on('SIGINT', async () => {
-  await prisma.$disconnect();
-  console.log('Połączenie z bazą danych zamknięte');
-  process.exit(0);
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
