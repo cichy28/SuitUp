@@ -1,5 +1,5 @@
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -7,32 +7,55 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// Enums for SQLite must be represented as String types in the models.
-// The values (ADMIN, PRODUCER, etc.) will be stored as strings in the database.
+// Definicja natywnych typów Enum dla PostgreSQL
+enum UserRole {
+  ADMIN
+  PRODUCER
+}
 
-// You will effectively treat these "enums" as String types in your application code
-// and ensure that only valid string values are used.
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  CANCELLED
+}
+
+enum ApprovalPolicy {
+  AUTOMATIC
+  MANUAL
+}
+
+enum HandlingMethod {
+  EMAIL
+  API
+}
+
+enum FileType {
+  PNG
+  JPG
+  WEBP
+  PDF
+}
 
 model User {
-  id                 String      @id @default(cuid())
-  email              String?     @unique
-  password           String?
-  companyName        String?
-  companyData        String?     @map("companyDataJson")
-  // Changed UserRole enum to String for SQLite compatibility
-  role               String      @default("PRODUCER") // Default value must be a string
-  logoId             String?
-  startScreenImageId String?
-  createdAt          DateTime    @default(now())
-  updatedAt          DateTime    @updatedAt
-
-  logo               Multimedia? @relation("UserLogo", fields: [logoId], references: [id], onDelete: SetNull)
-  startScreenImage   Multimedia? @relation("UserStartScreenImage", fields: [startScreenImageId], references: [id], onDelete: SetNull)
-  accounts           Account[]
-  multimedia         Multimedia[]
-  products           Product[]
-  properties         Property[]
-  orders             Order[]
+  id                   String      @id @default(cuid())
+  email                String?     @unique
+  password             String?
+  companyName          String?
+  companyData          Json?       @map("companyDataJson") // POPRAWKA: String -> Json
+  role                 UserRole    @default(PRODUCER)      // POPRAWKA: String -> UserRole
+  logoId               String?
+  startScreenImageId   String?
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  
+  logo                 Multimedia? @relation("UserLogo", fields: [logoId], references: [id], onDelete: SetNull)
+  startScreenImage     Multimedia? @relation("UserStartScreenImage", fields: [startScreenImageId], references: [id], onDelete: SetNull)
+  accounts             Account[]
+  multimedia           Multimedia[]
+  products             Product[]
+  properties           Property[]
+  orders               Order[]
 }
 
 model Account {
@@ -41,17 +64,16 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  // Removed @db.Text - String maps to TEXT in SQLite automatically
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?
+  id_token          String? @db.Text
   session_state     String?
-
+  
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  
   @@unique([provider, providerAccountId])
 }
 
@@ -60,37 +82,37 @@ model Customer {
   name    String?
   email   String  @unique
   phone   String?
-  address String? @map("addressJson")
-
+  address Json?   @map("addressJson") // POPRAWKA: String -> Json
+  
   orders Order[]
 }
 
 model Product {
-  id          String      @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
-  basePrice   Float
-  isActive    Boolean     @default(true)
+  basePrice   Decimal   // POPRAWKA: Float -> Decimal
+  isActive    Boolean   @default(true)
   ownerId     String
   mainImageId String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
   owner       User        @relation(fields: [ownerId], references: [id])
   mainImage   Multimedia? @relation(fields: [mainImageId], references: [id], onDelete: SetNull)
-
+  
   categories  ProductCategory[]
   properties  ProductProperty[]
   skus        ProductSku[]
 }
 
 model Category {
-  id          String  @id @default(cuid())
-  name        String  @unique
+  id          String   @id @default(cuid())
+  name        String   @unique
   description String?
   parentId    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
+  
   parent      Category?         @relation("CategoryHierarchy", fields: [parentId], references: [id])
   children    Category[]        @relation("CategoryHierarchy")
   products    ProductCategory[]
@@ -100,10 +122,10 @@ model ProductCategory {
   productId  String
   categoryId String
   assignedAt DateTime @default(now())
-
-  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
+  
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
   @@id([productId, categoryId])
 }
 
@@ -113,7 +135,7 @@ model Property {
   isGlobal         Boolean           @default(false)
   ownerId          String?
   createdAt        DateTime          @default(now())
-
+  
   owner            User?             @relation(fields: [ownerId], references: [id])
   propertyVariants PropertyVariant[]
   products         ProductProperty[]
@@ -122,38 +144,37 @@ model Property {
 model ProductProperty {
   productId  String
   propertyId String
-  // TO DO - dodanie do obsługi przez backend 
-  hotspotX   Float? // Pozycja X (np. 55.0)
-  hotspotY   Float? // Pozycja Y (np. 60.5)
-
-  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-
+  hotspotX   Float?
+  hotspotY   Float?
+  
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
   @@id([productId, propertyId])
 }
 
 model PropertyVariant {
-  id          String      @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
   propertyId  String
   imageId     String?
-  createdAt   DateTime    @default(now())
-
-  property    Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  image       Multimedia? @relation(fields: [imageId], references: [id], onDelete: SetNull)
-
-  productSkus ProductSkuPropertyVariant[]
+  createdAt   DateTime  @default(now())
+  
+  property      Property                    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  image         Multimedia?                 @relation(fields: [imageId], references: [id], onDelete: SetNull)
+  
+  productSkus   ProductSkuPropertyVariant[]
 }
 
 model ProductSku {
-  id               String                      @id @default(cuid())
-  productId        String
-  skuCode          String?                     @unique
-  price            Float?
-  stockQuantity    Int                         @default(0)
-  createdAt        DateTime                    @default(now())
-  updatedAt        DateTime                    @updatedAt
-
+  id              String      @id @default(cuid())
+  productId       String
+  skuCode         String?     @unique
+  price           Decimal?    // POPRAWKA: Float -> Decimal
+  stockQuantity   Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
   product          Product                     @relation(fields: [productId], references: [id], onDelete: Cascade)
   propertyVariants ProductSkuPropertyVariant[]
   orderItems       OrderItem[]
@@ -162,31 +183,27 @@ model ProductSku {
 model ProductSkuPropertyVariant {
   productSkuId      String
   propertyVariantId String
-
+  
   productSku        ProductSku      @relation(fields: [productSkuId], references: [id], onDelete: Cascade)
   propertyVariant   PropertyVariant @relation(fields: [propertyVariantId], references: [id], onDelete: Cascade)
-
+  
   @@id([productSkuId, propertyVariantId])
 }
 
 model Order {
   id                    String         @id @default(cuid())
   orderDate             DateTime       @default(now())
-  // Changed OrderStatus enum to String for SQLite compatibility
-  status                String         @default("PENDING")
-  customerData          String?        @map("customerDataJson")
+  status                OrderStatus    @default(PENDING)      // POPRAWKA: String -> OrderStatus
+  customerData          Json?          @map("customerDataJson") // POPRAWKA: String -> Json
   customerId            String?
   producerId            String
-
-  // Changed ApprovalPolicy enum to String for SQLite compatibility
-  approvalPolicy        String         @default("AUTOMATIC")
-  // Changed HandlingMethod enum to String for SQLite compatibility
-  handlingMethod        String         @default("EMAIL")
+  approvalPolicy        ApprovalPolicy @default(AUTOMATIC)   // POPRAWKA: String -> ApprovalPolicy
+  handlingMethod        HandlingMethod @default(EMAIL)       // POPRAWKA: String -> HandlingMethod
   confirmationMessage   String?
   handlingEmail         String?
   handlingEmailTemplate String?
   handlingApiUrl        String?
-
+  
   customer              Customer?      @relation(fields: [customerId], references: [id], onDelete: SetNull)
   producer              User           @relation(fields: [producerId], references: [id])
   items                 OrderItem[]
@@ -197,21 +214,20 @@ model OrderItem {
   orderId             String
   productSkuId        String
   quantity            Int
-  pricePerUnitAtOrder Float
-
-  order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  pricePerUnitAtOrder Decimal  // POPRAWKA: Float -> Decimal
+  
+  order               Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productSku          ProductSku @relation(fields: [productSkuId], references: [id], onDelete: Restrict)
 }
 
 model Multimedia {
   id             String            @id @default(cuid())
   url            String
-  // Changed FileType enum to String for SQLite compatibility
-  fileType       String
+  fileType       FileType          // POPRAWKA: String -> FileType
   altText        String?
   ownerId        String
   createdAt      DateTime          @default(now())
-
+  
   owner          User              @relation(fields: [ownerId], references: [id])
   usedAsLogo     User[]            @relation("UserLogo")
   usedAsStartImg User[]            @relation("UserStartScreenImage")

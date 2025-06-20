@@ -1,5 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-import { UserRole, FileType, OrderStatus, ApprovalPolicy, HandlingMethod } from "../../shared/enums";
+import { PrismaClient, UserRole, FileType, OrderStatus, ApprovalPolicy, HandlingMethod } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
 
 const prisma = new PrismaClient();
@@ -31,7 +30,7 @@ async function main() {
 			email: "admin@example.com",
 			password: "securepassword",
 			companyName: "Admin Corp",
-			role: UserRole.enum.ADMIN,
+			role: UserRole.ADMIN,
 		},
 	});
 
@@ -41,7 +40,7 @@ async function main() {
 			password: "anothersecurepassword",
 			companyName: "Producer Co.",
 			companyData: { type: "Sole Proprietorship" },
-			role: UserRole.enum.PRODUCER,
+			role: UserRole.PRODUCER,
 		},
 	});
 
@@ -51,7 +50,7 @@ async function main() {
 	const producerLogo = await prisma.multimedia.create({
 		data: {
 			url: "https://example.com/producer_logo.png",
-			fileType: FileType.enum.PNG,
+			fileType: FileType.PNG,
 			altText: "Producer Logo",
 			ownerId: producerUser.id,
 		},
@@ -69,7 +68,7 @@ async function main() {
 	const variant1Image = await prisma.multimedia.create({
 		data: {
 			url: "https://example.com/variant1_image.png",
-			fileType: FileType.enum.PNG,
+			fileType: FileType.PNG,
 			altText: "Variant 1 Image",
 			ownerId: producerUser.id,
 		},
@@ -253,10 +252,10 @@ async function main() {
 		data: {
 			customerId: customer2.id,
 			producerId: producerUser.id,
-			status: OrderStatus.enum.PENDING,
+			status: OrderStatus.PENDING,
 			customerData: { name: customer2.name, email: customer2.email },
-			approvalPolicy: ApprovalPolicy.enum.MANUAL,
-			handlingMethod: HandlingMethod.enum.API,
+			approvalPolicy: ApprovalPolicy.MANUAL,
+			handlingMethod: HandlingMethod.API,
 			handlingApiUrl: "https://example.com/api/handleorder",
 		},
 	});
