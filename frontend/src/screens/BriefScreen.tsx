@@ -1,210 +1,142 @@
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useState } from "react";
-import {
-	View,
-	Text,
-	StyleSheet,
-	Image,
-	TouchableOpacity,
-	TextInput,
-	Modal,
-	KeyboardAvoidingView,
-	Platform,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, TouchableOpacity, Modal, TextInput, Button, StyleSheet, Text } from "react-native";
+import { ThemedView } from "@/components/ThemedView";
+import { ThemedText } from "@/components/ThemedText";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { RootStackParamList } from "@/navigation/AppNavigator";
+import InteractiveImageView, { HotspotData } from "@/components/InteractiveImageView";
 
-import StyledButton from "../components/StyledButton";
-import { RootStackParamList } from "../navigation/AppNavigator";
+// Definicja stałych dla obrazka pozostaje w screenie, który go używa
+const YOUR_IMAGE_WIDTH = 458;
+const YOUR_IMAGE_HEIGHT = 882;
+const IMAGE_ASPECT_RATIO = YOUR_IMAGE_WIDTH / YOUR_IMAGE_HEIGHT;
+const imageSource = require("../../assets/images/body-measurement.jpg");
 
-// Definicja typu dla pojedynczego punktu pomiarowego
-type MeasurementPoint = {
-	id: string;
-	label: string;
-	// Pozycje w procentach, aby były responsywne
-	x: string;
-	y: string;
-};
-
-// Zahardcodowane pozycje hotspotów (w procentach)
-const MEASUREMENT_POINTS: MeasurementPoint[] = [
-	{ id: "chest", label: "Klatka piersiowa", x: "60%", y: "25%" },
-	{ id: "waist", label: "Talia", x: "40%", y: "42%" },
-	{ id: "hips", label: "Biodra", x: "65%", y: "55%" },
-	{ id: "sleeve", label: "Długość rękawa", x: "80%", y: "30%" },
-	{ id: "neck", label: "Obwód szyi", x: "55%", y: "15%" },
+// Definicja hotspotów dla tego konkretnego ekranu
+const initialHotspots: HotspotData[] = [
+	{ id: 1, name: "Shoulder", value: "", relativeTop: 0.22, relativeLeft: 0.5 },
+	{ id: 2, name: "Chest", value: "", relativeTop: 0.3, relativeLeft: 0.38 },
+	{ id: 3, name: "Chest", value: "", relativeTop: 0.3, relativeLeft: 0.62 },
+	{ id: 4, name: "Sleeve", value: "", relativeTop: 0.45, relativeLeft: 0.25 },
+	{ id: 5, name: "Sleeve", value: "", relativeTop: 0.45, relativeLeft: 0.75 },
+	{ id: 6, name: "Waist", value: "", relativeTop: 0.48, relativeLeft: 0.5 },
+	{ id: 7, name: "Hips", value: "", relativeTop: 0.58, relativeLeft: 0.4 },
+	{ id: 8, name: "Hips", value: "", relativeTop: 0.58, relativeLeft: 0.6 },
+	{ id: 9, name: "Inseam", value: "", relativeTop: 0.75, relativeLeft: 0.5 },
 ];
 
-type BriefScreenNavigationProp = StackNavigationProp<RootStackParamList, "Brief">;
-
 const BriefScreen = () => {
-	const navigation = useNavigation<BriefScreenNavigationProp>();
+	const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
-	// Stan do przechowywania wprowadzonych wymiarów
-	const [measurements, setMeasurements] = useState<{ [key: string]: string }>({});
-	// Stan do obsługi modala do wprowadzania danych
-	const [isModalVisible, setModalVisible] = useState(false);
-	const [currentPoint, setCurrentPoint] = useState<MeasurementPoint | null>(null);
-	const [inputValue, setInputValue] = useState("");
+	const [modalVisible, setModalVisible] = useState(false);
+	const [currentHotspot, setCurrentHotspot] = useState<HotspotData | null>(null);
+	const [measurement, setMeasurement] = useState("");
+	const [hotspots, setHotspots] = useState<HotspotData[]>(initialHotspots);
 
-	const handleHotspotPress = (point: MeasurementPoint) => {
-		setCurrentPoint(point);
-		setInputValue(measurements[point.id] || ""); // Ustaw aktualną wartość w inpucie
+	const handleHotspotPress = (hotspot: HotspotData) => {
+		setCurrentHotspot(hotspot);
+		setMeasurement(hotspot.value);
 		setModalVisible(true);
 	};
 
-	const handleSaveMeasurement = () => {
-		if (currentPoint) {
-			setMeasurements((prev) => ({
-				...prev,
-				[currentPoint.id]: inputValue,
-			}));
+	const handleSave = () => {
+		if (currentHotspot) {
+			setHotspots(hotspots.map((h) => (h.id === currentHotspot.id ? { ...h, value: measurement } : h)));
 		}
 		setModalVisible(false);
-		setCurrentPoint(null);
-		setInputValue("");
-	};
-
-	const handleNext = () => {
-		console.log("Zebrane wymiary:", measurements);
-		// Na razie tylko nawigujemy dalej, bez przekazywania danych
-		navigation.navigate("Configurator", { productId: "dummy-product-id" }); // Przekazujemy tymczasowe ID produktu
 	};
 
 	return (
-		<SafeAreaView style={styles.container}>
-			<Text style={styles.title}>Wprowadź swoje wymiary</Text>
-			<Text style={styles.subtitle}>Kliknij na punkty, aby dodać pomiar.</Text>
+		<ThemedView style={styles.container}>
+			<ThemedText type="title">Enter your measurements</ThemedText>
+			<ThemedText>We will use them to create your perfect fit.</ThemedText>
 
 			<View style={styles.imageContainer}>
-				<Image
-					source={require("../../assets/images/body-measurement.jpg")}
-					style={styles.bodyImage}
-					resizeMode="contain"
+				<InteractiveImageView
+					source={imageSource}
+					aspectRatio={IMAGE_ASPECT_RATIO}
+					hotspots={hotspots}
+					onHotspotPress={handleHotspotPress}
 				/>
-				{MEASUREMENT_POINTS.map((point) => (
-					<TouchableOpacity
-						key={point.id}
-						style={[styles.hotspot, { top: point.y, left: point.x }]}
-						onPress={() => handleHotspotPress(point)}
-					>
-						<Text style={styles.hotspotText}>{measurements[point.id] || "+"}</Text>
-					</TouchableOpacity>
-				))}
 			</View>
 
-			<StyledButton title="Dalej" onPress={handleNext} style={styles.nextButton} />
-
-			{/* Modal do wprowadzania danych */}
 			<Modal
-				visible={isModalVisible}
+				animationType="slide"
 				transparent={true}
-				animationType="fade"
+				visible={modalVisible}
 				onRequestClose={() => setModalVisible(false)}
 			>
-				<KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.modalBackdrop}>
-					<View style={styles.modalContent}>
-						<Text style={styles.modalTitle}>{currentPoint?.label}</Text>
+				<View style={styles.modalContainer}>
+					<View style={styles.modalView}>
+						<ThemedText type="subtitle">Enter {currentHotspot?.name}</ThemedText>
 						<TextInput
 							style={styles.input}
-							placeholder="Wpisz wymiar w cm"
+							onChangeText={setMeasurement}
+							value={measurement}
 							keyboardType="numeric"
-							value={inputValue}
-							onChangeText={setInputValue}
-							autoFocus={true}
+							placeholder="cm"
 						/>
-						<StyledButton title="Zapisz" onPress={handleSaveMeasurement} />
+						<Button title="Save" onPress={handleSave} />
 					</View>
-				</KeyboardAvoidingView>
+				</View>
 			</Modal>
-		</SafeAreaView>
+
+			<TouchableOpacity style={styles.button} onPress={() => navigation.navigate("ProductConfigurator")}>
+				<ThemedText style={styles.buttonText}>Continue</ThemedText>
+			</TouchableOpacity>
+		</ThemedView>
 	);
 };
 
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#f7f7f7",
-		alignItems: "center",
 		padding: 20,
-	},
-	title: {
-		fontSize: 24,
-		fontWeight: "bold",
-		marginBottom: 8,
-	},
-	subtitle: {
-		fontSize: 16,
-		color: "#666",
-		marginBottom: 20,
+		alignItems: "center",
 	},
 	imageContainer: {
 		width: "100%",
-		height: "65%", // Dopasuj wysokość do swoich potrzeb
-		position: "relative",
-		alignItems: "center",
-		justifyContent: "center",
-	},
-	bodyImage: {
-		width: "100%",
-		height: "100%",
-	},
-	hotspot: {
-		position: "absolute",
-		width: 40,
-		height: 40,
-		borderRadius: 20,
-		backgroundColor: "rgba(10, 126, 164, 0.7)", // Kolor z przycisku "Save"
-		justifyContent: "center",
-		alignItems: "center",
-		borderWidth: 2,
-		borderColor: "white",
-	},
-	hotspotText: {
-		color: "white",
-		fontWeight: "bold",
-		fontSize: 16,
-	},
-	nextButton: {
-		marginTop: "auto", // Przycisk na dole
-		width: "100%",
-	},
-	// Style dla Modala
-	modalBackdrop: {
 		flex: 1,
-		backgroundColor: "rgba(0, 0, 0, 0.5)",
+		marginVertical: 20,
+	},
+	modalContainer: {
+		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
+		backgroundColor: "rgba(0, 0, 0, 0.5)",
 	},
-	modalContent: {
-		width: "80%",
+	modalView: {
+		margin: 20,
 		backgroundColor: "white",
 		borderRadius: 20,
-		padding: 20,
+		padding: 35,
 		alignItems: "center",
 		shadowColor: "#000",
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
+		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.25,
 		shadowRadius: 4,
 		elevation: 5,
 	},
-	modalTitle: {
-		fontSize: 20,
-		fontWeight: "bold",
-		marginBottom: 15,
-	},
 	input: {
-		width: "100%",
+		height: 40,
+		margin: 12,
 		borderWidth: 1,
-		borderColor: "#ddd",
-		borderRadius: 10,
-		padding: 15,
-		fontSize: 18,
-		marginBottom: 20,
+		padding: 10,
+		width: 200,
 		textAlign: "center",
+		borderRadius: 5,
+	},
+	button: {
+		backgroundColor: "#007AFF",
+		paddingVertical: 15,
+		paddingHorizontal: 40,
+		borderRadius: 25,
+		marginTop: 20,
+	},
+	buttonText: {
+		color: "white",
+		fontSize: 16,
+		fontWeight: "bold",
 	},
 });
 
