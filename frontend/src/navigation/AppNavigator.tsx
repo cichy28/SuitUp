@@ -5,7 +5,7 @@ import LoadingScreen from "../screens/LoadingScreen";
 import WelcomeScreen from "../screens/WelcomeScreen";
 import BriefScreen from "../screens/BriefScreen";
 import RecommendationScreen from "../screens/RecommendationScreen";
-import ConfiguratorScreen from "../screens/ConfiguratorScreen";
+import ProductConfiguratorView from "../screens/ProductConfiguratorView";
 import MeasurementScreen from "../screens/MeasurementScreen";
 import SummaryScreen from "../screens/SummaryScreen";
 import ConfirmationScreen from "../screens/ConfirmationScreen";
@@ -31,7 +31,7 @@ export default function AppNavigator() {
 			<Stack.Screen name="Welcome" component={WelcomeScreen} />
 			<Stack.Screen name="Brief" component={BriefScreen} />
 			<Stack.Screen name="Recommendation" component={RecommendationScreen} />
-			<Stack.Screen name="Configurator" component={ConfiguratorScreen} />
+			<Stack.Screen name="Configurator" component={ProductConfiguratorView} />
 			<Stack.Screen name="Measurement" component={MeasurementScreen} />
 			<Stack.Screen name="Summary" component={SummaryScreen} />
 			<Stack.Screen name="Confirmation" component={ConfirmationScreen} />

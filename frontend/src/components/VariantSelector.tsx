@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from "react-native";
-import { Property } from "../../../shared/types"; // Importujemy podstawowy typ
+import { Property } from "../../../shared/validators/property"; // Importujemy podstawowy typ
 
 interface Props {
 	/** Obiekt aktywnej właściwości, której warianty mają być wyświetlone */
