@@ -37,6 +37,21 @@ enum FileType {
   PDF
 }
 
+enum BodyShape {
+  INVERTED_TRIANGLE
+  HOURGLASS
+  OVAL
+  RECTANGLE
+  TRIANGLE
+}
+
+enum StylePreference {
+  FITTED_WEAR
+  OVERSIZE_WEAR
+  RETRO_SHAPES
+  MASCULINE_SHAPES
+}
+
 model User {
   id                   String      @id @default(cuid())
   email                String?     @unique
@@ -96,6 +111,9 @@ model Product {
   mainImageId String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  suitableFor BodyShape[]
+  style       StylePreference[]
   
   owner       User        @relation(fields: [ownerId], references: [id])
   mainImage   Multimedia? @relation(fields: [mainImageId], references: [id], onDelete: SetNull)

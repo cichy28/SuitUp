@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, FileType, OrderStatus, ApprovalPolicy, HandlingMethod } from "@prisma/client";
+import { PrismaClient, UserRole, FileType, BodyShape, StylePreference } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
 
 const prisma = new PrismaClient();
@@ -16,10 +16,10 @@ async function main() {
 	await prisma.property.deleteMany();
 	await prisma.productCategory.deleteMany();
 	await prisma.category.deleteMany();
-	await prisma.account.deleteMany(); // Accounts are linked to users
-	await prisma.product.deleteMany(); // Products are linked to users
-	await prisma.multimedia.deleteMany(); // Multimedia is linked to users
-	await prisma.customer.deleteMany(); // Customers can be standalone, but orders link to them
+	await prisma.account.deleteMany();
+	await prisma.product.deleteMany();
+	await prisma.multimedia.deleteMany();
+	await prisma.customer.deleteMany();
 	await prisma.user.deleteMany();
 
 	console.log("Cleared existing data.");
@@ -38,260 +38,136 @@ async function main() {
 		data: {
 			email: "producer@example.com",
 			password: "anothersecurepassword",
-			companyName: "Producer Co.",
-			companyData: { type: "Sole Proprietorship" },
+			companyName: "Fashion Forward",
+			companyData: { type: "LLC" },
 			role: UserRole.PRODUCER,
 		},
 	});
 
 	console.log("Created users.");
 
-	// Create Multimedia
-	const producerLogo = await prisma.multimedia.create({
-		data: {
-			url: "https://example.com/producer_logo.png",
-			fileType: FileType.PNG,
-			altText: "Producer Logo",
-			ownerId: producerUser.id,
+	// --- NEW DUMMY PRODUCT DATA ---
+	const dummyProducts = [
+		{
+			name: "Elegancka Sukienka Ołówkowa",
+			basePrice: new Decimal(299.99),
+			suitableFor: [BodyShape.HOURGLASS, BodyShape.RECTANGLE],
+			style: [StylePreference.FITTED_WEAR, StylePreference.MASCULINE_SHAPES],
+			imageUrl: "https://placehold.co/600x900/EBD4CB/5D4037?text=Sukienka\\nO%C5%82%C3%B3wkowa",
 		},
-	});
-
-	const product1Image = await prisma.multimedia.create({
-		data: {
-			url: "https://example.com/product1_image.jpg",
-			fileType: FileType.JPG,
-			altText: "Product 1 Image",
-			ownerId: producerUser.id,
+		{
+			name: "Luźna Bluza z Kapturem",
+			basePrice: new Decimal(189.99),
+			suitableFor: [BodyShape.OVAL, BodyShape.RECTANGLE, BodyShape.TRIANGLE],
+			style: [StylePreference.OVERSIZE_WEAR],
+			imageUrl: "https://placehold.co/600x900/D7CCC8/4E342E?text=Bluza\\nOversize",
 		},
-	});
-
-	const variant1Image = await prisma.multimedia.create({
-		data: {
-			url: "https://example.com/variant1_image.png",
-			fileType: FileType.PNG,
-			altText: "Variant 1 Image",
-			ownerId: producerUser.id,
+		{
+			name: "Marynarka w Stylu Retro",
+			basePrice: new Decimal(450.0),
+			suitableFor: [BodyShape.INVERTED_TRIANGLE, BodyShape.RECTANGLE],
+			style: [StylePreference.RETRO_SHAPES, StylePreference.MASCULINE_SHAPES],
+			imageUrl: "https://placehold.co/600x900/C5CAE9/303F9F?text=Marynarka\\nRetro",
 		},
-	});
-
-	await prisma.user.update({
-		where: { id: producerUser.id },
-		data: { logoId: producerLogo.id },
-	});
-
-	console.log("Created multimedia.");
-
-	// Create Customers
-	const customer1 = await prisma.customer.create({
-		data: {
-			name: "John Doe",
-			email: "john.doe@example.com",
-			phone: "123-456-7890",
-			address: { street: "123 Main St", city: "Anytown" },
+		{
+			name: "Dopasowane Jeansy High-Waist",
+			basePrice: new Decimal(220.5),
+			suitableFor: [BodyShape.HOURGLASS, BodyShape.TRIANGLE],
+			style: [StylePreference.FITTED_WEAR, StylePreference.RETRO_SHAPES],
+			imageUrl: "https://placehold.co/600x900/B2EBF2/0097A7?text=Jeansy\\nHigh-Waist",
 		},
-	});
-
-	const customer2 = await prisma.customer.create({
-		data: {
-			name: "Jane Smith",
-			email: "jane.smith@example.com",
-			phone: "987-654-3210",
-			address: { street: "456 Oak Ave", city: "Otherville" },
+		{
+			name: "Koszula Oversize",
+			basePrice: new Decimal(155.0),
+			suitableFor: [BodyShape.OVAL, BodyShape.RECTANGLE, BodyShape.INVERTED_TRIANGLE],
+			style: [StylePreference.OVERSIZE_WEAR, StylePreference.MASCULINE_SHAPES],
+			imageUrl: "https://placehold.co/600x900/F8BBD0/C2185B?text=Koszula\\nOversize",
 		},
-	});
-
-	console.log("Created customers.");
-
-	// Create Categories
-	const mainCategory = await prisma.category.create({
-		data: {
-			name: "Electronics",
-			description: "Gadgets and electronic devices",
-		},
-	});
-
-	const subCategory = await prisma.category.create({
-		data: {
-			name: "Laptops",
-			description: "Portable computers",
-			parentId: mainCategory.id,
-		},
-	});
-
-	console.log("Created categories.");
-
-	// Create Properties
-	const colorProperty = await prisma.property.create({
-		data: {
-			name: "Color",
-			isGlobal: true,
-		},
-	});
-
-	const sizeProperty = await prisma.property.create({
-		data: {
-			name: "Size",
-			isGlobal: false,
-			ownerId: producerUser.id,
-		},
-	});
-
-	console.log("Created properties.");
-
-	// Create Property Variants
-	const colorRed = await prisma.propertyVariant.create({
-		data: {
-			name: "Red",
-			propertyId: colorProperty.id,
-			imageId: variant1Image.id,
-		},
-	});
-
-	const colorBlue = await prisma.propertyVariant.create({
-		data: {
-			name: "Blue",
-			propertyId: colorProperty.id,
-		},
-	});
-
-	const sizeSmall = await prisma.propertyVariant.create({
-		data: {
-			name: "Small",
-			propertyId: sizeProperty.id,
-		},
-	});
-
-	const sizeLarge = await prisma.propertyVariant.create({
-		data: {
-			name: "Large",
-			propertyId: sizeProperty.id,
-		},
-	});
-
-	console.log("Created property variants.");
-
-	// Create Products
-	const product1 = await prisma.product.create({
-		data: {
-			name: "SuperGadget",
+		{
+			name: "Spódnica Midi w Kształcie A",
 			basePrice: new Decimal(199.99),
-			isActive: true,
-			ownerId: producerUser.id,
-			mainImageId: product1Image.id,
-			categories: { create: { categoryId: subCategory.id } },
-			properties: { create: [{ propertyId: colorProperty.id }, { propertyId: sizeProperty.id }] },
+			suitableFor: [BodyShape.TRIANGLE, BodyShape.HOURGLASS],
+			style: [StylePreference.RETRO_SHAPES],
+			imageUrl: "https://placehold.co/600x900/F0F4C3/AFB42B?text=Sp%C3%B3dnica\\nMidi",
 		},
-	});
-
-	const product2 = await prisma.product.create({
-		data: {
-			name: "MegaWidget",
-			basePrice: new Decimal(50.0),
-			isActive: true,
-			ownerId: producerUser.id,
-			categories: { create: { categoryId: mainCategory.id } },
-			properties: { create: { propertyId: colorProperty.id } },
+		{
+			name: "Garnitur Męski Krój",
+			basePrice: new Decimal(799.0),
+			suitableFor: [BodyShape.RECTANGLE, BodyShape.INVERTED_TRIANGLE],
+			style: [StylePreference.MASCULINE_SHAPES],
+			imageUrl: "https://placehold.co/600x900/BCAAA4/5D4037?text=Garnitur",
 		},
-	});
+		{
+			name: "Klasyczny T-shirt",
+			basePrice: new Decimal(89.9),
+			suitableFor: [
+				BodyShape.HOURGLASS,
+				BodyShape.INVERTED_TRIANGLE,
+				BodyShape.OVAL,
+				BodyShape.RECTANGLE,
+				BodyShape.TRIANGLE,
+			],
+			style: [StylePreference.FITTED_WEAR],
+			imageUrl: "https://placehold.co/600x900/FFFFFF/333333?text=T-shirt",
+		},
+		{
+			name: "Szerokie Spodnie Palazzo",
+			basePrice: new Decimal(250.0),
+			suitableFor: [BodyShape.INVERTED_TRIANGLE, BodyShape.RECTANGLE],
+			style: [StylePreference.OVERSIZE_WEAR, StylePreference.RETRO_SHAPES],
+			imageUrl: "https://placehold.co/600x900/A5D6A7/2E7D32?text=Spodnie\\nPalazzo",
+		},
+		{
+			name: "Krótki Top",
+			basePrice: new Decimal(99.0),
+			suitableFor: [BodyShape.HOURGLASS],
+			style: [StylePreference.FITTED_WEAR],
+			imageUrl: "https://placehold.co/600x900/FFCCBC/E64A19?text=Kr%C3%B3tki\\nTop",
+		},
+		{
+			name: "Bomberka w Stylu Lat 90.",
+			basePrice: new Decimal(320.0),
+			suitableFor: [BodyShape.INVERTED_TRIANGLE, BodyShape.OVAL],
+			style: [StylePreference.RETRO_SHAPES, StylePreference.OVERSIZE_WEAR],
+			imageUrl: "https://placehold.co/600x900/CFD8DC/455A64?text=Bomberka",
+		},
+		{
+			name: "Body z Długim Rękawem",
+			basePrice: new Decimal(140.0),
+			suitableFor: [BodyShape.HOURGLASS, BodyShape.RECTANGLE],
+			style: [StylePreference.FITTED_WEAR],
+			imageUrl: "https://placehold.co/600x900/424242/FFFFFF?text=Body",
+		},
+	];
 
-	console.log("Created products.");
-
-	// Create Product SKUs
-	const product1Sku1 = await prisma.productSku.create({
-		data: {
-			productId: product1.id,
-			skuCode: "SG-RED-S",
-			price: new Decimal(209.99),
-			stockQuantity: 100,
-			propertyVariants: {
-				create: [{ propertyVariantId: colorRed.id }, { propertyVariantId: sizeSmall.id }],
+	for (const productData of dummyProducts) {
+		const productImage = await prisma.multimedia.create({
+			data: {
+				url: productData.imageUrl,
+				fileType: FileType.JPG,
+				altText: `Image for ${productData.name}`,
+				ownerId: producerUser.id,
 			},
-		},
-	});
+		});
 
-	const product1Sku2 = await prisma.productSku.create({
-		data: {
-			productId: product1.id,
-			skuCode: "SG-BLUE-L",
-			price: new Decimal(219.99),
-			stockQuantity: 50,
-			propertyVariants: {
-				create: [{ propertyVariantId: colorBlue.id }, { propertyVariantId: sizeLarge.id }],
+		await prisma.product.create({
+			data: {
+				name: productData.name,
+				basePrice: productData.basePrice,
+				isActive: true,
+				ownerId: producerUser.id,
+				mainImageId: productImage.id,
+				suitableFor: productData.suitableFor,
+				style: productData.style,
 			},
-		},
-	});
+		});
+	}
 
-	const product2Sku1 = await prisma.productSku.create({
-		data: {
-			productId: product2.id,
-			skuCode: "MW-BLUE",
-			price: new Decimal(55.0),
-			stockQuantity: 200,
-			propertyVariants: {
-				create: [{ propertyVariantId: colorBlue.id }],
-			},
-		},
-	});
+	console.log(`Created ${dummyProducts.length} dummy products with images.`);
 
-	console.log("Created product SKUs.");
+	// --- END OF NEW DUMMY PRODUCT DATA ---
 
-	// Create Orders
-	const order1 = await prisma.order.create({
-		data: {
-			customerId: customer1.id,
-			producerId: producerUser.id,
-			status: OrderStatus.CONFIRMED,
-			customerData: { name: customer1.name, email: customer1.email },
-			approvalPolicy: ApprovalPolicy.AUTOMATIC,
-			handlingMethod: HandlingMethod.EMAIL,
-			handlingEmail: producerUser.email,
-		},
-	});
-
-	const order2 = await prisma.order.create({
-		data: {
-			customerId: customer2.id,
-			producerId: producerUser.id,
-			status: OrderStatus.PENDING,
-			customerData: { name: customer2.name, email: customer2.email },
-			approvalPolicy: ApprovalPolicy.MANUAL,
-			handlingMethod: HandlingMethod.API,
-			handlingApiUrl: "https://example.com/api/handleorder",
-		},
-	});
-
-	console.log("Created orders.");
-
-	// Create Order Items
-	await prisma.orderItem.create({
-		data: {
-			orderId: order1.id,
-			productSkuId: product1Sku1.id,
-			quantity: 2,
-			pricePerUnitAtOrder: product1Sku1.price || new Decimal(0),
-		},
-	});
-
-	await prisma.orderItem.create({
-		data: {
-			orderId: order1.id,
-			productSkuId: product2Sku1.id,
-			quantity: 1,
-			pricePerUnitAtOrder: product2Sku1.price || new Decimal(0),
-		},
-	});
-
-	await prisma.orderItem.create({
-		data: {
-			orderId: order2.id,
-			productSkuId: product1Sku2.id,
-			quantity: 5,
-			pricePerUnitAtOrder: product1Sku2.price || new Decimal(0),
-		},
-	});
-
-	console.log("Created order items.");
-
+	// Create Customers, Categories, etc. (can be kept if needed for other tests)
 	console.log("Seeding finished.");
 }
 
