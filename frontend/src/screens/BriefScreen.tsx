@@ -1,37 +1,37 @@
-import React, { useState } from "react";
-import { View, TouchableOpacity, Modal, TextInput, Button, StyleSheet, Text } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, TextInput, StyleSheet, Modal, Button, TouchableOpacity } from "react-native";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // KROK 1: Import
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import InteractiveImageView, { HotspotData, initialHotspots } from "@/components/InteractiveImageView";
 import { RootStackParamList } from "@/navigation/AppNavigator";
-import InteractiveImageView, { HotspotData } from "@/components/InteractiveImageView";
 
-// Definicja stałych dla obrazka pozostaje w screenie, który go używa
-const YOUR_IMAGE_WIDTH = 458;
-const YOUR_IMAGE_HEIGHT = 882;
-const IMAGE_ASPECT_RATIO = YOUR_IMAGE_WIDTH / YOUR_IMAGE_HEIGHT;
+const IMAGE_ASPECT_RATIO = 750 / 1125;
 const imageSource = require("../../assets/images/body-measurement.jpg");
-
-// Definicja hotspotów dla tego konkretnego ekranu
-const initialHotspots: HotspotData[] = [
-	{ id: 1, name: "Shoulder", value: "", relativeTop: 0.22, relativeLeft: 0.5 },
-	{ id: 2, name: "Chest", value: "", relativeTop: 0.3, relativeLeft: 0.38 },
-	{ id: 3, name: "Chest", value: "", relativeTop: 0.3, relativeLeft: 0.62 },
-	{ id: 4, name: "Sleeve", value: "", relativeTop: 0.45, relativeLeft: 0.25 },
-	{ id: 5, name: "Sleeve", value: "", relativeTop: 0.45, relativeLeft: 0.75 },
-	{ id: 6, name: "Waist", value: "", relativeTop: 0.48, relativeLeft: 0.5 },
-	{ id: 7, name: "Hips", value: "", relativeTop: 0.58, relativeLeft: 0.4 },
-	{ id: 8, name: "Hips", value: "", relativeTop: 0.58, relativeLeft: 0.6 },
-	{ id: 9, name: "Inseam", value: "", relativeTop: 0.75, relativeLeft: 0.5 },
-];
+const STORAGE_KEY = "userMeasurements";
 
 const BriefScreen = () => {
 	const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-
 	const [modalVisible, setModalVisible] = useState(false);
 	const [currentHotspot, setCurrentHotspot] = useState<HotspotData | null>(null);
 	const [measurement, setMeasurement] = useState("");
 	const [hotspots, setHotspots] = useState<HotspotData[]>(initialHotspots);
+
+	// KROK 2: Wczytywanie danych przy starcie ekranu
+	useEffect(() => {
+		const loadMeasurements = async () => {
+			try {
+				const savedMeasurements = await AsyncStorage.getItem(STORAGE_KEY);
+				if (savedMeasurements !== null) {
+					setHotspots(JSON.parse(savedMeasurements));
+				}
+			} catch (e) {
+				console.error("Failed to load measurements from storage.", e);
+			}
+		};
+		loadMeasurements();
+	}, []);
 
 	const handleHotspotPress = (hotspot: HotspotData) => {
 		setCurrentHotspot(hotspot);
@@ -39,11 +39,28 @@ const BriefScreen = () => {
 		setModalVisible(true);
 	};
 
-	const handleSave = () => {
+	// KROK 3: Zapisywanie danych po każdej zmianie
+	const handleSave = async () => {
 		if (currentHotspot) {
-			setHotspots(hotspots.map((h) => (h.id === currentHotspot.id ? { ...h, value: measurement } : h)));
+			const newHotspots = hotspots.map((h) => (h.id === currentHotspot.id ? { ...h, value: measurement } : h));
+			setHotspots(newHotspots);
+			try {
+				await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newHotspots));
+			} catch (e) {
+				console.error("Failed to save measurements to storage.", e);
+			}
 		}
 		setModalVisible(false);
+	};
+
+	const handleContinue = () => {
+		const allMeasurementsEntered = hotspots.every((h) => h.value.trim() !== "");
+		if (!allMeasurementsEntered) {
+			console.log("Proszę wprowadzić wszystkie wymiary.");
+			// Tutaj można dodać alert dla użytkownika
+			return;
+		}
+		navigation.navigate("StylePreferences", { measurements: hotspots });
 	};
 
 	return (
@@ -81,7 +98,7 @@ const BriefScreen = () => {
 				</View>
 			</Modal>
 
-			<TouchableOpacity style={styles.button} onPress={() => navigation.navigate("ProductConfigurator")}>
+			<TouchableOpacity style={styles.button} onPress={handleContinue}>
 				<ThemedText style={styles.buttonText}>Continue</ThemedText>
 			</TouchableOpacity>
 		</ThemedView>
