@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Product } from "../../../shared/validators/product";
 import { BodyShape, StylePreference } from "../../../shared/enums";
 
-const API_URL = "https://your-api-endpoint.com/api"; // Zastąp prawdziwym URL
+const API_URL = "http://localhost:3000/api"; // Zastąp prawdziwym URL
 
 export function useGetRecommendedProducts(bodyShape: BodyShape | null, styles: StylePreference[]) {
 	const [data, setData] = useState<Product[] | null>(null);

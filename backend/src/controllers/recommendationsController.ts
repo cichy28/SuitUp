@@ -1,9 +1,14 @@
+// Zaktualizowany plik: backend/src/controllers/recommendationsController.ts
 import { Request, Response } from "express";
 import prisma from "../db";
 import { BodyShape, StylePreference } from "@prisma/client";
 
 export const getRecommendations = async (req: Request, res: Response) => {
-	const { bodyShape, styles } = req.query;
+	// Pobieramy dane z req.query
+	const { bodyShape } = req.query;
+	let { styles } = req.query;
+	// Upewniamy się, że 'styles' jest tablicą, zanim użyjemy go w Prisma.
+	const stylesArray = typeof styles === "string" ? styles.split(",") : (styles as StylePreference[]);
 
 	try {
 		const products = await prisma.product.findMany({
@@ -13,7 +18,8 @@ export const getRecommendations = async (req: Request, res: Response) => {
 					has: bodyShape as BodyShape,
 				},
 				style: {
-					hasSome: styles as StylePreference[],
+					// Używamy nowo utworzonej tablicy
+					hasSome: stylesArray,
 				},
 			},
 			include: {

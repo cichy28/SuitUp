@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 // The PrismaClient import might not be directly used here in index.ts,
 // but is good practice to show it's part of the project dependencies.
 // import { PrismaClient } from '@prisma/client';
@@ -20,7 +21,14 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
+const corsOptions = {
+	origin: "*", // Pozwól na zapytania z każdego źródła. W produkcji ogranicz to do domeny frontendu.
+	methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Jawnie zezwól na wszystkie popularne metody HTTP.
+	preflightContinue: false,
+	optionsSuccessStatus: 204, // Standardowa odpowiedź sukcesu dla zapytań preflight.
+};
 // Middleware
+app.use(cors(corsOptions));
 app.use(express.json()); // Parse JSON request bodies
 
 // Routes
