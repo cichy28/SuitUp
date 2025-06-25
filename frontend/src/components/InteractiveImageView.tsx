@@ -18,6 +18,21 @@ export interface HotspotData {
 	displayImage?: ImageSourcePropType;
 }
 
+export const initialHotspots: HotspotData[] = [
+	{ id: 1, name: "Ramiona", value: "", relativeTop: 0.2, relativeLeft: 0.3, displayType: "text", displayText: "+" },
+	{
+		id: 2,
+		name: "Klatka piersiowa",
+		value: "",
+		relativeTop: 0.4,
+		relativeLeft: 0.5,
+		displayType: "text",
+		displayText: "+",
+	},
+	{ id: 3, name: "Rękaw", value: "", relativeTop: 0.6, relativeLeft: 0.2, displayType: "text", displayText: "+" },
+	// Dodaj więcej hotspotów zgodnie z potrzebami
+];
+
 interface InteractiveImageViewProps {
 	source: ImageSourcePropType;
 	aspectRatio: number;

@@ -11,6 +11,7 @@ import MeasurementScreen from "../screens/MeasurementScreen";
 import SummaryScreen from "../screens/SummaryScreen";
 import ConfirmationScreen from "../screens/ConfirmationScreen";
 import StylePreferencesScreen from "../screens/StylePreferencesScreen";
+import { BodyShape, StylePreference } from "../../../shared/enums";
 
 // Definicja typów dla parametrów nawigacji
 export type RootStackParamList = {
@@ -18,7 +19,7 @@ export type RootStackParamList = {
 	Welcome: undefined;
 	Brief: undefined;
 	StylePreferences: { measurements: HotspotData[] }; // Dodanie nowego ekranu z parametrami
-	Recommendation: undefined;
+	Recommendation: { bodyShape: BodyShape | null; selectedStyles: StylePreference[] };
 	Configurator: { productId: string };
 	Measurement: undefined;
 	Summary: undefined;

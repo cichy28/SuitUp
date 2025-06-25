@@ -1,10 +1,13 @@
 import { z } from "zod";
+import { BodyShape, StylePreference } from "../enums";
 
 export const ProductSchema = z.object({
 	id: z.string().cuid(),
 	name: z.string(),
 	basePrice: z.number(),
 	isActive: z.boolean(),
+	suitableFor: z.array(BodyShape).optional(),
+	style: z.array(StylePreference).optional(),
 	ownerId: z.string().cuid(),
 	mainImageId: z.string().cuid().nullable(),
 	createdAt: z.date(),
@@ -15,6 +18,8 @@ export const CreateProductInputSchema = z.object({
 	name: z.string(),
 	basePrice: z.number(),
 	isActive: z.boolean().optional(),
+	suitableFor: z.array(BodyShape).optional(),
+	style: z.array(StylePreference).optional(),
 	ownerId: z.string().cuid(),
 	mainImageId: z.string().cuid().optional(),
 });
@@ -24,6 +29,8 @@ export const UpdateProductInputSchema = z
 		name: z.string().optional(),
 		basePrice: z.number().optional(),
 		isActive: z.boolean().optional(),
+		suitableFor: z.array(BodyShape).optional(),
+		style: z.array(StylePreference).optional(),
 		ownerId: z.string().cuid().optional(),
 		mainImageId: z.string().cuid().optional().nullable(),
 	})

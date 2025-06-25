@@ -93,8 +93,7 @@ const StylePreferencesScreen = () => {
 	const handleFinish = () => {
 		console.log("Zakończono! Wybrana sylwetka:", bodyShape);
 		console.log("Wybrane style:", selectedStyles);
-		// Nawigacja do ekranu z rekomendacjami, przekazując zebrane dane
-		// navigation.navigate("Recommendation", { bodyShape, selectedStyles });
+		navigation.navigate("Recommendation", { bodyShape, selectedStyles });
 	};
 
 	return (

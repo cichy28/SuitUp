@@ -13,6 +13,11 @@ CREATE TYPE "HandlingMethod" AS ENUM ('EMAIL', 'API');
 -- CreateEnum
 CREATE TYPE "FileType" AS ENUM ('PNG', 'JPG', 'WEBP', 'PDF');
 
+CREATE TYPE "BodyShape" AS ENUM ('INVERTED_TRIANGLE', 'HOURGLASS', 'OVAL', 'RECTANGLE', 'TRIANGLE');
+
+CREATE TYPE "StylePreference" AS ENUM ('FITTED_WEAR', 'OVERSIZE_WEAR', 'RETRO_SHAPES', 'MASCULINE_SHAPES');
+
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
@@ -66,6 +71,8 @@ CREATE TABLE "Product" (
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "ownerId" TEXT NOT NULL,
     "mainImageId" TEXT,
+    "suitableFor" "BodyShape"[],
+    "style" "StylePreference"[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
