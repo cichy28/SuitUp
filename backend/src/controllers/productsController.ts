@@ -31,36 +31,28 @@ export const getProductById = async (req: Request, res: Response) => {
 		const product = await prisma.product.findUnique({
 			where: { id },
 			include: {
-				owner: {
-					select: { id: true, email: true, companyName: true },
-				},
-				mainImage: {
-					select: { id: true, url: true, altText: true },
-				},
-				categories: {
-					// Include categories the product belongs to
+				mainImage: true, // Dołączamy główny obrazek
+				hotspots: {
+					// Dołączamy wszystkie hotspoty dla tego produktu
 					include: {
-						category: true, // Include category details
+						property: {
+							// A dla każdego hotspota dołączamy jego właściwość
+							include: {
+								propertyVariants: true, // Oraz wszystkie dostępne warianty dla tej właściwości
+							},
+						},
 					},
 				},
-				properties: {
-					// Include product-specific properties
-					include: {
-						property: true, // Include property details
-					},
-				},
-				skus: true, // Include related SKUs
 			},
 		});
 
 		if (!product) {
 			return res.status(404).json({ message: "Product not found" });
 		}
-
-		res.status(200).json(product);
-	} catch (error: any) {
-		console.error(`Error fetching product with ID ${id}:`, error);
-		res.status(500).json({ message: `Error fetching product with ID ${id}`, error: error.message });
+		res.json(product);
+	} catch (error) {
+		const e = error as Error;
+		res.status(500).json({ message: "Error fetching product", error: e.message });
 	}
 };
 

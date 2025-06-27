@@ -1,98 +1,205 @@
-// w pliku: frontend/src/screens/ConfiguratorScreen.tsx
-import React, { useState, useEffect } from "react";
-import { StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useDesign } from "@/context/DesignContext"; // Użycie nowego hooka
-import { ProductImageView } from "@/components/ProductImageView";
-import { ConfiguredParametersList } from "@/components/ConfiguredParametersList";
-import VariantSelector from "@/components/VariantSelector";
-import StyledButton from "@/components/StyledButton";
-import ProgressBar from "@/components/ProgressBar";
-import { Hotspot } from "shared/validators/hotspot";
-import { Property } from "shared/validators/property"; // Załóżmy, że te typy istnieją
-import { PropertyVariant } from "shared/validators/propertyVariant"; // Załóżmy, że te typy istnieją
+// In: frontend/src/screens/ProductConfiguratorView.tsx
 
-// Załóżmy, że dane produktu są pobierane z API
-const MOCK_PRODUCT_IMAGE = "https://placehold.co/600x400/EEE/31343C";
-const MOCK_PROPERTIES: (Property & { hotspots: Hotspot[]; propertyVariants: PropertyVariant[] })[] = [
-	// Dane powinny pochodzić z API
-];
+import React, { useState, useMemo } from "react";
+import { View, Text, StyleSheet, Button, ActivityIndicator, Modal } from "react-native";
+import { RouteProp, useRoute } from "@react-navigation/native";
 
-const ProductConfiguratorView = () => {
-	const { currentStep, totalSteps, selectedVariables, handleVariableChange, goToNextStep, goToPreviousStep } =
-		useDesign();
+import { RootStackParamList } from "../navigation/AppNavigator";
+import { useGetProductById } from "../hooks/useApi";
+import { InteractiveImageView } from "../components/InteractiveImageView";
+import { ThemedView } from "../components/ThemedView";
+import { ThemedText } from "../components/ThemedText";
+import VariantSelector from "../components/VariantSelector";
+import { Hotspot, PropertyVariant } from "shared/validators/product";
 
-	const [activeProperty, setActiveProperty] = useState<
-		(Property & { hotspots: Hotspot[]; propertyVariants: PropertyVariant[] }) | undefined
-	>(undefined);
+type ConfiguratorRouteProp = RouteProp<RootStackParamList, "Configurator">;
 
-	// Funkcja, która zostanie przekazana do ProductImageView
+// --- POPRAWKA TUTAJ ---
+// Zmieniamy na export domyślny, aby pasował do AppNavigator.tsx
+export default function ProductConfiguratorView() {
+	// --------------------
+	const route = useRoute<ConfiguratorRouteProp>();
+	const { productId } = route.params;
+
+	const { data: product, loading, error } = useGetProductById(productId);
+
+	const [selectedVariants, setSelectedVariants] = useState<Record<string, PropertyVariant>>({});
+	const [isModalVisible, setModalVisible] = useState(false);
+	const [activeHotspot, setActiveHotspot] = useState<Hotspot | null>(null);
+
+	const currentPrice = useMemo(() => {
+		if (!product) return 0;
+		const basePrice = Number(product.basePrice);
+		const additionalCost = Object.values(selectedVariants).reduce(
+			(sum, variant) => sum + Number(variant.additionalCost),
+			0
+		);
+		return basePrice + additionalCost;
+	}, [product, selectedVariants]);
+
+	const allOptionsSelected = useMemo(() => {
+		if (!product || !product.hotspots) return false;
+		return product.hotspots.length === Object.keys(selectedVariants).length;
+	}, [product, selectedVariants]);
+
 	const handleHotspotPress = (hotspot: Hotspot) => {
-		// Znajdź właściwość (parametr) powiązaną z tym hotspotem
-		const property = MOCK_PROPERTIES.find((p) => p.id === hotspot.propertyId);
-		setActiveProperty(property);
+		setActiveHotspot(hotspot);
+		setModalVisible(true);
 	};
 
-	const handleVariantSelect = (variantId: string) => {
-		if (activeProperty) {
-			handleVariableChange(activeProperty.id, variantId);
-			setActiveProperty(undefined); // Zamknij selektor po wyborze
+	const handleVariantSelect = (variant: PropertyVariant) => {
+		if (activeHotspot) {
+			setSelectedVariants((prev) => ({
+				...prev,
+				[activeHotspot.propertyId]: variant,
+			}));
 		}
+		setModalVisible(false);
+		setActiveHotspot(null);
 	};
 
-	const hotspots = MOCK_PROPERTIES.flatMap((p) => p.hotspots);
-	const selectedPropertyIds = Object.keys(selectedVariables);
+	if (loading) {
+		return (
+			<View style={styles.centeredContainer}>
+				<ActivityIndicator size="large" />
+				<Text>Ładowanie produktu...</Text>
+			</View>
+		);
+	}
 
-	// Przygotowanie danych dla ConfiguredParametersList
-	const selectedVariantsForList = MOCK_PROPERTIES.reduce(
-		(acc, prop) => {
-			const selectedVariantId = selectedVariables[prop.id];
-			if (selectedVariantId) {
-				acc[prop.id] = prop.propertyVariants.find((v) => v.id === selectedVariantId);
-			}
-			return acc;
-		},
-		{} as { [propertyId: string]: PropertyVariant | undefined }
-	);
+	if (error || !product) {
+		return (
+			<View style={styles.centeredContainer}>
+				<Text>Nie udało się załadować produktu. Spróbuj ponownie.</Text>
+			</View>
+		);
+	}
 
 	return (
-		<SafeAreaView style={styles.container}>
-			<ProgressBar progress={currentStep / totalSteps} />
-
-			<View style={styles.imageContainer}>
-				<ProductImageView
-					imageUrl={MOCK_PRODUCT_IMAGE}
-					hotspots={hotspots}
-					selectedPropertyIds={selectedPropertyIds}
+		<ThemedView style={styles.container}>
+			{product.mainImage && (
+				<InteractiveImageView
+					imageUrl={product.mainImage.url}
+					hotspots={product.hotspots}
 					onHotspotPress={handleHotspotPress}
-					activeHotspotId={activeProperty?.hotspots[0]?.id} // Założenie: jeden hotspot na właściwość
+				/>
+			)}
+
+			<View style={styles.detailsContainer}>
+				<ThemedText style={styles.productName}>{product.name}</ThemedText>
+				<ThemedText style={styles.price}>{currentPrice.toFixed(2)} zł</ThemedText>
+				<ThemedText style={styles.description}>Wybierz opcje dla każdego z punktów na obrazku.</ThemedText>
+
+				<View style={styles.summaryBox}>
+					{product.hotspots.map((hotspot) => {
+						const selected = selectedVariants[hotspot.propertyId];
+						return (
+							<View key={hotspot.id} style={styles.summaryItem}>
+								<Text style={styles.summaryProperty}>{hotspot.property?.name || "Cecha"}:</Text>
+								<Text style={selected ? styles.summarySelected : styles.summaryNotSelected}>
+									{selected ? selected.name : "Nie wybrano"}
+								</Text>
+							</View>
+						);
+					})}
+				</View>
+
+				<Button
+					title="Dalej"
+					onPress={() => console.log("Przejście do podsumowania", { productId, selectedVariants })}
+					disabled={!allOptionsSelected}
 				/>
 			</View>
 
-			<View style={styles.selectorContainer}>
-				<VariantSelector
-					property={activeProperty}
-					selectedVariantId={activeProperty ? selectedVariables[activeProperty.id] : undefined}
-					onVariantSelect={handleVariantSelect}
-				/>
-			</View>
-
-			<ConfiguredParametersList properties={MOCK_PROPERTIES} selectedVariants={selectedVariantsForList} />
-
-			<View style={styles.navigationButtons}>
-				<StyledButton title="Wstecz" onPress={goToPreviousStep} disabled={currentStep === 1} />
-				<StyledButton title="Dalej" onPress={goToNextStep} disabled={currentStep === totalSteps} />
-			</View>
-		</SafeAreaView>
+			<Modal
+				animationType="slide"
+				transparent={true}
+				visible={isModalVisible}
+				onRequestClose={() => setModalVisible(false)}
+			>
+				<View style={styles.modalContainer}>
+					<View style={styles.modalContent}>
+						{activeHotspot && activeHotspot.property && (
+							<VariantSelector
+								property={activeHotspot.property}
+								onSelectVariant={handleVariantSelect}
+								onClose={() => setModalVisible(false)}
+							/>
+						)}
+					</View>
+				</View>
+			</Modal>
+		</ThemedView>
 	);
-};
+}
 
-// ... reszta pliku, w tym style
 const styles = StyleSheet.create({
-	container: { flex: 1, backgroundColor: "#fff" },
-	imageContainer: { flex: 3 }, // Więcej miejsca na obraz
-	selectorContainer: { flex: 2 }, // Miejsce na selektor wariantów
-	navigationButtons: { flexDirection: "row", justifyContent: "space-around", padding: 20 },
+	centeredContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	container: {
+		flex: 1,
+		backgroundColor: "#fff",
+	},
+	detailsContainer: {
+		padding: 20,
+		borderTopLeftRadius: 20,
+		borderTopRightRadius: 20,
+		backgroundColor: "#F7F5F3",
+		marginTop: -20,
+	},
+	productName: {
+		fontSize: 24,
+		fontWeight: "bold",
+	},
+	price: {
+		fontSize: 20,
+		color: "#888",
+		marginVertical: 8,
+	},
+	description: {
+		fontSize: 14,
+		color: "#555",
+		marginBottom: 16,
+	},
+	summaryBox: {
+		marginBottom: 20,
+		padding: 15,
+		backgroundColor: "#FFF",
+		borderRadius: 10,
+	},
+	summaryItem: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		paddingVertical: 4,
+	},
+	summaryProperty: {
+		fontWeight: "bold",
+		color: "#333",
+	},
+	summarySelected: {
+		color: "green",
+	},
+	summaryNotSelected: {
+		color: "red",
+		fontStyle: "italic",
+	},
+	modalContainer: {
+		flex: 1,
+		justifyContent: "flex-end",
+		backgroundColor: "rgba(0,0,0,0.5)",
+	},
+	modalContent: {
+		backgroundColor: "white",
+		borderTopLeftRadius: 20,
+		borderTopRightRadius: 20,
+		padding: 20,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: -2 },
+		shadowOpacity: 0.25,
+		shadowRadius: 4,
+		elevation: 5,
+	},
 });
-
-export default ProductConfiguratorView; // Pamiętaj, aby opakować go w DesignProvider w nawigacji

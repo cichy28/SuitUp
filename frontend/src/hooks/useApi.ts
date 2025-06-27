@@ -1,41 +1,52 @@
-import { useState, useEffect } from "react";
-import { Product } from "../../../shared/validators/product";
-import { BodyShape, StylePreference } from "../../../shared/enums";
+// In: frontend/src/hooks/useApi.ts
 
-const API_URL = "http://localhost:3000/api"; // Zastąp prawdziwym URL
+import useSWR from "swr";
+import { api } from "../utils/api";
+import { Product } from "shared/validators/product";
+import { BodyShape, StylePreference } from "shared/enums";
 
-export function useGetRecommendedProducts(bodyShape: BodyShape | null, styles: StylePreference[]) {
-	const [data, setData] = useState<Product[] | null>(null);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<Error | null>(null);
+type FullProduct = Product & {
+	hotspots: any[];
+	mainImage: any;
+};
 
-	useEffect(() => {
-		if (!bodyShape || styles.length === 0) {
-			setLoading(false);
-			return;
-		}
+const fetcher = (url: string) => api.get(url).then((res) => res.data);
 
-		const fetchData = async () => {
-			setLoading(true);
-			try {
-				const params = new URLSearchParams({
-					bodyShape: bodyShape,
-					styles: styles.join(","),
-				});
-				const response = await fetch(`${API_URL}/recommendations?${params.toString()}`);
-				if (!response.ok) {
-					throw new Error(`HTTP error! status: ${response.status}`);
-				}
-				const result = await response.json();
-				setData(result);
-			} catch (e) {
-				setError(e as Error);
-			} finally {
-				setLoading(false);
-			}
-		};
-		fetchData();
-	}, [bodyShape, styles]);
+/**
+ * Hook do pobierania rekomendowanych produktów.
+ */
+export function useGetRecommendedProducts(bodyShape: BodyShape | null, selectedStyles?: StylePreference[]) {
+	const params = new URLSearchParams();
+	if (bodyShape) {
+		params.append("bodyShape", bodyShape);
+	}
 
-	return { data, loading, error };
+	if (selectedStyles && selectedStyles.length > 0) {
+		// --- POPRAWKA TUTAJ ---
+		// Zmieniamy 'style' na 'styles', aby pasowało do walidatora na backendzie.
+		selectedStyles.forEach((style) => params.append("styles", style));
+		// --------------------
+	}
+
+	const shouldFetch = selectedStyles && selectedStyles.length > 0;
+	const { data, error } = useSWR<Product[]>(shouldFetch ? `/recommendations?${params.toString()}` : null, fetcher);
+
+	return {
+		data,
+		loading: shouldFetch && !error && !data,
+		error,
+	};
+}
+
+/**
+ * Hook do pobierania szczegółowych danych pojedynczego produktu po jego ID.
+ */
+export function useGetProductById(productId?: string) {
+	const { data, error } = useSWR<FullProduct>(productId ? `/products/${productId}` : null, fetcher);
+
+	return {
+		data,
+		loading: !error && !data && !!productId,
+		error,
+	};
 }

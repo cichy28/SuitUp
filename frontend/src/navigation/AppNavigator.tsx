@@ -38,6 +38,11 @@ export default function AppNavigator() {
 			<Stack.Screen name="Recommendation" component={RecommendationScreen} />
 			<Stack.Screen name="Configurator" component={ProductConfiguratorView} />
 			<Stack.Screen name="Measurement" component={MeasurementScreen} />
+			<Stack.Screen
+				name="ProductConfigurator"
+				component={ProductConfiguratorView}
+				options={{ title: "Konfiguruj Produkt" }}
+			/>
 			<Stack.Screen name="Summary" component={SummaryScreen} />
 			<Stack.Screen name="Confirmation" component={ConfirmationScreen} />
 		</Stack.Navigator>

@@ -1,10 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import morgan from "morgan";
 // The PrismaClient import might not be directly used here in index.ts,
 // but is good practice to show it's part of the project dependencies.
 // import { PrismaClient } from '@prisma/client';
-
+import { uploadRoutes } from "./routes/upload";
 import { router as customerRoutes } from "./routes/customers";
 import { router as userRoutes } from "./routes/users";
 import { router as productRoutes } from "./routes/products";
@@ -15,7 +16,7 @@ import { router as propertyRoutes } from "./routes/properties";
 import { router as productSkuRoutes } from "./routes/productSkus";
 import { router as propertyVariantRoutes } from "./routes/propertyVariants"; // Import propertyVariant routes
 import { router as recommendationsRoutes } from "./routes/recommendations";
-
+import path from "path"; // Upewnij się, że masz import path
 dotenv.config();
 
 const app = express();
@@ -30,7 +31,8 @@ const corsOptions = {
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json()); // Parse JSON request bodies
-
+app.use("/uploads", express.static(path.join(__dirname, "../uploads"))); // Serwuj pliki z folderu /uploads
+app.use(morgan("dev"));
 // Routes
 app.use("/api/customers", customerRoutes);
 app.use("/api/users", userRoutes);
@@ -42,6 +44,7 @@ app.use("/api/properties", propertyRoutes);
 app.use("/api/product-skus", productSkuRoutes);
 app.use("/api/property-variants", propertyVariantRoutes);
 app.use("/api/recommendations", recommendationsRoutes);
+app.use("/api/upload", uploadRoutes); // Dodaj nowy router
 
 // Simple root route
 app.get("/", (req, res) => {
