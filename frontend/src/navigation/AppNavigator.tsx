@@ -1,3 +1,5 @@
+// In: frontend/src/navigation/AppNavigator.tsx
+
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { HotspotData } from "@/components/InteractiveImageView"; // Zaimportuj typ
 
@@ -20,7 +22,7 @@ export type RootStackParamList = {
 	Brief: undefined;
 	StylePreferences: { measurements: HotspotData[] }; // Dodanie nowego ekranu z parametrami
 	Recommendation: { bodyShape: BodyShape | null; selectedStyles: StylePreference[] };
-	Configurator: { productId: string };
+	ProductConfigurator: { productId: string }; // Ujednolicona nazwa
 	Measurement: undefined;
 	Summary: undefined;
 	Confirmation: undefined;
@@ -36,13 +38,12 @@ export default function AppNavigator() {
 			<Stack.Screen name="Brief" component={BriefScreen} />
 			<Stack.Screen name="StylePreferences" component={StylePreferencesScreen} />
 			<Stack.Screen name="Recommendation" component={RecommendationScreen} />
-			<Stack.Screen name="Configurator" component={ProductConfiguratorView} />
-			<Stack.Screen name="Measurement" component={MeasurementScreen} />
 			<Stack.Screen
 				name="ProductConfigurator"
 				component={ProductConfiguratorView}
 				options={{ title: "Konfiguruj Produkt" }}
 			/>
+			<Stack.Screen name="Measurement" component={MeasurementScreen} />
 			<Stack.Screen name="Summary" component={SummaryScreen} />
 			<Stack.Screen name="Confirmation" component={ConfirmationScreen} />
 		</Stack.Navigator>

@@ -25,20 +25,20 @@ export const getAllProducts = async (req: Request, res: Response) => {
 };
 
 // Get product by ID
+// Get product by ID
 export const getProductById = async (req: Request, res: Response) => {
 	const { id } = req.params;
 	try {
 		const product = await prisma.product.findUnique({
 			where: { id },
 			include: {
-				mainImage: true, // Dołączamy główny obrazek
-				hotspots: {
-					// Dołączamy wszystkie hotspoty dla tego produktu
+				mainImage: true,
+				properties: {
+					// Corrected field name
 					include: {
 						property: {
-							// A dla każdego hotspota dołączamy jego właściwość
 							include: {
-								propertyVariants: true, // Oraz wszystkie dostępne warianty dla tej właściwości
+								propertyVariants: true,
 							},
 						},
 					},

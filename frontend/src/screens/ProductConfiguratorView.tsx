@@ -1,205 +1,113 @@
 // In: frontend/src/screens/ProductConfiguratorView.tsx
 
-import React, { useState, useMemo } from "react";
-import { View, Text, StyleSheet, Button, ActivityIndicator, Modal } from "react-native";
 import { RouteProp, useRoute } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, ActivityIndicator, Image, ScrollView } from "react-native";
+import { api } from "../utils/api"; // Poprawny import instancji api
+import { RootStackParamList } from "../navigation/AppNavigator"; // Poprawny import typów nawigacji
+import { Product } from "../../../shared/validators/product"; // Poprawny import typu Product
 
-import { RootStackParamList } from "../navigation/AppNavigator";
-import { useGetProductById } from "../hooks/useApi";
-import { InteractiveImageView } from "../components/InteractiveImageView";
-import { ThemedView } from "../components/ThemedView";
-import { ThemedText } from "../components/ThemedText";
-import VariantSelector from "../components/VariantSelector";
-import { Hotspot, PropertyVariant } from "shared/validators/product";
+type ProductConfiguratorViewRouteProp = RouteProp<RootStackParamList, "ProductConfigurator">;
 
-type ConfiguratorRouteProp = RouteProp<RootStackParamList, "Configurator">;
-
-// --- POPRAWKA TUTAJ ---
-// Zmieniamy na export domyślny, aby pasował do AppNavigator.tsx
-export default function ProductConfiguratorView() {
-	// --------------------
-	const route = useRoute<ConfiguratorRouteProp>();
+const ProductConfiguratorView = () => {
+	const route = useRoute<ProductConfiguratorViewRouteProp>();
 	const { productId } = route.params;
+	const [product, setProduct] = useState<Product | null>(null); // Użycie typu Product
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
-	const { data: product, loading, error } = useGetProductById(productId);
+	useEffect(() => {
+		const fetchProduct = async () => {
+			try {
+				// Użycie instancji api do wysłania zapytania GET
+				const response = await api.get(`/products/${productId}`);
+				setProduct(response.data);
+			} catch (e: any) {
+				setError(e.response?.data?.message || e.message);
+			} finally {
+				setLoading(false);
+			}
+		};
 
-	const [selectedVariants, setSelectedVariants] = useState<Record<string, PropertyVariant>>({});
-	const [isModalVisible, setModalVisible] = useState(false);
-	const [activeHotspot, setActiveHotspot] = useState<Hotspot | null>(null);
-
-	const currentPrice = useMemo(() => {
-		if (!product) return 0;
-		const basePrice = Number(product.basePrice);
-		const additionalCost = Object.values(selectedVariants).reduce(
-			(sum, variant) => sum + Number(variant.additionalCost),
-			0
-		);
-		return basePrice + additionalCost;
-	}, [product, selectedVariants]);
-
-	const allOptionsSelected = useMemo(() => {
-		if (!product || !product.hotspots) return false;
-		return product.hotspots.length === Object.keys(selectedVariants).length;
-	}, [product, selectedVariants]);
-
-	const handleHotspotPress = (hotspot: Hotspot) => {
-		setActiveHotspot(hotspot);
-		setModalVisible(true);
-	};
-
-	const handleVariantSelect = (variant: PropertyVariant) => {
-		if (activeHotspot) {
-			setSelectedVariants((prev) => ({
-				...prev,
-				[activeHotspot.propertyId]: variant,
-			}));
-		}
-		setModalVisible(false);
-		setActiveHotspot(null);
-	};
+		fetchProduct();
+	}, [productId]);
 
 	if (loading) {
 		return (
-			<View style={styles.centeredContainer}>
+			<View style={styles.centered}>
 				<ActivityIndicator size="large" />
-				<Text>Ładowanie produktu...</Text>
 			</View>
 		);
 	}
 
-	if (error || !product) {
+	if (error) {
 		return (
-			<View style={styles.centeredContainer}>
-				<Text>Nie udało się załadować produktu. Spróbuj ponownie.</Text>
+			<View style={styles.centered}>
+				<Text>Error: {error}</Text>
+			</View>
+		);
+	}
+
+	if (!product) {
+		return (
+			<View style={styles.centered}>
+				<Text>No product found.</Text>
 			</View>
 		);
 	}
 
 	return (
-		<ThemedView style={styles.container}>
-			{product.mainImage && (
-				<InteractiveImageView
-					imageUrl={product.mainImage.url}
-					hotspots={product.hotspots}
-					onHotspotPress={handleHotspotPress}
-				/>
-			)}
+		<ScrollView style={styles.container}>
+			<Text style={styles.title}>{product.name}</Text>
+			{/* Sprawdzenie, czy mainImage istnieje, zanim spróbujemy uzyskać dostęp do jego właściwości */}
+			{product.mainImage && <Image source={{ uri: product.mainImage.url }} style={styles.image} />}
+			<Text style={styles.price}>Base Price: ${product.basePrice}</Text>
 
-			<View style={styles.detailsContainer}>
-				<ThemedText style={styles.productName}>{product.name}</ThemedText>
-				<ThemedText style={styles.price}>{currentPrice.toFixed(2)} zł</ThemedText>
-				<ThemedText style={styles.description}>Wybierz opcje dla każdego z punktów na obrazku.</ThemedText>
-
-				<View style={styles.summaryBox}>
-					{product.hotspots.map((hotspot) => {
-						const selected = selectedVariants[hotspot.propertyId];
-						return (
-							<View key={hotspot.id} style={styles.summaryItem}>
-								<Text style={styles.summaryProperty}>{hotspot.property?.name || "Cecha"}:</Text>
-								<Text style={selected ? styles.summarySelected : styles.summaryNotSelected}>
-									{selected ? selected.name : "Nie wybrano"}
-								</Text>
-							</View>
-						);
-					})}
-				</View>
-
-				<Button
-					title="Dalej"
-					onPress={() => console.log("Przejście do podsumowania", { productId, selectedVariants })}
-					disabled={!allOptionsSelected}
-				/>
-			</View>
-
-			<Modal
-				animationType="slide"
-				transparent={true}
-				visible={isModalVisible}
-				onRequestClose={() => setModalVisible(false)}
-			>
-				<View style={styles.modalContainer}>
-					<View style={styles.modalContent}>
-						{activeHotspot && activeHotspot.property && (
-							<VariantSelector
-								property={activeHotspot.property}
-								onSelectVariant={handleVariantSelect}
-								onClose={() => setModalVisible(false)}
-							/>
-						)}
+			{product.properties && product.properties.length > 0 ? (
+				product.properties.map((property, index) => (
+					<View key={index} style={styles.propertyContainer}>
+						<Text style={styles.propertyTitle}>{property.property.name}</Text>
+						{/* Dalej można mapować property.property.propertyVariants, jeśli istnieją */}
 					</View>
-				</View>
-			</Modal>
-		</ThemedView>
+				))
+			) : (
+				<Text>No configurable properties for this product.</Text>
+			)}
+		</ScrollView>
 	);
-}
+};
 
 const styles = StyleSheet.create({
-	centeredContainer: {
+	centered: {
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
 	},
 	container: {
 		flex: 1,
-		backgroundColor: "#fff",
+		padding: 16,
 	},
-	detailsContainer: {
-		padding: 20,
-		borderTopLeftRadius: 20,
-		borderTopRightRadius: 20,
-		backgroundColor: "#F7F5F3",
-		marginTop: -20,
-	},
-	productName: {
+	title: {
 		fontSize: 24,
 		fontWeight: "bold",
-	},
-	price: {
-		fontSize: 20,
-		color: "#888",
-		marginVertical: 8,
-	},
-	description: {
-		fontSize: 14,
-		color: "#555",
 		marginBottom: 16,
 	},
-	summaryBox: {
-		marginBottom: 20,
-		padding: 15,
-		backgroundColor: "#FFF",
-		borderRadius: 10,
+	image: {
+		width: "100%",
+		height: 300,
+		marginBottom: 16,
 	},
-	summaryItem: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		paddingVertical: 4,
+	price: {
+		fontSize: 18,
+		marginBottom: 16,
 	},
-	summaryProperty: {
+	propertyContainer: {
+		marginBottom: 16,
+	},
+	propertyTitle: {
+		fontSize: 20,
 		fontWeight: "bold",
-		color: "#333",
-	},
-	summarySelected: {
-		color: "green",
-	},
-	summaryNotSelected: {
-		color: "red",
-		fontStyle: "italic",
-	},
-	modalContainer: {
-		flex: 1,
-		justifyContent: "flex-end",
-		backgroundColor: "rgba(0,0,0,0.5)",
-	},
-	modalContent: {
-		backgroundColor: "white",
-		borderTopLeftRadius: 20,
-		borderTopRightRadius: 20,
-		padding: 20,
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: -2 },
-		shadowOpacity: 0.25,
-		shadowRadius: 4,
-		elevation: 5,
 	},
 });
+
+export default ProductConfiguratorView;

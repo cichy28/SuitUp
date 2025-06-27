@@ -49,7 +49,10 @@ export default function RecommendationScreen({ route }: Props) {
 		// --------------------
 
 		return (
-			<TouchableOpacity style={styles.card} onPress={() => navigation.navigate("Configurator", { productId: item.id })}>
+			<TouchableOpacity
+				style={styles.card}
+				onPress={() => navigation.navigate("ProductConfigurator", { productId: item.id })}
+			>
 				<Image source={{ uri: item.mainImage?.url || "https://placehold.co/400x600" }} style={styles.image} />
 				<View style={styles.textContainer}>
 					<Text style={styles.title}>{item.name}</Text>
