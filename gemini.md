@@ -12,6 +12,7 @@ This is a full-stack application for a suit/clothing service. It consists of a R
 
 ## 2. Tech Stack
 
+- **Operating system** Windows 11
 - **Language:** TypeScript
 - **Frontend:**
   - Framework: React Native with Expo
