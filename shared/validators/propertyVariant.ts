@@ -6,6 +6,8 @@ export const PropertyVariantSchema = z.object({
 	name: z.string(),
 	propertyId: z.string().cuid(),
 	imageId: z.string().cuid().nullable(),
+	priceAdjustment: z.number().optional().nullable(),
+	displayOrder: z.number().int().optional(),
 	createdAt: z.date(),
 });
 
@@ -15,6 +17,8 @@ export const CreatePropertyVariantInputSchema = z.object({
 	name: z.string(),
 	propertyId: z.string().cuid(), // Property must be assigned
 	imageId: z.string().cuid().optional().nullable(), // Image is optional
+	priceAdjustment: z.number().optional().nullable(),
+	displayOrder: z.number().int().optional(),
 });
 
 export const UpdatePropertyVariantInputSchema = z

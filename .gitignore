@@ -2,6 +2,7 @@
 node_modules/
 dist/
 build/
+uploads/
 .env
 .env.local
 .env.development.local
@@ -53,3 +54,6 @@ docker-compose.override.yml
 .cache/
 tmp/
 temp/
+
+
+_do_importu/

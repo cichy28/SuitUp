@@ -3,29 +3,28 @@ import { z } from "zod";
 export const PropertySchema = z.object({
 	id: z.string().cuid(),
 	name: z.string(),
-	// type: z.string(), // Usunięte - brak w schemacie Prisma
-	// description: z.string().nullable(), // Usunięte - brak w schemacie Prisma
-	isGlobal: z.boolean(), // Dodane/Poprawione zgodnie z Prisma
-	ownerId: z.string().cuid().nullable(), // Istniało, zgodne z Prisma
+	description: z.string().nullable().optional(),
+	isGlobal: z.boolean(),
+	displayOrder: z.number().int().optional(),
+	ownerId: z.string().cuid().nullable(),
 	createdAt: z.date(),
-	// updatedAt: z.date(), // Usunięte - brak w schemacie Prisma
 });
 
 export const CreatePropertyInputSchema = z.object({
 	name: z.string(),
-	// type: z.string(), // Usunięte - brak w schemacie Prisma
-	// description: z.string().optional(), // Usunięte - brak w schemacie Prisma
-	isGlobal: z.boolean().optional(), // Dodane - ma wartość domyślną w Prisma
-	ownerId: z.string().cuid().optional().nullable(), // Dodane/Poprawione - opcjonalne i nullable w Prisma
+	description: z.string().optional().nullable(),
+	isGlobal: z.boolean().optional(),
+	displayOrder: z.number().int().optional(),
+	ownerId: z.string().cuid().optional().nullable(),
 });
 
 export const UpdatePropertyInputSchema = z
 	.object({
 		name: z.string().optional(),
-		// type: z.string().optional(), // Usunięte - brak w schemacie Prisma
-		// description: z.string().optional().nullable(), // Usunięte - brak w schemacie Prisma
-		isGlobal: z.boolean().optional(), // Dodane - można opcjonalnie aktualizować
-		ownerId: z.string().cuid().optional().nullable(), // Dodane/Poprawione - można opcjonalnie aktualizować/ustawić na null
+		description: z.string().optional().nullable(),
+		isGlobal: z.boolean().optional(),
+		displayOrder: z.number().int().optional(),
+		ownerId: z.string().cuid().optional().nullable(),
 	})
 	.refine((data: any) => Object.keys(data).length > 0, {
 		message: "At least one field must be provided for update.",

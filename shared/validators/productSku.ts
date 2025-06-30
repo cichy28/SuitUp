@@ -6,6 +6,7 @@ export const ProductSkuSchema = z.object({
 	productId: z.string().cuid(),
 	skuCode: z.string().nullable(),
 	price: z.number().nullable(), // Prisma Decimal maps well to number in JS
+	priceAdjustment: z.number().optional().nullable(),
 	stockQuantity: z.number().int().nonnegative(),
 	createdAt: z.date(),
 	updatedAt: z.date(),
@@ -17,6 +18,7 @@ export const CreateProductSkuInputSchema = z.object({
 	productId: z.string().cuid(), // Product must be assigned
 	skuCode: z.string().optional().nullable(), // skuCode can be optional/nullable based on schema
 	price: z.number().optional().nullable(), // Price can be optional/nullable
+	priceAdjustment: z.number().optional().nullable(),
 	stockQuantity: z.number().int().nonnegative().optional(), // Stock quantity optional, will default in Prisma
 	// Note: Linking PropertyVariants on creation might require a nested structure here
 	// or separate endpoints after SKU creation. We'll handle just basic fields for now.

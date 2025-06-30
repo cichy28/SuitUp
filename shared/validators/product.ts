@@ -4,6 +4,7 @@ import { BodyShape, StylePreference } from "../enums";
 export const ProductSchema = z.object({
 	id: z.string().cuid(),
 	name: z.string(),
+	description: z.string().nullable(),
 	basePrice: z.number(),
 	isActive: z.boolean(),
 	suitableFor: z.array(BodyShape).optional(),
@@ -16,6 +17,7 @@ export const ProductSchema = z.object({
 
 export const CreateProductInputSchema = z.object({
 	name: z.string(),
+	description: z.string().optional().nullable(),
 	basePrice: z.number(),
 	isActive: z.boolean().optional(),
 	suitableFor: z.array(BodyShape).optional(),
@@ -27,6 +29,7 @@ export const CreateProductInputSchema = z.object({
 export const UpdateProductInputSchema = z
 	.object({
 		name: z.string().optional(),
+		description: z.string().optional().nullable(),
 		basePrice: z.number().optional(),
 		isActive: z.boolean().optional(),
 		suitableFor: z.array(BodyShape).optional(),
