@@ -190,9 +190,11 @@ model ProductSku {
   skuCode         String?     @unique
   price           Decimal?    // POPRAWKA: Float -> Decimal
   stockQuantity   Int         @default(0)
+  imageId         String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   
+  image            Multimedia?                 @relation(fields: [imageId], references: [id], onDelete: SetNull)
   product          Product                     @relation(fields: [productId], references: [id], onDelete: Cascade)
   propertyVariants ProductSkuPropertyVariant[]
   orderItems       OrderItem[]
@@ -251,4 +253,5 @@ model Multimedia {
   usedAsStartImg User[]            @relation("UserStartScreenImage")
   usedInProducts Product[]
   usedInVariants PropertyVariant[]
+  usedInSkus     ProductSku[]
 }

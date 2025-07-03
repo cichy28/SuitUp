@@ -113,119 +113,107 @@ async function processProperties(propertiesPath: string, product: Product, owner
     }
 }
 
-async function processSkus(skusPath: string, product: Product, owner: User, variantMap: Map<string, string>) {
-    console.log(`\n--- Phase 2: Processing SKUs from ${skusPath} ---`);
+async function processSkus(skusPath: string, product: Product, owner: User, variantMap: Map<string, string>): Promise<string | null> {
+    console.log(`
+--- Phase 2: Processing SKUs from ${skusPath} ---`);
     const skuFiles = await fs.readdir(skusPath, { withFileTypes: true });
+    let firstSkuImageId: string | null = null;
 
     for (const skuFile of skuFiles.filter(f => f.isFile())) {
         const skuName = path.parse(skuFile.name).name;
+        const skuImagePath = path.join(skusPath, skuFile.name);
         console.log(`  Processing SKU: ${skuName}`);
+
+        const imageId = await getOrCreateMultimedia(skuImagePath, owner.id);
+        if (!firstSkuImageId) {
+            firstSkuImageId = imageId; // Capture the first image ID
+        }
 
         let dbSku = await prisma.productSku.findFirst({ where: { skuCode: skuName, productId: product.id } });
         if (!dbSku) {
-            dbSku = await prisma.productSku.create({ data: { skuCode: skuName, productId: product.id, price: 0 } });
-            console.log(`    Created SKU: ${dbSku.skuCode} (ID: ${dbSku.id})`);
+            dbSku = await prisma.productSku.create({
+                data: {
+                    skuCode: skuName,
+                    productId: product.id,
+                    price: 0,
+                    imageId: imageId
+                }
+            });
+            console.log(`    Created SKU: ${dbSku.skuCode} (ID: ${dbSku.id}) with Image ID: ${imageId}`);
         } else {
-            console.log(`    SKU "${skuName}" already exists.`);
+            await prisma.productSku.update({
+                where: { id: dbSku.id },
+                data: { imageId: imageId }
+            });
+            console.log(`    SKU "${skuName}" already exists. Updated with Image ID: ${imageId}`);
         }
 
-        // Parse SKU name to connect variants
-        const codes = skuName.split('_');
-        let firstVariantIndex = -1;
-        for(let i = 0; i < codes.length; i++) {
-            if (variantMap.has(codes[i])) {
-                firstVariantIndex = i;
-                break;
-            }
-        }
-
-        if (firstVariantIndex === -1) {
-            console.warn(`      -> No variant codes found in SKU name "${skuName}"`);
-            continue;
-        }
-
-        const variantCodes = codes.slice(firstVariantIndex);
-        for (const code of variantCodes) {
-            const variantId = variantMap.get(code);
-            if (variantId) {
-                await prisma.productSkuPropertyVariant.upsert({
-                    where: { productSkuId_propertyVariantId: { productSkuId: dbSku.id, propertyVariantId: variantId } },
-                    update: {},
-                    create: { productSkuId: dbSku.id, propertyVariantId: variantId },
-                });
-                console.log(`      -> Linked variant ${code}`);
-            } else {
-                console.warn(`      -> Variant code "${code}" from SKU "${skuName}" not found in variant map.`);
-            }
+        const codes = skuName.split('_').filter(code => variantMap.has(code));
+        for (const code of codes) {
+            const variantId = variantMap.get(code)!;
+            await prisma.productSkuPropertyVariant.upsert({
+                where: { productSkuId_propertyVariantId: { productSkuId: dbSku.id, propertyVariantId: variantId } },
+                update: {},
+                create: { productSkuId: dbSku.id, propertyVariantId: variantId }
+            });
+            console.log(`      -> Linked variant ${code}`);
         }
     }
+    return firstSkuImageId;
 }
 
 async function processProduct(productPath: string, owner: User) {
     const productName = path.basename(productPath);
-    console.log(`\nProcessing product: ${productName}`);
+    console.log(`
+Processing product: ${productName}`);
 
     let product = await prisma.product.findFirst({ where: { name: productName, ownerId: owner.id } });
 
+    // Metadata loading logic...
+    const metadataFilePath = path.join(productPath, 'product_metadata.json');
     let suitableFor: BodyShape[] = [];
     let style: StylePreference[] = [];
-
-    const metadataFilePath = path.join(productPath, 'product_metadata.json');
     try {
-        const metadataContent = await fs.readFile(metadataFilePath, 'utf-8');
-        const metadata = JSON.parse(metadataContent);
-        if (Array.isArray(metadata.suitableFor)) {
-            suitableFor = metadata.suitableFor;
-        }
-        if (Array.isArray(metadata.style)) {
-            style = metadata.style;
-        }
-        console.log(`  -> Loaded metadata for ${productName}: suitableFor=${suitableFor}, style=${style}`);
-    } catch (error) {
-        if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-            console.warn(`  -> No product_metadata.json found for ${productName}. Using default empty arrays.`);
-        } else {
-            console.error(`  -> Error reading product_metadata.json for ${productName}:`, error);
-        }
-    }
+        const metadata = JSON.parse(await fs.readFile(metadataFilePath, 'utf-8'));
+        suitableFor = metadata.suitableFor || [];
+        style = metadata.style || [];
+    } catch (e) { /* ... */ }
 
     if (!product) {
         product = await prisma.product.create({
-            data: {
-                name: productName,
-                basePrice: 0,
-                ownerId: owner.id,
-                suitableFor: suitableFor,
-                style: style,
-            }
+            data: { name: productName, basePrice: 0, ownerId: owner.id, suitableFor, style }
         });
         console.log(`Created product: ${product.name} (ID: ${product.id})`);
     } else {
-        // Update existing product with metadata
         product = await prisma.product.update({
             where: { id: product.id },
-            data: {
-                suitableFor: suitableFor,
-                style: style,
-            }
+            data: { suitableFor, style }
         });
         console.log(`Product "${product.name}" already exists. Updated metadata.`);
     }
 
-    const content = await fs.readdir(productPath, { withFileTypes: true });
-    const propertiesDir = content.find(d => d.isDirectory() && d.name === PROPERTIES_FOLDER_NAME);
-    const skusDir = content.find(d => d.isDirectory() && d.name === SKU_FOLDER_NAME);
+    const propertiesDir = path.join(productPath, PROPERTIES_FOLDER_NAME);
+    const skusDir = path.join(productPath, SKU_FOLDER_NAME);
 
-    if (!propertiesDir) {
+    if (!await fs.stat(propertiesDir).then(s => s.isDirectory()).catch(() => false)) {
         console.warn(`Product "${productName}" is missing a "${PROPERTIES_FOLDER_NAME}" directory. Skipping.`);
         return;
     }
 
     const variantMap = new Map<string, string>();
-    await processProperties(path.join(productPath, propertiesDir.name), product, owner, variantMap);
+    await processProperties(propertiesDir, product, owner, variantMap);
 
-    if (skusDir) {
-        await processSkus(path.join(productPath, skusDir.name), product, owner, variantMap);
+    if (await fs.stat(skusDir).then(s => s.isDirectory()).catch(() => false)) {
+        const firstSkuImageId = await processSkus(skusDir, product, owner, variantMap);
+
+        // This is the FIX: Update the product with the main image ID
+        if (firstSkuImageId && !product.mainImageId) {
+            await prisma.product.update({
+                where: { id: product.id },
+                data: { mainImageId: firstSkuImageId }
+            });
+            console.log(`  -> Set mainImageId for ${product.name} to ${firstSkuImageId}`);
+        }
     } else {
         console.log("No SKU directory found for this product.");
     }

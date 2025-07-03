@@ -1,28 +1,24 @@
 // In: frontend/src/utils/api.ts
-
 import axios from "axios";
+import { Product } from "../../../shared/validators/product";
 
-// Adres URL Twojego lokalnego serwera backendowego.
-// Upewnij się, że port (tutaj 3000) jest taki sam, na jakim działa Twój backend.
 const API_URL = "http://localhost:3000/api";
 
-// Tworzymy nową instancję axios z domyślną konfiguracją
 export const api = axios.create({
-	baseURL: API_URL,
-	headers: {
-		"Content-Type": "application/json",
-	},
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-/**
- * Możesz tutaj w przyszłości dodać interceptory, np. do automatycznego
- * dołączania tokena autoryzacyjnego do każdego zapytania.
- * * Przykład:
- * api.interceptors.request.use(config => {
- * const token = localStorage.getItem('authToken');
- * if (token) {
- * config.headers.Authorization = `Bearer ${token}`;
- * }
- * return config;
- * });
- */
+export const getProductDetails = async (productId: string): Promise<Product> => {
+  try {
+    const response = await api.get<Product>(`/products/${productId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching product details:", error);
+    throw error;
+  }
+};
+
+

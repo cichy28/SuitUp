@@ -8,12 +8,9 @@ export const getAllProducts = async (req: Request, res: Response) => {
 	try {
 		const products = await prisma.product.findMany({
 			include: {
-				// Optionally include related data, e.g., owner name, main image URL
+				mainImage: true, // Ensure mainImage is always included
 				owner: {
 					select: { id: true, email: true, companyName: true },
-				},
-				mainImage: {
-					select: { id: true, url: true, altText: true },
 				},
 			},
 		});
@@ -34,11 +31,28 @@ export const getProductById = async (req: Request, res: Response) => {
 			include: {
 				mainImage: true,
 				properties: {
-					// Corrected field name
 					include: {
 						property: {
 							include: {
-								propertyVariants: true,
+								propertyVariants: {
+									include: {
+										image: true,
+									},
+								},
+							},
+						},
+					},
+				},
+				skus: {
+					include: {
+						image: true,
+						propertyVariants: {
+							include: {
+								propertyVariant: {
+									include: {
+										image: true,
+									},
+								},
 							},
 						},
 					},

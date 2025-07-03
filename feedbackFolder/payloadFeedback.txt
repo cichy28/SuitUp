@@ -1,0 +1,41 @@
+[
+    {
+        "id": "cmcjjps7n000w5769pixzjqx1",
+        "name": "PRODUCT_LEMANSKA_02",
+        "basePrice": "0",
+        "isActive": true,
+        "ownerId": "cmcjjps4k0000576923g464pq",
+        "mainImageId": null,
+        "createdAt": "2025-06-30T20:22:51.156Z",
+        "updatedAt": "2025-06-30T20:22:51.156Z",
+        "suitableFor": [
+            "TRIANGLE",
+            "INVERTED_TRIANGLE"
+        ],
+        "style": [
+            "RETRO_SHAPES",
+            "OVERSIZE_WEAR"
+        ],
+        "mainImage": null
+    },
+    {
+        "id": "cmcjjpsdp002g5769txeqh6hs",
+        "name": "SP_D",
+        "basePrice": "0",
+        "isActive": true,
+        "ownerId": "cmcjjps4k0000576923g464pq",
+        "mainImageId": null,
+        "createdAt": "2025-06-30T20:22:51.374Z",
+        "updatedAt": "2025-06-30T20:22:51.374Z",
+        "suitableFor": [
+            "OVAL",
+            "RECTANGLE",
+            "INVERTED_TRIANGLE"
+        ],
+        "style": [
+            "FITTED_WEAR",
+            "OVERSIZE_WEAR"
+        ],
+        "mainImage": null
+    }
+. W @f
