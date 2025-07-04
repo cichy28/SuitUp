@@ -1,0 +1,15 @@
+C:\Users\JanCichosz\…guratorView.tsx:102 
+ Uncaught ReferenceError: activeProperty is not defined
+    at ProductConfiguratorView (C:\Users\JanCichosz\…atorView.tsx:102:51)
+ProductConfiguratorView	@	C:\Users\JanCichosz\…guratorView.tsx:102
+<ProductConfiguratorView>		
+ProductConfiguratorScreen	@	C:\Users\JanCichosz\…uratorScreen.tsx:47
+
+
+C:\Users\JanCichosz\…uratorScreen.tsx:47 
+ An error occurred in the <ProductConfiguratorView> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+<ProductConfiguratorView>		
+ProductConfiguratorScreen	@	C:\Users\JanCichosz\…uratorScreen.tsx:47

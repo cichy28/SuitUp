@@ -168,3 +168,51 @@ export const deleteOrder = async (req: Request, res: Response) => {
 
 // TODO: Implement endpoints for managing OrderItems within an Order (e.g., Add Item, Update Item Quantity, Remove Item)
 // This would likely require new controllers/routes or modifications to the existing ones.
+
+export const placeOrder = async (req: Request, res: Response) => {
+	try {
+		// 1. Validate input
+		const { product, selectedVariants, customerData } = req.body;
+		// TODO: Add Zod validation for this payload
+
+		// 2. Find the corresponding ProductSku
+		// This is a simplified logic. A robust implementation would need to
+		// match all selected variants to find the exact SKU.
+		const productSku = await prisma.productSku.findFirst({
+			where: {
+				productId: product.id,
+				// This condition assumes variant values are stored in a way that allows searching
+				// This might need adjustment based on the actual data structure
+			},
+		});
+
+		if (!productSku) {
+			return res.status(404).json({ message: "Product variant not found" });
+		}
+
+		// 3. Create the Order
+		const newOrder = await prisma.order.create({
+			data: {
+				customerData: customerData,
+				producerId: product.ownerId, // Assuming the product owner is the producer
+				items: {
+					create: [
+						{
+							productSkuId: productSku.id,
+							quantity: 1,
+							price: product.basePrice, // Or a calculated price based on variants
+						},
+					],
+				},
+			},
+			include: {
+				items: true,
+			},
+		});
+
+		res.status(201).json(newOrder);
+	} catch (error: any) {
+		console.error("Error placing order:", error);
+		res.status(500).json({ message: "Error placing order", error: error.message });
+	}
+};

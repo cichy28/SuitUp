@@ -19,7 +19,7 @@ export type RootStackParamList = {
 	Recommendation: { bodyShape: BodyShape | null; selectedStyles: StylePreference[] };
 	ProductConfigurator: { productId: string };
 	Measurement: undefined;
-	Summary: undefined;
+	Summary: { product: Product; selectedVariants: Record<string, string> };
 	Confirmation: undefined;
 };
 
@@ -31,15 +31,15 @@ export default function AppNavigator() {
 			<Stack.Screen name="Loading" component={LoadingScreen} />
 			<Stack.Screen name="Welcome" component={WelcomeScreen} />
 			<Stack.Screen name="Brief" component={BriefScreen} />
-			<Stack.Screen name="StylePreferences" component={StylePreferencesScreen} />
-			<Stack.Screen name="Recommendation" component={RecommendationScreen} />
+			<Stack.Screen name="StylePreferences" component={StylePreferencesScreen} options={{ headerShown: true, title: 'Preferencje Stylu' }} />
+			<Stack.Screen name="Recommendation" component={RecommendationScreen} options={{ headerShown: true, title: 'Rekomendacje' }} />
 			<Stack.Screen
 				name="ProductConfigurator"
 				component={ProductConfiguratorScreen} // Poprawiony komponent
-				options={{ title: "Konfiguruj Produkt" }}
+				options={{ headerShown: true, title: "Konfiguruj Produkt" }}
 			/>
 			<Stack.Screen name="Measurement" component={MeasurementScreen} />
-			<Stack.Screen name="Summary" component={SummaryScreen} />
+			<Stack.Screen name="Summary" component={SummaryScreen} options={{ headerShown: true, title: 'Podsumowanie' }} />
 			<Stack.Screen name="Confirmation" component={ConfirmationScreen} />
 		</Stack.Navigator>
 	);

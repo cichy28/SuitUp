@@ -12,12 +12,19 @@ export const api = axios.create({
 });
 
 export const getProductDetails = async (productId: string): Promise<Product> => {
+  const response = await api.get(`/products/${productId}`);
+  return response.data;
+};
+
+export const placeOrder = async (orderData: any) => {
   try {
-    const response = await api.get<Product>(`/products/${productId}`);
+    const response = await api.post("/orders/place", orderData);
     return response.data;
-  } catch (error) {
-    console.error("Error fetching product details:", error);
-    throw error;
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message);
+    }
+    throw new Error("An unknown error occurred");
   }
 };
 

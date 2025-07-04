@@ -5,30 +5,21 @@ import StyledButton from "../components/StyledButton";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useDesign } from "../context/DesignContext";
+import { Colors, Fonts, Spacing } from '../constants/Theme';
 
-// Definicja typów dla stacku nawigacji, jeśli jeszcze nie masz
 type RootStackParamList = {
 	Welcome: undefined;
 	Brief: undefined;
-	// Dodaj inne ekrany, jeśli są potrzebne
 };
 
 type WelcomeScreenNavigationProp = StackNavigationProp<RootStackParamList, "Welcome">;
 
 const WelcomeScreen = () => {
-	// --- POCZĄTEK ZMIANY ---
-	// Pobieramy cały obiekt navigation, a nie tylko dispatch
 	const navigation = useNavigation<WelcomeScreenNavigationProp>();
-	// --- KONIEC ZMIANY ---
-
 	const { goToNextStep } = useDesign();
 
 	const handleStart = () => {
-		// goToNextStep(); // Ta funkcja z kontekstu nie nawiguje między ekranami
-		// --- POCZĄTEK ZMIANY ---
-		// Wywołujemy dispatch jako metodę obiektu navigation
-		navigation.navigate("Brief"); // Używamy navigate do przejścia do ekranu Brief
-		// --- KONIEC ZMIANY ---
+		navigation.navigate("Brief");
 	};
 
 	return (
@@ -48,8 +39,8 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: "space-between",
 		alignItems: "center",
-		backgroundColor: "#fff",
-		padding: 20,
+		backgroundColor: Colors.background,
+		padding: Spacing.medium,
 	},
 	content: {
 		flex: 1,
@@ -60,18 +51,19 @@ const styles = StyleSheet.create({
 		width: 150,
 		height: 150,
 		resizeMode: "contain",
-		marginBottom: 20,
+		marginBottom: Spacing.large,
 	},
 	title: {
-		fontSize: 24,
-		fontWeight: "bold",
-		marginBottom: 10,
+		fontSize: Fonts.sizes.title,
+		fontWeight: Fonts.weights.bold,
+		color: Colors.text,
+		marginBottom: Spacing.small,
 	},
 	subtitle: {
-		fontSize: 16,
-		color: "#666",
+		fontSize: Fonts.sizes.subtitle,
+		color: Colors.darkGray,
 		textAlign: "center",
-		paddingHorizontal: 20,
+		paddingHorizontal: Spacing.large,
 	},
 });
 

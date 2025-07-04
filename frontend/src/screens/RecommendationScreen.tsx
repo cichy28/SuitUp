@@ -92,7 +92,6 @@ const styles = StyleSheet.create({
 		paddingTop: 16,
 	},
 	card: {
-		flex: 1,
 		margin: 8,
 		borderRadius: 12,
 		backgroundColor: "#fff",
@@ -102,10 +101,11 @@ const styles = StyleSheet.create({
 		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.1,
 		shadowRadius: 4,
+		width: 150, // Fixed width
 	},
 	image: {
-		width: "100%",
-		aspectRatio: 2 / 3,
+		width: 150, // Fixed width
+		height: 225, // Fixed height
 	},
 	textContainer: {
 		padding: 12,

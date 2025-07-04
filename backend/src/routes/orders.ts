@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAllOrders, getOrderById, createOrder, updateOrder, deleteOrder } from "../controllers/ordersController";
+import { getAllOrders, getOrderById, createOrder, updateOrder, deleteOrder, placeOrder } from "../controllers/ordersController";
 import validateRequest from "../middleware/validateRequest";
 import { CreateOrderInputSchema, UpdateOrderInputSchema } from "../../../shared/validators/order";
 import { z } from "zod";
@@ -36,5 +36,8 @@ router.put(
 router.delete("/:id", validateRequest(z.object({ params: OrderIdParamSchema })), deleteOrder);
 
 // TODO: Add routes for managing OrderItems within an Order (e.g., POST /api/orders/:orderId/items, DELETE /api/orders/:orderId/items/:itemId, PUT /api/orders/:orderId/items/:itemId)
+
+// POST place new order
+router.post("/place", placeOrder);
 
 export { router };

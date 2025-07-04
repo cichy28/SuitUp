@@ -1,13 +1,15 @@
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../navigation/AppNavigator";
 import React, { useState, useEffect, useMemo } from "react";
-import { Image, StyleSheet, Text, View, TouchableOpacity, ScrollView } from "react-native";
+import { Image, StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Product } from "../../../shared/validators/product";
+import { Product, ProductProperty } from "../../../shared/validators/product";
 import { Property } from "../../../shared/validators/property";
 import { PropertyVariant } from "../../../shared/validators/propertyVariant";
 import { ProductSku } from "../../../shared/validators/productSku";
 import VisualVariantSelector from "./VisualVariantSelector";
-import { ProductProperty } from "shared/validators/product";
-import { Multimedia } from "shared/validators/multimedia";
+import HotspotImageView, { HotspotData } from "./HotspotImageView";
 
 interface ProductConfiguratorViewProps {
   product: Product & {
@@ -26,6 +28,7 @@ interface ProductConfiguratorViewProps {
 }
 
 const ProductConfiguratorView: React.FC<ProductConfiguratorViewProps> = ({ product }) => {
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
   const [activePropertyId, setActivePropertyId] = useState<string | null>(null);
 
@@ -71,6 +74,20 @@ const ProductConfiguratorView: React.FC<ProductConfiguratorViewProps> = ({ produ
     return product.mainImage?.url ?? "https://placehold.co/600x400/EEE/31343C";
   }, [currentSku, product.mainImage]);
 
+  const hotspots: HotspotData[] = useMemo(() => {
+    return product.properties.map((prop, index) => ({
+      id: prop.property.id,
+      name: prop.property.name,
+      value: selectedVariants[prop.property.id],
+      relativeTop: 0.2 + (index * 0.15),
+      relativeLeft: 0.2 + (index * 0.1),
+    }));
+  }, [product.properties, selectedVariants]);
+
+  const handleHotspotPress = (hotspot: HotspotData) => {
+    setActivePropertyId(hotspot.id as string);
+  };
+
   const activeProperty = useMemo(() => {
     return product.properties.find(p => p.property.id === activePropertyId)?.property;
   }, [activePropertyId, product.properties]);
@@ -78,20 +95,12 @@ const ProductConfiguratorView: React.FC<ProductConfiguratorViewProps> = ({ produ
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.imageContainer}>
-        <Image
+        <HotspotImageView
           source={{ uri: imageUrl }}
-          style={styles.productImage}
-          resizeMode="contain"
+          aspectRatio={1} // You might need to adjust this
+          hotspots={hotspots}
+          onHotspotPress={handleHotspotPress}
         />
-        {product.properties.map((prop) => (
-          <TouchableOpacity
-            key={prop.property.id}
-            style={[styles.hotspot, { top: `${prop.hotspotY || 20}%`, left: `${prop.hotspotX || 20}%` }]}
-            onPress={() => setActivePropertyId(prop.property.id)}
-          >
-            <View style={activePropertyId === prop.property.id ? styles.activeHotspotIndicator : styles.hotspotIndicator} />
-          </TouchableOpacity>
-        ))}
       </View>
       <View style={styles.optionsContainer}>
         <Text style={styles.activePropertyTitle}>{activeProperty?.name}</Text>
@@ -103,6 +112,9 @@ const ProductConfiguratorView: React.FC<ProductConfiguratorViewProps> = ({ produ
           />
         )}
       </View>
+      <TouchableOpacity style={styles.finishButton} onPress={() => navigation.navigate('Summary', { product, selectedVariants })}>
+        <Text style={styles.finishButtonText}>Finish</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -134,39 +146,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 10,
   },
-  hotspot: {
-    position: 'absolute',
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
+  
+  finishButton: {
+    backgroundColor: '#007bff',
+    padding: 15,
+    borderRadius: 5,
     alignItems: 'center',
+    margin: 10,
   },
-  hotspotIndicator: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: 'rgba(0, 122, 255, 0.7)',
-    borderWidth: 2,
-    borderColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
-  },
-  activeHotspotIndicator: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: 'rgba(255, 59, 48, 0.9)',
-    borderWidth: 2,
-    borderColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
+  finishButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   }
 });
-
 export default ProductConfiguratorView;
