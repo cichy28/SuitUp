@@ -1,5 +1,6 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ViewStyle } from 'react-native';
+import { Colors, Fonts, Spacing, BorderRadius } from '../constants/Theme';
 
 interface Props {
   title: string;
@@ -18,22 +19,22 @@ const StyledButton = ({ title, onPress, variant = 'primary', style }: Props) => 
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 30,
+    paddingVertical: Spacing.medium,
+    paddingHorizontal: Spacing.large,
+    borderRadius: BorderRadius.large,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primary: {
-    backgroundColor: '#82D4D4', // Teal color
+    backgroundColor: Colors.primary,
   },
   secondary: {
-    backgroundColor: '#E0E0E0', // Grey color
+    backgroundColor: Colors.lightGray,
   },
   text: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: Colors.white,
+    fontSize: Fonts.sizes.body,
+    fontWeight: Fonts.weights.bold,
   },
 });
 

@@ -3,6 +3,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'rea
 import { Property } from '../../../shared/validators/property';
 import { PropertyVariant } from '../../../shared/validators/propertyVariant';
 import { Multimedia } from '../../../shared/validators/multimedia';
+import { Colors, Fonts, Spacing, BorderRadius } from '../constants/Theme';
 
 interface VisualVariantSelectorProps {
   property: Property & {
@@ -38,35 +39,38 @@ const VisualVariantSelector: React.FC<VisualVariantSelectorProps> = ({ property,
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 10,
+    marginVertical: Spacing.medium,
   },
   label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    marginLeft: 10,
+    fontSize: Fonts.sizes.subtitle,
+    fontWeight: Fonts.weights.bold,
+    color: Colors.text,
+    marginBottom: Spacing.medium,
+    marginLeft: Spacing.medium,
   },
   variantOption: {
-    marginHorizontal: 5,
+    marginHorizontal: Spacing.small,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    padding: 5,
+    borderColor: Colors.lightGray,
+    borderRadius: BorderRadius.medium,
+    padding: Spacing.small,
     alignItems: 'center',
+    backgroundColor: Colors.white,
   },
   selectedOption: {
-    borderColor: '#007BFF',
+    borderColor: Colors.primary,
     borderWidth: 2,
   },
   variantImage: {
     width: 80,
     height: 80,
-    borderRadius: 8,
+    borderRadius: BorderRadius.small,
   },
   variantName: {
-    marginTop: 5,
-    fontSize: 12,
+    marginTop: Spacing.small,
+    fontSize: Fonts.sizes.caption,
     textAlign: 'center',
+    color: Colors.text,
   },
 });
 

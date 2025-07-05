@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
+import { View, StyleSheet, TouchableOpacity, Image, Text } from "react-native";
 import StyledButton from "@/components/StyledButton";
 import { useNavigation, RouteProp, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "@/navigation/AppNavigator";
 import { HotspotData } from "@/components/InteractiveImageView";
 import { BodyShape, StylePreference } from "../../../shared/enums";
-import { Spacing, Typography } from "@/constants/Styles";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // KROK 1: Import
+import { Colors, Fonts, Spacing, BorderRadius } from "@/constants/Theme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type StylePreferencesScreenNavigationProp = RouteProp<RootStackParamList, "StylePreferences">;
 
-// Klucze do AsyncStorage
 const BODY_SHAPE_KEY = "userBodyShape";
 const STYLE_PREFS_KEY = "userStylePreferences";
 
@@ -44,7 +41,6 @@ const StylePreferencesScreen = () => {
 	const [bodyShape, setBodyShape] = useState<BodyShape | null>(null);
 	const [selectedStyles, setSelectedStyles] = useState<StylePreference[]>([]);
 
-	// KROK 2: Wczytanie zapisanych preferencji przy starcie
 	useEffect(() => {
 		const loadPreferences = async () => {
 			try {
@@ -63,7 +59,6 @@ const StylePreferencesScreen = () => {
 		loadPreferences();
 	}, []);
 
-	// KROK 3: Klasyfikacja i zapis typu sylwetki
 	useEffect(() => {
 		const classifyAndSaveShape = async () => {
 			const shape = classifyBodyShape(measurements);
@@ -77,7 +72,6 @@ const StylePreferencesScreen = () => {
 		classifyAndSaveShape();
 	}, [measurements]);
 
-	// KROK 4: Zapis preferencji stylu przy każdej zmianie
 	const toggleStylePreference = async (style: StylePreference) => {
 		const newStyles = selectedStyles.includes(style)
 			? selectedStyles.filter((s) => s !== style)
@@ -97,11 +91,9 @@ const StylePreferencesScreen = () => {
 	};
 
 	return (
-		<ThemedView style={styles.container}>
+		<View style={styles.container}>
 			<View style={styles.content}>
-				<ThemedText type="subtitle" style={styles.header}>
-					YOUR BODY TYPE
-				</ThemedText>
+				<Text style={styles.header}>YOUR BODY TYPE</Text>
 				<View style={styles.shapeSelector}>
 					{BODY_SHAPES_OPTIONS.map((option) => (
 						<TouchableOpacity key={option.type} style={styles.shapeOption}>
@@ -113,9 +105,7 @@ const StylePreferencesScreen = () => {
 					))}
 				</View>
 
-				<ThemedText type="subtitle" style={styles.header}>
-					I LIKE
-				</ThemedText>
+				<Text style={styles.header}>I LIKE</Text>
 				<View style={styles.styleSelector}>
 					{STYLE_PREFERENCES_OPTIONS.map((option) => (
 						<TouchableOpacity
@@ -123,7 +113,7 @@ const StylePreferencesScreen = () => {
 							style={styles.styleOption}
 							onPress={() => toggleStylePreference(option.id)}
 						>
-							<ThemedText style={styles.styleLabel}>{option.label}</ThemedText>
+							<Text style={styles.styleLabel}>{option.label}</Text>
 							<View style={[styles.checkbox, selectedStyles.includes(option.id) && styles.checkboxSelected]}>
 								{selectedStyles.includes(option.id) && <View style={styles.checkboxInner} />}
 							</View>
@@ -132,7 +122,7 @@ const StylePreferencesScreen = () => {
 				</View>
 			</View>
 			<StyledButton title="Finish" onPress={handleFinish} />
-		</ThemedView>
+		</View>
 	);
 };
 
@@ -141,11 +131,15 @@ const styles = StyleSheet.create({
 		flex: 1,
 		padding: Spacing.medium,
 		justifyContent: "space-between",
+		backgroundColor: Colors.background,
 	},
 	content: {
 		flex: 1,
 	},
 	header: {
+		fontSize: Fonts.sizes.subtitle,
+		fontWeight: Fonts.weights.bold,
+		color: Colors.text,
 		marginVertical: Spacing.large,
 		textAlign: "center",
 		letterSpacing: 1.5,
@@ -153,7 +147,7 @@ const styles = StyleSheet.create({
 	shapeSelector: {
 		flexDirection: "row",
 		justifyContent: "space-around",
-		marginBottom: Spacing.xLarge,
+		marginBottom: Spacing.large,
 	},
 	shapeOption: {
 		alignItems: "center",
@@ -177,23 +171,25 @@ const styles = StyleSheet.create({
 		paddingVertical: Spacing.medium,
 	},
 	styleLabel: {
-		fontSize: Typography.fontSize.large,
+		fontSize: Fonts.sizes.body,
+		color: Colors.text,
 	},
 	checkbox: {
 		width: 24,
 		height: 24,
 		borderWidth: 2,
-		borderColor: "#82D4D4",
+		borderColor: Colors.primary,
 		justifyContent: "center",
 		alignItems: "center",
+		borderRadius: BorderRadius.small,
 	},
 	checkboxSelected: {
-		backgroundColor: "#82D4D4",
+		backgroundColor: Colors.primary,
 	},
 	checkboxInner: {
 		width: 12,
 		height: 12,
-		backgroundColor: "white",
+		backgroundColor: Colors.white,
 	},
 });
 

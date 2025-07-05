@@ -10,6 +10,7 @@ import { PropertyVariant } from "../../../shared/validators/propertyVariant";
 import { ProductSku } from "../../../shared/validators/productSku";
 import VisualVariantSelector from "./VisualVariantSelector";
 import HotspotImageView, { HotspotData } from "./HotspotImageView";
+import { Colors, Fonts, Spacing, BorderRadius } from '../constants/Theme';
 
 interface ProductConfiguratorViewProps {
   product: Product & {
@@ -51,7 +52,6 @@ const ProductConfiguratorView: React.FC<ProductConfiguratorViewProps> = ({ produ
 
   const currentSku = useMemo(() => {
     const selectedVariantIds = new Set(Object.values(selectedVariants));
-    // Ensure a variant is selected for every property before trying to find a SKU
     if (selectedVariantIds.size < product.properties.length) {
       return null;
     }
@@ -66,11 +66,9 @@ const ProductConfiguratorView: React.FC<ProductConfiguratorViewProps> = ({ produ
   }, [selectedVariants, product.skus, product.properties]);
 
   const imageUrl = useMemo(() => {
-    // If we have a matching SKU with a specific image, use it.
     if (currentSku && currentSku.image) {
       return currentSku.image.url;
     }
-    // Fallback to the main product image.
     return product.mainImage?.url ?? "https://placehold.co/600x400/EEE/31343C";
   }, [currentSku, product.mainImage]);
 
@@ -122,7 +120,7 @@ const ProductConfiguratorView: React.FC<ProductConfiguratorViewProps> = ({ produ
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.background,
   },
   imageContainer: {
     flex: 1,
@@ -136,28 +134,29 @@ const styles = StyleSheet.create({
   },
   optionsContainer: {
     height: 180,
-    padding: 10,
+    padding: Spacing.medium,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: Colors.lightGray,
+    backgroundColor: Colors.white,
   },
   activePropertyTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: Fonts.sizes.subtitle,
+    fontWeight: Fonts.weights.bold,
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: Spacing.medium,
+    color: Colors.text,
   },
-  
   finishButton: {
-    backgroundColor: '#007bff',
-    padding: 15,
-    borderRadius: 5,
+    backgroundColor: Colors.primary,
+    padding: Spacing.medium,
+    borderRadius: BorderRadius.medium,
     alignItems: 'center',
-    margin: 10,
+    margin: Spacing.medium,
   },
   finishButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: Colors.white,
+    fontSize: Fonts.sizes.subtitle,
+    fontWeight: Fonts.weights.bold,
   }
 });
 export default ProductConfiguratorView;
