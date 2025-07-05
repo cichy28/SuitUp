@@ -1,25 +1,26 @@
 version: "3.8"
+
 services:
-  postgres: # Ten serwis już masz
-    image: postgres:15
-    restart: always
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: db
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     ports:
-      - "15432:5432"
+      - "3000:3000"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  adminer:
-    image: adminer
-    restart: always
+      - ./backend/node_modules:/app/backend/node_modules
+      - ./backend/dist:/app/backend/dist
+      - ./uploads:/app/uploads
+      - ./_do_importu:/app/_do_importu
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
     ports:
-      - "9081:8080" # Używamy innego portu, np. 8081
+      - "80:80"
+    env_file:
+      - ./frontend/.env.production
     depends_on:
-      - postgres
-
-volumes:
-  postgres_data:
-  pgadmin_data: # Dodaj ten wolumen
+      - backend

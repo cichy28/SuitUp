@@ -30,6 +30,7 @@ This is a full-stack application for a suit/clothing service. It consists of a R
 
 - `C:/Users/JanCichosz/Downloads/suit-app/`: The project root.
 - `C:/Users/JanCichosz/Downloads/suit-app/backend/`: Contains the backend server code.
+  - `.env.development`, `.env.production`: Environment variables for development and production. During testing, both files contain identical environment variables, pointing to the external Supabase database. For production deployment, these files will be updated with new machine URLs.
   - `src/`: Source code for the backend.
   - `prisma/`: Prisma schema, migrations, and seed scripts.
   - `scripts/seed.ts`: A script to populate the database with dummy data for testing and development.
