@@ -22,7 +22,6 @@ export const UpdateMultimediaInputSchema = z
 		url: z.string().url().optional(),
 		fileType: FileType.optional(),
 		altText: z.string().optional().nullable(),
-		ownerId: z.string().cuid().optional(),
 	})
 	.refine((data) => Object.keys(data).length > 0, {
 		message: "At least one field must be provided for update.",

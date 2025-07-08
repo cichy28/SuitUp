@@ -2,7 +2,16 @@ import React, { useState, useEffect } from "react";
 import { View, TextInput, StyleSheet, Modal, Button, TouchableOpacity, Text } from "react-native";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import HotspotImageView, { HotspotData, initialHotspots } from "@/components/HotspotImageView";
+import HotspotImageView, { HotspotData } from "@/components/HotspotImageView";
+
+const initialHotspots: HotspotData[] = [
+    { id: "neck", name: "Neck", value: "", relativeTop: 0.1, relativeLeft: 0.5 },
+    { id: "chest", name: "Chest", value: "", relativeTop: 0.25, relativeLeft: 0.5 },
+    { id: "waist", name: "Waist", value: "", relativeTop: 0.4, relativeLeft: 0.5 },
+    { id: "hips", name: "Hips", value: "", relativeTop: 0.55, relativeLeft: 0.5 },
+    { id: "inseam", name: "Inseam", value: "", relativeTop: 0.7, relativeLeft: 0.5 },
+    { id: "sleeve", name: "Sleeve", value: "", relativeTop: 0.3, relativeLeft: 0.2 },
+];
 import { RootStackParamList } from "@/navigation/AppNavigator";
 import { Colors, Fonts, Spacing, BorderRadius } from '@/constants/Theme';
 

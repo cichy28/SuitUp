@@ -36,6 +36,7 @@ enum FileType {
   JPG
   WEBP
   PDF
+  GIF
 }
 
 enum BodyShape {

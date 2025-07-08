@@ -3,6 +3,7 @@ import { View, Image, StyleSheet, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
+import loadingImage from "assets/loading.jpg";
 
 type LoadingScreenNavigationProp = StackNavigationProp<RootStackParamList, "Loading">;
 
@@ -19,7 +20,7 @@ const LoadingScreen = () => {
 
 	return (
 		<View style={styles.container}>
-			<Image source={require("../../assets/loading.jpg")} style={styles.backgroundImage} />
+						<Image source={loadingImage} style={styles.backgroundImage} />
 			{/* Można dodać logo lub inne elementy, jeśli są potrzebne */}
 		</View>
 	);

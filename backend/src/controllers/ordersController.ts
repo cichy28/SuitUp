@@ -200,7 +200,7 @@ export const placeOrder = async (req: Request, res: Response) => {
 						{
 							productSkuId: productSku.id,
 							quantity: 1,
-							price: product.basePrice, // Or a calculated price based on variants
+							pricePerUnitAtOrder: product.basePrice, // Or a calculated price based on variants
 						},
 					],
 				},

@@ -24,7 +24,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = parseInt(process.env.PORT || '3000', 10);
 
 const corsOptions = {
 	origin: "*", // Pozwól na zapytania z każdego źródła. W produkcji ogranicz to do domeny frontendu.
@@ -62,6 +62,6 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 	res.status(500).send("Something broke!");
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
 	console.log(`Server is running on port ${port}`);
 });
