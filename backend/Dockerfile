@@ -36,6 +36,10 @@ RUN npm run prisma:generate
 # Build the backend application
 RUN npm run build
 
+# Create uploads directory
+RUN mkdir -p uploads
+RUN chmod -R 777 uploads
+
 EXPOSE 3000
 
 CMD ["npm", "start"]

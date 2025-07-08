@@ -35,7 +35,9 @@ const corsOptions = {
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json()); // Parse JSON request bodies
-app.use("/uploads", express.static(path.join(__dirname, "../../uploads"))); // Serwuj pliki z folderu /uploads
+const uploadsPath = path.join(__dirname, "../../uploads");
+console.log(`Serving static files from: ${uploadsPath}`); // Dodaj tę linię
+app.use("/uploads", express.static(uploadsPath)); // Serwuj pliki z folderu /uploads
 app.use(morgan("dev"));
 // Routes
 app.use("/api/customers", customerRoutes);

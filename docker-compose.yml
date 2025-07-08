@@ -10,8 +10,8 @@ services:
     env_file:
       - ./backend/.env.production
     volumes:
-      - ./uploads:/app/uploads
-      - ./_do_importu:/app/_do_importu
+      - ./uploads:/app/backend/dist/uploads
+      - ./_do_importu://app/backend/dist/_do_importu
   frontend:
     build:
       context: .
