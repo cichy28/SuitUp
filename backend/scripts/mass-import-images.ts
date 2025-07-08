@@ -6,7 +6,7 @@ import bcrypt from "bcrypt";
 
 // --- CONFIGURATION ---
 const SOURCE_FOLDER = path.join(__dirname, "..", "..", "..", "_do_importu");
-const DESTINATION_FOLDER = path.join(__dirname, "..", "..", "uploads");
+const DESTINATION_FOLDER = path.join(__dirname, "..", "..", "..", "uploads");
 const PUBLIC_URL_BASE = "http://localhost:3000/uploads";
 const TEST_USER_EMAIL = "test-importer@example.com";
 const TEST_USER_COMPANY_NAME = "Test Importer";

@@ -17,14 +17,14 @@ import { router as productSkuRoutes } from "./routes/productSkus";
 import { router as propertyVariantRoutes } from "./routes/propertyVariants"; // Import propertyVariant routes
 import { router as recommendationsRoutes } from "./routes/recommendations";
 import path from "path"; // Upewnij się, że masz import path
-if (process.env.NODE_ENV === 'production') {
-  dotenv.config({ path: '.env.production' });
+if (process.env.NODE_ENV === "production") {
+	dotenv.config({ path: ".env.production" });
 } else {
-  dotenv.config({ path: '.env.development' });
+	dotenv.config({ path: ".env.development" });
 }
 
 const app = express();
-const port = parseInt(process.env.PORT || '3000', 10);
+const port = parseInt(process.env.PORT || "3000", 10);
 
 const corsOptions = {
 	origin: "*", // Pozwól na zapytania z każdego źródła. W produkcji ogranicz to do domeny frontendu.
@@ -35,7 +35,7 @@ const corsOptions = {
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json()); // Parse JSON request bodies
-app.use("/uploads", express.static(path.join(__dirname, "../uploads"))); // Serwuj pliki z folderu /uploads
+app.use("/uploads", express.static(path.join(__dirname, "../../uploads"))); // Serwuj pliki z folderu /uploads
 app.use(morgan("dev"));
 // Routes
 app.use("/api/customers", customerRoutes);
@@ -62,6 +62,6 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 	res.status(500).send("Something broke!");
 });
 
-app.listen(port, '0.0.0.0', () => {
+app.listen(port, "0.0.0.0", () => {
 	console.log(`Server is running on port ${port}`);
 });

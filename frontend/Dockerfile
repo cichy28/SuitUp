@@ -1,5 +1,7 @@
 FROM node:20-alpine as builder
 
+ARG EXPO_PUBLIC_API_URL
+
 WORKDIR /app
 
 # Copy root package.json and package-lock.json for shared dependencies
@@ -25,11 +27,12 @@ WORKDIR /app/frontend
 
 # Copy frontend specific package.json and package-lock.json
 COPY frontend/package*.json ./
-COPY frontend/.env.development ./
-COPY frontend/.env.production ./
 
 # Install frontend dependencies
 RUN npm install
+
+# Build the web application
+ENV EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL
 
 # Build the web application
 RUN npm run build
