@@ -26,9 +26,44 @@ export const getRecommendations = async (req: Request, res: Response) => {
 				mainImage: {
 					select: { url: true, altText: true },
 				},
+				skus: {
+					include: {
+						propertyVariants: {
+							include: {
+								propertyVariant: {
+									select: { priceAdjustment: true },
+								},
+							},
+						},
+					},
+				},
 			},
 		});
-		res.status(200).json(products);
+
+		const productsWithPrices = products.map((product) => {
+			const skusWithPrices = product.skus.map((sku) => {
+				const totalVariantPriceAdjustment = sku.propertyVariants.reduce((sum, pv) => {
+					return sum + (pv.propertyVariant?.priceAdjustment?.toNumber() || 0);
+				}, 0);
+
+				const skuBasePrice = (product.basePrice?.toNumber() || 0) + totalVariantPriceAdjustment;
+				const finalPrice = parseFloat((skuBasePrice * (sku.priceMultiplier?.toNumber() || 1)).toFixed(2));
+
+				return {
+					...sku,
+					skuBasePrice: parseFloat(skuBasePrice.toFixed(2)),
+					finalPrice,
+					priceMultiplier: sku.priceMultiplier?.toNumber() || 1,
+				};
+			});
+
+			return {
+				...product,
+				skus: skusWithPrices,
+			};
+		});
+
+		res.status(200).json(productsWithPrices);
 	} catch (error: any) {
 		console.error("Error fetching recommendations:", error);
 		res.status(500).json({ message: "Error fetching recommendations", error: error.message });

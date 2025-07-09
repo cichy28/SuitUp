@@ -174,15 +174,16 @@ model ProductProperty {
 }
 
 model PropertyVariant {
-  id          String    @id @default(cuid())
-  name        String
-  propertyId  String
-  imageId     String?
-  createdAt   DateTime  @default(now())
-  
+  id              String    @id @default(cuid())
+  name            String
+  propertyId      String
+  imageId         String?
+  priceAdjustment Decimal   @default(0.00)
+  createdAt       DateTime  @default(now())
+
   property      Property                    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   image         Multimedia?                 @relation(fields: [imageId], references: [id], onDelete: SetNull)
-  
+
   productSkus   ProductSkuPropertyVariant[]
 }
 
@@ -193,6 +194,7 @@ model ProductSku {
   price           Decimal?    // POPRAWKA: Float -> Decimal
   stockQuantity   Int         @default(0)
   imageId         String?
+  priceMultiplier Decimal     @default(1.0)
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   

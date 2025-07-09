@@ -14,7 +14,7 @@ dotenv.config({ path: path.resolve(__dirname, "../../.env.development") });
 interface ProductMetadata extends Omit<Product, "id" | "ownerId" | "mainImageId" | "createdAt" | "updatedAt"> {
 	skus: {
 		skuCode: string;
-		priceAdjustment: number;
+		priceMultiplier: number;
 		stockQuantity: number;
 		color: string;
 		size: string;
@@ -154,12 +154,12 @@ async function generateProducts() {
 				const skuImagePath = path.join(variantsPath, `${skuName}.jpg`);
 				await generateImage(`Lemanska - ${productName} - ${color} ${size}`, skuImagePath);
 
-				const priceAdjustment = parseFloat((Math.random() * 50).toFixed(2)); // Random price adjustment up to 50
+				const priceMultiplier = parseFloat((Math.random() * (1.5 - 0.5) + 0.5).toFixed(2)); // Random price multiplier between 0.5 and 1.5
 				const stockQuantity = Math.floor(Math.random() * 100) + 1; // Random stock between 1 and 100
 
 				skus.push({
 					skuCode: skuName,
-					priceAdjustment,
+					priceMultiplier,
 					stockQuantity,
 					color,
 					size,
@@ -183,7 +183,7 @@ async function generateProducts() {
 			colorVariants.push({
 				name: color,
 				value: color,
-				priceAdjustment: parseFloat((Math.random() * 10).toFixed(2)),
+				priceAdjustment: parseFloat((Math.random() * 20).toFixed(2)),
 				displayOrder: colorDisplayOrder++,
 			});
 		}

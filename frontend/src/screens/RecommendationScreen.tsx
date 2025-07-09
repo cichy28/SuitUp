@@ -8,6 +8,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useGetRecommendedProducts } from "../hooks/useApi";
 import { Product } from "shared/validators/product";
 import { ThemedView } from "../components/ThemedView";
+import { PriceView } from "../components/PriceView";
 import { RootStackParamList } from "../navigation/AppNavigator";
 
 type RecommendationScreenRouteProp = RouteProp<RootStackParamList, "Recommendation">;
@@ -42,12 +43,6 @@ export default function RecommendationScreen({ route }: Props) {
 	}
 
 	const renderItem = ({ item }: { item: Product }) => {
-		// --- POPRAWKA TUTAJ ---
-		// Upewniamy się, że basePrice jest liczbą, zanim użyjemy .toFixed()
-		// Jeśli cena jest nieprawidłowa lub jej nie ma, wyświetli się "0.00"
-		const price = Number(item.basePrice || 0).toFixed(2);
-		// --------------------
-
 		return (
 			<TouchableOpacity
 				style={styles.card}
@@ -56,8 +51,13 @@ export default function RecommendationScreen({ route }: Props) {
 				<Image source={{ uri: item.mainImage?.url || "https://placehold.co/400x600" }} style={styles.image} />
 				<View style={styles.textContainer}>
 					<Text style={styles.title}>{item.name}</Text>
-					{/* Używamy bezpiecznej, sformatowanej ceny */}
-					<Text style={styles.price}>{price} zł</Text>
+					{item.skus && item.skus.length > 0 && (
+						<PriceView
+							skuBasePrice={item.skus[0].skuBasePrice || 0}
+							finalPrice={item.skus[0].finalPrice || 0}
+							priceMultiplier={item.skus[0].priceMultiplier || 1}
+						/>
+					)}
 				</View>
 			</TouchableOpacity>
 		);
@@ -114,10 +114,5 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: "600",
 		color: "#333",
-	},
-	price: {
-		fontSize: 14,
-		color: "#888",
-		marginTop: 4,
 	},
 });
