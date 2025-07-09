@@ -6,8 +6,8 @@ This is the backend for the suit-app.
 
 This project uses `.env` files for environment variable management. There are two main files for configuration:
 
--   `.env.development`: For local development.
--   `.env.production`: For the production environment.
+- `.env.development`: For local development.
+- `.env.production`: For the production environment.
 
 During testing, both `.env.development` and `.env.production` files contain identical environment variables, pointing to the external Supabase database. This setup allows for consistent testing across development and production-like environments.
 
@@ -52,5 +52,8 @@ This will first build the TypeScript source into JavaScript, and then start the 
 
 For testing purposes, a default user is created by the seeding script.
 
--   **Email:** `test-importer@example.com`
--   **Password:** `password123`
+- **Email:** `test-importer@example.com`
+- **Password:** `password123`
+
+Restart-Service -Name "hns" -Force
+Command to use on windows in case port 3000 blocekd

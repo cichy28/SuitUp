@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image, ScrollView } from 'react-native';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { Product } from '../../../shared/validators/product';
@@ -12,7 +12,7 @@ const SummaryScreen = () => {
   const route = useRoute<SummaryScreenRouteProp>();
   const navigation = useNavigation();
   const { product, selectedVariants } = route.params;
-  const [customerData, setCustomerData] = useState({ name: '', email: '', address: '' });
+  const [customerData, setCustomerData] = useState({ name: '', email: '', address: '', comment: '', quantity: '1' });
 
   const currentSku = useMemo(() => {
     const selectedVariantIds = new Set(Object.values(selectedVariants));
@@ -46,56 +46,87 @@ const SummaryScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Order Summary</Text>
-      <Image source={{ uri: imageUrl }} style={styles.productImage} />
-      <Text style={styles.productName}>{product.name}</Text>
-      <Text style={styles.sku}>SKU: {currentSku?.sku ?? 'N/A'}</Text>
-      <Text style={styles.price}>Price: {product.basePrice} PLN</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Name"
-        onChangeText={(text) => setCustomerData({ ...customerData, name: text })}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        onChangeText={(text) => setCustomerData({ ...customerData, email: text })}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Address"
-        onChangeText={(text) => setCustomerData({ ...customerData, address: text })}
-      />
-      <TouchableOpacity style={styles.button} onPress={handlePlaceOrder}>
-        <Text style={styles.buttonText}>Place Order</Text>
-      </TouchableOpacity>
-    </View>
+    <ScrollView style={styles.scrollViewContainer}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Order Summary</Text>
+        <View style={styles.imageWrapper}>
+          <Image source={{ uri: imageUrl }} style={styles.productImage} resizeMode="contain" />
+        </View>
+        <Text style={styles.productName}>{product.name}</Text>
+        <Text style={styles.sku}>SKU: {currentSku?.sku ?? 'N/A'}</Text>
+        <Text style={styles.price}>Price: {currentSku?.price ?? product.basePrice} PLN</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Name"
+          onChangeText={(text) => setCustomerData({ ...customerData, name: text })}
+          value={customerData.name}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          onChangeText={(text) => setCustomerData({ ...customerData, email: text })}
+          value={customerData.email}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Address"
+          onChangeText={(text) => setCustomerData({ ...customerData, address: text })}
+          value={customerData.address}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Quantity (e.g., 1)"
+          onChangeText={(text) => setCustomerData({ ...customerData, quantity: text })}
+          value={customerData.quantity}
+          keyboardType="numeric"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Customer Comments (optional)"
+          onChangeText={(text) => setCustomerData({ ...customerData, comment: text })}
+          value={customerData.comment}
+          multiline
+          numberOfLines={4}
+        />
+        <TouchableOpacity style={styles.button} onPress={handlePlaceOrder}>
+          <Text style={styles.buttonText}>Place Order</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  scrollViewContainer: {
     flex: 1,
-    padding: Spacing.medium,
     backgroundColor: Colors.background,
+  },
+  container: {
+    padding: Spacing.medium,
   },
   title: {
     fontSize: Fonts.sizes.title,
-    fontWeight: Fonts.weights.bold,
+    fontWeight: '700',
     color: Colors.text,
     marginBottom: Spacing.medium,
     textAlign: 'center',
   },
+  imageWrapper: {
+    width: '100%',
+    height: 200, // Fixed height for the image container
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.medium,
+    borderRadius: BorderRadius.medium,
+    overflow: 'hidden', // Clip image if it overflows
+  },
   productImage: {
     width: '100%',
-    height: 200,
-    borderRadius: BorderRadius.medium,
-    marginBottom: Spacing.medium,
+    height: '100%',
   },
   productName: {
     fontSize: Fonts.sizes.subtitle,
-    fontWeight: Fonts.weights.bold,
+    fontWeight: '700',
     color: Colors.text,
     marginBottom: Spacing.small,
   },
@@ -127,7 +158,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: Colors.white,
     fontSize: Fonts.sizes.subtitle,
-    fontWeight: Fonts.weights.bold,
+    fontWeight: '700',
   },
 });
 

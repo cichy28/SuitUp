@@ -28,21 +28,29 @@ const HotspotImageView: React.FC<HotspotImageViewProps> = ({ source, aspectRatio
 		}
 		const { width: containerWidth, height: containerHeight } = containerLayout;
 		const containerRatio = containerWidth / containerHeight;
-		let renderedWidth: number;
-		let renderedHeight: number;
+
+		let actualImageWidth: number;
+		let actualImageHeight: number;
 
 		if (aspectRatio > containerRatio) {
-			renderedWidth = containerWidth;
-			renderedHeight = containerWidth / aspectRatio;
+			actualImageWidth = containerWidth;
+			actualImageHeight = containerWidth / aspectRatio;
 		} else {
-			renderedHeight = containerHeight;
-			renderedWidth = containerHeight * aspectRatio;
+			actualImageHeight = containerHeight;
+			actualImageWidth = containerHeight * aspectRatio;
 		}
 
-		const offsetX = (containerWidth - renderedWidth) / 2;
-		const offsetY = (containerHeight - renderedHeight) / 2;
+		const actualOffsetX = (containerWidth - actualImageWidth) / 2;
+		const actualOffsetY = (containerHeight - actualImageHeight) / 2;
 
-		return { width: renderedWidth, height: renderedHeight, left: offsetX, top: offsetY };
+		return { 
+			width: actualImageWidth, 
+			height: actualImageHeight, 
+			left: actualOffsetX, 
+			top: actualOffsetY, 
+			containerWidth, 
+			containerHeight 
+		};
 	}, [containerLayout, aspectRatio]);
 
 	return (
@@ -57,6 +65,7 @@ const HotspotImageView: React.FC<HotspotImageViewProps> = ({ source, aspectRatio
 							height: imageBox.height,
 							top: imageBox.top,
 							left: imageBox.left,
+							resizeMode: "contain",
 						}}
 					/>
 					{hotspots.map((hotspot) => {
@@ -109,7 +118,7 @@ const styles = StyleSheet.create({
 	},
 	hotspotText: {
 		color: "white",
-		fontWeight: "bold",
+		fontWeight: '700',
 		fontSize: 16,
 		lineHeight: 18,
 	},
