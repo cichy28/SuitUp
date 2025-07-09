@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config({ path: '.env.development' }); // Load environment variables from .env.development
 import { PrismaClient, User, FileType, Product, Property, BodyShape, StylePreference } from "@prisma/client";
 import fs from "fs/promises";
 import path from "path";
@@ -5,8 +7,8 @@ import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
 
 // --- CONFIGURATION ---
-const SOURCE_FOLDER = path.join(__dirname, "..", "..", "..", "_do_importu");
-const DESTINATION_FOLDER = path.join(__dirname, "..", "..", "..", "uploads");
+const SOURCE_FOLDER = path.join(__dirname, "..", "..", "_do_importu");
+const DESTINATION_FOLDER = path.join(__dirname, "..", "..", "uploads");
 const PUBLIC_URL_BASE = "http://localhost:3000/uploads";
 const TEST_USER_EMAIL = "test-importer@example.com";
 const TEST_USER_COMPANY_NAME = "Test Importer";
@@ -59,7 +61,17 @@ async function getOrCreateMultimedia(filePath: string, ownerId: string): Promise
 	const fileExtension = path.extname(originalFilename).replace(".", "");
 	const uniqueFilename = `${uuidv4()}.${fileExtension}`;
 	const destinationPath = path.join(DESTINATION_FOLDER, uniqueFilename);
-	await fs.copyFile(filePath, destinationPath);
+
+	try {
+		// Ensure the destination directory exists
+		await fs.mkdir(DESTINATION_FOLDER, { recursive: true });
+		await fs.copyFile(filePath, destinationPath);
+		console.log(`  -> Successfully copied ${originalFilename} to ${destinationPath}`);
+	} catch (error) {
+		console.error(`  ❌ Error copying file ${originalFilename} to ${destinationPath}:`, error);
+		throw error; // Re-throw to stop the process if file copy fails
+	}
+
 	const newMultimedia = await prisma.multimedia.create({
 		data: {
 			url: `${PUBLIC_URL_BASE}/${uniqueFilename}`,
@@ -68,7 +80,7 @@ async function getOrCreateMultimedia(filePath: string, ownerId: string): Promise
 			ownerId: ownerId,
 		},
 	});
-	console.log(`  -> Copied and saved: ${originalFilename} as ID: ${newMultimedia.id}`);
+	console.log(`  -> Saved multimedia record for ID: ${newMultimedia.id}`);
 	return newMultimedia.id;
 }
 
@@ -105,7 +117,7 @@ async function processProperties(
 		const variantFiles = await fs.readdir(propertyPath, { withFileTypes: true });
 		for (const variantFile of variantFiles.filter((f) => f.isFile())) {
 			const variantName = path.parse(variantFile.name).name;
-			let dbVariant = await prisma.propertyVariant.findFirst({
+						let dbVariant = await prisma.propertyVariant.findFirst({
 				where: { name: variantName, propertyId: dbProperty.id },
 			});
 			if (!dbVariant) {
@@ -115,7 +127,12 @@ async function processProperties(
 				});
 				console.log(`      Created variant: ${dbVariant.name} (ID: ${dbVariant.id})`);
 			} else {
-				console.log(`      Variant "${variantName}" already exists.`);
+				const imageId = await getOrCreateMultimedia(path.join(propertyPath, variantFile.name), owner.id);
+				await prisma.propertyVariant.update({
+					where: { id: dbVariant.id },
+					data: { imageId: imageId },
+				});
+				console.log(`      Variant "${variantName}" already exists. Updated with Image ID: ${imageId}`);
 			}
 			variantMap.set(variantName, dbVariant.id);
 		}

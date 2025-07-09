@@ -57,3 +57,28 @@ This is a full-stack application for a suit/clothing service. It consists of a R
 - **Validation:** All new data validation logic should use `zod` and be placed in the `shared/validators/` directory.
 - **API Routes:** Backend routes are defined in `backend/src/routes/` and linked to controllers in `backend/src/controllers/`.
 - **Database:** Database schema is managed by Prisma migrations. Changes should be made in `backend/prisma/schema.prisma` and migrated using `npx prisma migrate dev`.
+
+## 5. Database Interaction
+
+To directly query the database using Prisma, you can use the `query-db.ts` script located in `backend/scripts/`.
+
+**Usage:**
+
+1. Create a file named `query.sql` in the `backend/scripts/` directory.
+2. Write your SQL query inside `backend/scripts/query.sql`.
+3. Navigate to the `backend/` directory in your terminal.
+4. Run the script:
+
+```bash
+npx cross-env ts-node scripts/query-db.ts
+```
+
+**Example:**
+
+To retrieve the `id`, `url`, and `fileType` of the first 5 multimedia entries, first create `backend/scripts/query.sql` with the following content:
+
+```sql
+SELECT id, url, "fileType" FROM "Multimedia" LIMIT 5;
+```
+
+Then, run the script as shown in the usage section. This script will output the query result in JSON format.

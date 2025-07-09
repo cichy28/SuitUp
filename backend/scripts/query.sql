@@ -1,0 +1,1 @@
+SELECT id, url, "fileType" FROM "Multimedia" WHERE id = '57ff67bc-33e3-425a-a7d3-0d4d0fcea983';
