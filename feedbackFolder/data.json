@@ -1,0 +1,78 @@
+{
+	"name": "SP_D",
+	"basePrice": 148.96,
+	"description": "This is a sample description for SP_D.",
+	"isActive": true,
+	"suitableFor": ["OVAL", "RECTANGLE", "INVERTED_TRIANGLE"],
+	"style": ["FITTED_WEAR", "OVERSIZE_WEAR"],
+	"skus": [
+		{
+			"skuCode": "SP_D_BLUE_XL",
+			"priceAdjustment": 1.06,
+			"stockQuantity": 91,
+			"color": "BLUE",
+			"size": "XL"
+		},
+		{
+			"skuCode": "SP_D_BLUE_L",
+			"priceAdjustment": 1.76,
+			"stockQuantity": 94,
+			"color": "BLUE",
+			"size": "L"
+		},
+		{
+			"skuCode": "SP_D_BLACK_XL",
+			"priceAdjustment": 39.84,
+			"stockQuantity": 45,
+			"color": "BLACK",
+			"size": "XL"
+		},
+		{
+			"skuCode": "SP_D_BLACK_L",
+			"priceAdjustment": 45.92,
+			"stockQuantity": 84,
+			"color": "BLACK",
+			"size": "L"
+		}
+	],
+	"properties": [
+		{
+			"name": "KOLOR",
+			"description": "Dostępne kolory produktu.",
+			"displayOrder": 0,
+			"variants": [
+				{
+					"name": "BLUE",
+					"value": "BLUE",
+					"priceAdjustment": 6.58,
+					"displayOrder": 0
+				},
+				{
+					"name": "BLACK",
+					"value": "BLACK",
+					"priceAdjustment": 1.96,
+					"displayOrder": 1
+				}
+			]
+		},
+		{
+			"name": "ROZMIAR",
+			"description": "Dostępne rozmiary produktu.",
+			"displayOrder": 1,
+			"variants": [
+				{
+					"name": "XL",
+					"value": "XL",
+					"priceAdjustment": 11.04,
+					"displayOrder": 0
+				},
+				{
+					"name": "L",
+					"value": "L",
+					"priceAdjustment": 16.27,
+					"displayOrder": 1
+				}
+			]
+		}
+	]
+}

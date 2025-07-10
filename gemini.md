@@ -82,3 +82,15 @@ SELECT id, url, "fileType" FROM "Multimedia" LIMIT 5;
 ```
 
 Then, run the script as shown in the usage section. This script will output the query result in JSON format.
+
+## 6. Reviewing Code Changes
+
+To review all the changes made to the codebase since the last commit (a relatively stable version), you can use the following Git command. This is useful for understanding what has been modified and can help in diagnosing issues if something goes wrong.
+
+This command will show you all the additions and deletions to the tracked files in your project.
+
+```bash
+git diff HEAD
+```
+
+**Note:** This command is safe to use as it only displays the changes and does not modify the repository's history in any way.

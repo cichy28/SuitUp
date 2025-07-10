@@ -90,7 +90,7 @@ async function processProperties(
 	propertiesPath: string,
 	product: Product,
 	owner: User,
-	variantMap: Map<string, string>
+	variantPriceAdjustments: { [key: string]: number }
 ) {
 	console.log(`\n--- Phase 1: Processing Properties from ${propertiesPath} ---`);
 	const propertyFolders = await fs.readdir(propertiesPath, { withFileTypes: true });
@@ -117,24 +117,25 @@ async function processProperties(
 		const variantFiles = await fs.readdir(propertyPath, { withFileTypes: true });
 		for (const variantFile of variantFiles.filter((f) => f.isFile())) {
 			const variantName = path.parse(variantFile.name).name;
+			const priceAdjustment = variantPriceAdjustments[variantName] ?? 0; // Get price adjustment from metadata
 						let dbVariant = await prisma.propertyVariant.findFirst({
 				where: { name: variantName, propertyId: dbProperty.id },
 			});
 			if (!dbVariant) {
 				const imageId = await getOrCreateMultimedia(path.join(propertyPath, variantFile.name), owner.id);
 				dbVariant = await prisma.propertyVariant.create({
-					data: { name: variantName, propertyId: dbProperty.id, imageId: imageId },
+					data: { name: variantName, propertyId: dbProperty.id, imageId: imageId, priceAdjustment: priceAdjustment },
 				});
 				console.log(`      Created variant: ${dbVariant.name} (ID: ${dbVariant.id})`);
 			} else {
 				const imageId = await getOrCreateMultimedia(path.join(propertyPath, variantFile.name), owner.id);
 				await prisma.propertyVariant.update({
 					where: { id: dbVariant.id },
-					data: { imageId: imageId },
+					data: { imageId: imageId, priceAdjustment: priceAdjustment },
 				});
 				console.log(`      Variant "${variantName}" already exists. Updated with Image ID: ${imageId}`);
 			}
-			variantMap.set(variantName, dbVariant.id);
+			// variantMap.set(variantName, dbVariant.id); // variantMap is not used in processProperties
 		}
 	}
 }
@@ -143,10 +144,10 @@ async function processSkus(
 	skusPath: string,
 	product: Product,
 	owner: User,
+	skuPrices: { [key: string]: number }, // Pass skuPrices from metadata
 	variantMap: Map<string, string>
 ): Promise<string | null> {
-	console.log(`
---- Phase 2: Processing SKUs from ${skusPath} ---`);
+	console.log(`\n--- Phase 2: Processing SKUs from ${skusPath} ---`);
 	const skuFiles = await fs.readdir(skusPath, { withFileTypes: true });
 	let firstSkuImageId: string | null = null;
 
@@ -160,13 +161,14 @@ async function processSkus(
 			firstSkuImageId = imageId; // Capture the first image ID
 		}
 
+		const skuPrice = skuPrices[skuName] ?? 0; // Get price from metadata
 		let dbSku = await prisma.productSku.findFirst({ where: { skuCode: skuName, productId: product.id } });
 		if (!dbSku) {
 			dbSku = await prisma.productSku.create({
 				data: {
 					skuCode: skuName,
 					productId: product.id,
-					price: 0,
+					price: skuPrice,
 					imageId: imageId,
 				},
 			});
@@ -174,7 +176,7 @@ async function processSkus(
 		} else {
 			await prisma.productSku.update({
 				where: { id: dbSku.id },
-				data: { imageId: imageId },
+				data: { imageId: imageId, price: skuPrice }, // Update price as well
 			});
 			console.log(`    SKU "${skuName}" already exists. Updated with Image ID: ${imageId}`);
 		}
@@ -195,8 +197,7 @@ async function processSkus(
 
 async function processProduct(productPath: string, owner: User) {
 	const productName = path.basename(productPath);
-	console.log(`
-Processing product: ${productName}`);
+	console.log(`\nProcessing product: ${productName}`);
 
 	let product = await prisma.product.findFirst({ where: { name: productName, ownerId: owner.id } });
 
@@ -204,23 +205,44 @@ Processing product: ${productName}`);
 	const metadataFilePath = path.join(productPath, "product_metadata.json");
 	let suitableFor: BodyShape[] = [];
 	let style: StylePreference[] = [];
+	let basePrice: number | undefined;
+	let skuPrices: { [key: string]: number } = {};
+	let variantPriceAdjustments: { [key: string]: number } = {};
+
 	try {
 		const metadata = JSON.parse(await fs.readFile(metadataFilePath, "utf-8"));
 		suitableFor = metadata.suitableFor || [];
 		style = metadata.style || [];
+		basePrice = metadata.basePrice;
+		// Transform skus array to a map for easy lookup
+		if (metadata.skus) {
+			metadata.skus.forEach((sku: any) => {
+				skuPrices[sku.skuCode] = sku.priceAdjustment; // Assuming priceAdjustment in metadata is the base price for SKU
+			});
+		}
+		// Transform properties.variants to a map for easy lookup
+		if (metadata.properties) {
+			metadata.properties.forEach((prop: any) => {
+				if (prop.variants) {
+					prop.variants.forEach((variant: any) => {
+						variantPriceAdjustments[variant.name] = variant.priceAdjustment;
+					});
+				}
+			});
+		}
 	} catch (e) {
-		/* ... */
+		console.warn(`No product_metadata.json found or invalid for ${productName}. Using defaults.`);
 	}
 
 	if (!product) {
 		product = await prisma.product.create({
-			data: { name: productName, basePrice: 0, ownerId: owner.id, suitableFor, style },
+			data: { name: productName, basePrice: basePrice ?? 0, ownerId: owner.id, suitableFor, style },
 		});
 		console.log(`Created product: ${product.name} (ID: ${product.id})`);
 	} else {
 		product = await prisma.product.update({
 			where: { id: product.id },
-			data: { suitableFor, style },
+			data: { suitableFor, style, basePrice: basePrice ?? 0 }, // Update basePrice as well
 		});
 		console.log(`Product "${product.name}" already exists. Updated metadata.`);
 	}
@@ -239,7 +261,7 @@ Processing product: ${productName}`);
 	}
 
 	const variantMap = new Map<string, string>();
-	await processProperties(propertiesDir, product, owner, variantMap);
+	await processProperties(propertiesDir, product, owner, variantPriceAdjustments); // Pass variantPriceAdjustments
 
 	if (
 		await fs
@@ -247,7 +269,7 @@ Processing product: ${productName}`);
 			.then((s) => s.isDirectory())
 			.catch(() => false)
 	) {
-		const firstSkuImageId = await processSkus(skusDir, product, owner, variantMap);
+		const firstSkuImageId = await processSkus(skusDir, product, owner, skuPrices, variantMap); // Pass skuPrices
 
 		// This is the FIX: Update the product with the main image ID
 		if (firstSkuImageId && !product.mainImageId) {
