@@ -49,7 +49,10 @@ export const getProductById = async (req: Request, res: Response) => {
 						propertyVariants: {
 							include: {
 								propertyVariant: {
-									include: {
+									select: {
+										id: true,
+										name: true,
+										propertyId: true,
 										image: true,
 									},
 								},

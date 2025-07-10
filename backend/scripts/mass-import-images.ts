@@ -90,7 +90,8 @@ async function processProperties(
 	propertiesPath: string,
 	product: Product,
 	owner: User,
-	variantPriceAdjustments: { [key: string]: number }
+	variantPriceAdjustments: { [key: string]: number },
+	variantMap: Map<string, string>
 ) {
 	console.log(`\n--- Phase 1: Processing Properties from ${propertiesPath} ---`);
 	const propertyFolders = await fs.readdir(propertiesPath, { withFileTypes: true });
@@ -135,7 +136,7 @@ async function processProperties(
 				});
 				console.log(`      Variant "${variantName}" already exists. Updated with Image ID: ${imageId}`);
 			}
-			// variantMap.set(variantName, dbVariant.id); // variantMap is not used in processProperties
+			variantMap.set(variantName, dbVariant.id);
 		}
 	}
 }
@@ -261,7 +262,7 @@ async function processProduct(productPath: string, owner: User) {
 	}
 
 	const variantMap = new Map<string, string>();
-	await processProperties(propertiesDir, product, owner, variantPriceAdjustments); // Pass variantPriceAdjustments
+	await processProperties(propertiesDir, product, owner, variantPriceAdjustments, variantMap); // Pass variantPriceAdjustments
 
 	if (
 		await fs
@@ -294,6 +295,7 @@ async function massImport() {
 			const owner = await getOwner(companyFolder.name);
 			const productFolders = await fs.readdir(companyPath, { withFileTypes: true });
 			for (const productFolder of productFolders.filter((d) => d.isDirectory())) {
+				const variantMap = new Map<string, string>(); // Declare variantMap here
 				await processProduct(path.join(companyPath, productFolder.name), owner);
 			}
 		}

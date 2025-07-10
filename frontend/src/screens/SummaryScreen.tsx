@@ -15,19 +15,28 @@ const SummaryScreen = () => {
   const [customerData, setCustomerData] = useState({ name: '', email: '', address: '', comment: '', quantity: '1' });
 
   const currentSku = useMemo(() => {
-    const selectedVariantIds = new Set(Object.values(selectedVariants));
-    if (selectedVariantIds.size < product.properties.length) {
-      return null;
+    const selectedVariantIds = Object.values(selectedVariants);
+
+    let bestMatch = null;
+    let maxMatchCount = 0;
+
+    for (const sku of product.skus) {
+      const skuVariantIds = sku.propertyVariants.map(pv => pv.propertyVariant.id);
+      const matchCount = selectedVariantIds.filter(id => skuVariantIds.includes(id)).length;
+
+      if (matchCount > maxMatchCount) {
+        maxMatchCount = matchCount;
+        bestMatch = sku;
+      } else if (matchCount === maxMatchCount && bestMatch) {
+        // If match count is the same, prefer the one with fewer variants (more specific)
+        if (skuVariantIds.length < bestMatch.propertyVariants.length) {
+          bestMatch = sku;
+        }
+      }
     }
 
-    return product.skus.find(sku => {
-      if (sku.propertyVariants.length !== selectedVariantIds.size) {
-        return false;
-      }
-      const skuVariantIds = new Set(sku.propertyVariants.map(pv => pv.propertyVariant.id));
-      return sku.propertyVariants.every(pv => selectedVariantIds.has(pv.propertyVariant.id)) && selectedVariantIds.size === skuVariantIds.size;
-    });
-  }, [selectedVariants, product.skus, product.properties]);
+    return bestMatch;
+  }, [selectedVariants, product.skus]);
 
   const imageUrl = useMemo(() => {
     if (currentSku && currentSku.image) {

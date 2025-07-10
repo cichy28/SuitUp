@@ -33,7 +33,6 @@ This is a full-stack application for a suit/clothing service. It consists of a R
   - `.env.development`, `.env.production`: Environment variables for development and production. During testing, both files contain identical environment variables, pointing to the external Supabase database. For production deployment, these files will be updated with new machine URLs.
   - `src/`: Source code for the backend.
   - `prisma/`: Prisma schema, migrations, and seed scripts.
-  - `scripts/seed.ts`: A script to populate the database with dummy data for testing and development.
   - `scripts/mass-import-images.ts`: A utility script for bulk-importing images into the database.
 - `C:/Users/JanCichosz/Downloads/suit-app/frontend/`: Contains the frontend mobile app code.
   - `src/`: Source code for the frontend app.
@@ -44,6 +43,14 @@ This is a full-stack application for a suit/clothing service. It consists of a R
 - `C:/Users/JanCichosz/Downloads/suit-app/shared/`: Shared TypeScript code.
   - `validators/`: Contains `zod` validation schemas.
   - `enums.ts`: Contains shared enumerations.
+- `C:/Users/JanCichosz/Downloads/suit-app/_do_importu/`: This folder is used for staging data and images to be imported into the database and application.
+  - The structure within this folder represents the data to be imported:
+    - `_do_importu/{company_name}/{product_name}/`: Base directory for a product.
+      - `product_metadata.json`: Contains product parameters to be imported.
+      - `WARIANTY/`: (Corresponds to `variants/`) Contains images representing individual product SKUs.
+      - `WLASCIWOSCI/`: (Corresponds to `properties/`) Contains subfolders for each property, e.g., `WLASCIWOSCI/{property_name}/`.
+        - `WLASCIWOSCI/{property_name}/{variant_name}.jpg`: Image files representing property variants.
+- `C:/Users/JanCichosz/Downloads/suit-app/uploads/`: This folder stores images that have been imported and are used by the application. File names in this folder should correspond to entries in the database.
 
 ## 4. Development Workflow & Conventions
 
@@ -83,7 +90,30 @@ SELECT id, url, "fileType" FROM "Multimedia" LIMIT 5;
 
 Then, run the script as shown in the usage section. This script will output the query result in JSON format.
 
-## 6. Reviewing Code Changes
+## 6. Database Management (Development)
+
+During development, it's safe and often necessary to clear and re-import all data to ensure consistency, especially when making schema changes or dealing with data inconsistencies. This process will reset your development database to a clean state and re-populate it with initial data.
+
+**Important:** This process is intended for development environments only and should **never** be used on a production database as it will result in data loss.
+
+To clear and re-import all data:
+
+1.  **Reset the database:** This command will drop all data and reset your Prisma migrations.
+    ```bash
+    npm run prisma:reset --workspace=backend
+    ```
+    *Note: On Windows, you might encounter an `EPERM` error during this step. This usually indicates a file permission issue with the Prisma client. It often does not prevent the command from succeeding, and you can proceed to the next step.*
+2.  **Apply migrations:** This will re-apply the latest database schema.
+    ```bash
+    npm run prisma:migrate:dev --workspace=backend
+    ```
+    *Note: Similar to `prisma:reset`, an `EPERM` error might occur on Windows but typically does not hinder the migration process.*
+3.  **Import initial data:** This will import data from the `_do_importu` directory.
+    ```bash
+    npm run import-images --workspace=backend
+    ```
+
+## 7. Reviewing Code Changes
 
 To review all the changes made to the codebase since the last commit (a relatively stable version), you can use the following Git command. This is useful for understanding what has been modified and can help in diagnosing issues if something goes wrong.
 

@@ -29,6 +29,7 @@ interface ProductConfiguratorViewProps {
 }
 
 const ProductConfiguratorView: React.FC<ProductConfiguratorViewProps> = ({ product }) => {
+  
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
   const [activePropertyId, setActivePropertyId] = useState<string | null>(null);
@@ -51,25 +52,32 @@ const ProductConfiguratorView: React.FC<ProductConfiguratorViewProps> = ({ produ
   };
 
   const currentSku = useMemo(() => {
-    const selectedVariantIds = new Set(Object.values(selectedVariants));
-    if (selectedVariantIds.size < product.properties.length) {
-      return null;
-    }
+    const selectedVariantEntries = Object.entries(selectedVariants);
 
-    return product.skus.find(sku => {
-      if (sku.propertyVariants.length !== selectedVariantIds.size) {
-        return false;
-      }
-      const skuVariantIds = new Set(sku.propertyVariants.map(pv => pv.propertyVariant.id));
-      return sku.propertyVariants.every(pv => selectedVariantIds.has(pv.propertyVariant.id)) && selectedVariantIds.size === skuVariantIds.size;
+    const foundSku = product.skus.find(sku => {
+      const skuPropertyVariantIds = new Set(sku.propertyVariants.map(pv => pv.propertyVariant.id));
+
+      // Condition 1: All selected variants must be present in the SKU's propertyVariants
+      const allSelectedVariantsPresent = selectedVariantEntries.every(([propertyId, variantId]) => {
+        const isPresent = sku.propertyVariants.some(pv =>
+          pv.propertyVariant.propertyId === propertyId && pv.propertyVariant.id === variantId
+        );
+        return isPresent;
+      });
+
+      // Condition 2: The number of selected variants must be equal to the number of variants in the SKU
+      // This ensures an exact match, not just a subset.
+      const numberOfVariantsMatch = selectedVariantEntries.length === sku.propertyVariants.length;
+
+      return allSelectedVariantsPresent && numberOfVariantsMatch;
     });
-  }, [selectedVariants, product.skus, product.properties]);
+
+    return foundSku;
+  }, [selectedVariants, product.skus]);
 
   const imageUrl = useMemo(() => {
-    if (currentSku && currentSku.image) {
-      return currentSku.image.url;
-    }
-    return product.mainImage?.url ?? "https://placehold.co/600x400/EEE/31343C";
+    const url = currentSku && currentSku.image ? currentSku.image.url : product.mainImage?.url ?? "https://placehold.co/600x400/EEE/31343C";
+    return url;
   }, [currentSku, product.mainImage]);
 
   const hotspots: HotspotData[] = useMemo(() => {
