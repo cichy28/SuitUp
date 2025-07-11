@@ -2,6 +2,10 @@ import { Request, Response } from "express";
 import prisma from "../db";
 import { CreateOrderInputSchema, UpdateOrderInputSchema } from "../../../shared/validators/order";
 import { z } from "zod";
+import { sendOrderConfirmationEmail } from "../services/emailService"; // Import the email service
+import * as fs from 'fs/promises'; // Import fs for reading templates
+import * as path from 'path'; // Import path for resolving template paths
+import { Order, Customer, User, OrderItem, ProductSku, Product } from '@prisma/client'; // Import Prisma types
 
 // Get all orders
 export const getAllOrders = async (req: Request, res: Response) => {
@@ -170,49 +174,143 @@ export const deleteOrder = async (req: Request, res: Response) => {
 // This would likely require new controllers/routes or modifications to the existing ones.
 
 export const placeOrder = async (req: Request, res: Response) => {
-	try {
-		// 1. Validate input
-		const { product, selectedVariants, customerData } = req.body;
-		// TODO: Add Zod validation for this payload
+    try {
+        // 1. Validate input
+        const { product, selectedVariants, customerData } = req.body;
+        // TODO: Add Zod validation for this payload
 
-		// 2. Find the corresponding ProductSku
-		// This is a simplified logic. A robust implementation would need to
-		// match all selected variants to find the exact SKU.
-		const productSku = await prisma.productSku.findFirst({
-			where: {
-				productId: product.id,
-				// This condition assumes variant values are stored in a way that allows searching
-				// This might need adjustment based on the actual data structure
-			},
-		});
+        // Find or create customer
+        let customer = await prisma.customer.findUnique({
+            where: { email: customerData.email },
+        });
 
-		if (!productSku) {
-			return res.status(404).json({ message: "Product variant not found" });
-		}
+        if (!customer) {
+            // If customer doesn't exist, create a new one
+            customer = await prisma.customer.create({
+                data: {
+                    name: customerData.name,
+                    email: customerData.email,
+                    phone: customerData.phone || null,
+                    address: customerData.address ? { street: customerData.address } : null, // Store address as JSON
+                },
+            });
+        }
 
-		// 3. Create the Order
-		const newOrder = await prisma.order.create({
-			data: {
-				customerData: customerData,
-				producerId: product.ownerId, // Assuming the product owner is the producer
-				items: {
-					create: [
-						{
-							productSkuId: productSku.id,
-							quantity: 1,
-							pricePerUnitAtOrder: product.basePrice, // Or a calculated price based on variants
-						},
-					],
-				},
-			},
-			include: {
-				items: true,
-			},
-		});
+        // 2. Find the corresponding ProductSku
+        // This is a simplified logic. A robust implementation would need to
+        // match all selected variants to find the exact SKU.
+        const productSku = await prisma.productSku.findFirst({
+            where: {
+                productId: product.id,
+                // This condition assumes variant values are stored in a way that allows searching
+                // This might need adjustment based on the actual data structure
+            },
+            include: {
+                product: true, // Include product details for email
+            },
+        });
 
-		res.status(201).json(newOrder);
-	} catch (error: any) {
-		console.error("Error placing order:", error);
-		res.status(500).json({ message: "Error placing order", error: error.message });
-	}
+        if (!productSku) {
+            return res.status(404).json({ message: "Product variant not found" });
+        }
+
+        // 3. Create the Order
+        const newOrder = await prisma.order.create({
+            data: {
+                customerId: customer.id, // Link to the created/found customer
+                producerId: product.ownerId, // Assuming the product owner is the producer
+                items: {
+                    create: [
+                        {
+                            productSkuId: productSku.id,
+                            quantity: 1,
+                            pricePerUnitAtOrder: product.basePrice, // Or a calculated price based on variants
+                        },
+                    ],
+                },
+            },
+            include: {
+                items: {
+                    include: {
+                        productSku: {
+                            include: {
+                                product: true,
+                            },
+                        },
+                    },
+                },
+                customer: true, // Include customer details
+                producer: true, // Include producer details
+            },
+        });
+
+        // 4. Send Confirmation Emails
+        const currentYear = new Date().getFullYear();
+
+        // Read email templates
+        const customerEmailTemplatePath = path.join(__dirname, '../templates/emails/customerOrderConfirmation.html');
+        const producerEmailTemplatePath = path.join(__dirname, '../templates/emails/producerOrderNotification.html');
+
+        let customerEmailHtml = await fs.readFile(customerEmailTemplatePath, 'utf8');
+        let producerEmailHtml = await fs.readFile(producerEmailTemplatePath, 'utf8');
+
+        // Prepare order items HTML for email
+        const orderItemsHtml = newOrder.items.map(item => `
+            <tr>
+                <td>${item.productSku.product.name}</td>
+                <td>${item.productSku.name || 'N/A'}</td>
+                <td>${item.quantity}</td>
+                <td>${item.pricePerUnitAtOrder.toNumber().toFixed(2)}</td>
+            </tr>
+        `).join('');
+
+        // Populate customer email template
+        customerEmailHtml = customerEmailHtml
+            .replace(/{customerName}/g, newOrder.customer?.name || 'Kliencie')
+            .replace(/{orderId}/g, newOrder.id)
+            .replace(/{orderDate}/g, (newOrder.createdAt ?? new Date()).toLocaleDateString('pl-PL'))
+            .replace(/{producerCompanyName}/g, newOrder.producer?.companyName || 'N/A')
+            .replace(/{orderItems}/g, orderItemsHtml)
+            .replace(/{totalAmount}/g, newOrder.items.reduce((sum, item) => sum + (item.quantity * item.pricePerUnitAtOrder.toNumber()), 0).toFixed(2))
+            .replace(/{currentYear}/g, currentYear.toString());
+
+        // Parse customer address JSON
+        const customerAddress: any = newOrder.customer?.address || {};
+
+        // Populate producer email template
+        producerEmailHtml = producerEmailHtml
+            .replace(/{producerCompanyName}/g, newOrder.producer?.companyName || 'Producencie')
+            .replace(/{orderId}/g, newOrder.id)
+            .replace(/{orderDate}/g, (newOrder.createdAt ?? new Date()).toLocaleDateString('pl-PL'))
+            .replace(/{customerName}/g, newOrder.customer?.name || 'N/A')
+            .replace(/{customerEmail}/g, newOrder.customer?.email || 'N/A')
+            .replace(/{customerAddress}/g, `${customerAddress.street || ''}, ${customerAddress.city || ''}, ${customerAddress.zipCode || ''}`.trim())
+            .replace(/{customerPhone}/g, newOrder.customer?.phone || 'N/A')
+            .replace(/{orderItems}/g, orderItemsHtml)
+            .replace(/{totalAmount}/g, newOrder.items.reduce((sum, item) => sum + (item.quantity * item.pricePerUnitAtOrder.toNumber()), 0).toFixed(2))
+            .replace(/{currentYear}/g, currentYear.toString());
+
+        // Send email to customer
+        if (newOrder.customer?.email) {
+            await sendOrderConfirmationEmail(
+                newOrder.customer.email,
+                `Potwierdzenie zamówienia #${newOrder.id}`,
+                customerEmailHtml
+            );
+        }
+
+        // Send email to producer
+        if (newOrder.producer?.email) {
+            await sendOrderConfirmationEmail(
+                newOrder.producer.email,
+                `Nowe zamówienie #${newOrder.id} od ${newOrder.customer?.name || ''}`,
+                producerEmailHtml
+            );
+        }
+
+        res.status(201).json(newOrder);
+    } catch (error: any) {
+        console.error("Error placing order:", error);
+        res.status(500).json({ message: "Error placing order", error: error.message });
+    }
 };

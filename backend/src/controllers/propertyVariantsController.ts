@@ -150,11 +150,9 @@ export const deletePropertyVariant = async (req: Request, res: Response) => {
 		}
 		if (error.code === "P2003") {
 			// Foreign key constraint failure (less likely with Cascade on ProductSkuPropertyVariant)
-			return res
-				.status(409)
-				.json({
-					message: "Cannot delete property variant because it is referenced by other records with Restrict onDelete",
-				});
+			return res.status(409).json({
+				message: "Cannot delete property variant because it is referenced by other records with Restrict onDelete",
+			});
 		}
 		console.error(`Error deleting property variant with ID ${id}:`, error);
 		res.status(500).json({ message: `Error deleting property variant with ID ${id}`, error: error.message });
