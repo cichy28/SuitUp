@@ -7,7 +7,7 @@ const router = Router();
 // Konfiguracja multer do zapisywania plików na dysku
 const storage = multer.diskStorage({
 	destination: function (req, file, cb) {
-		cb(null, path.resolve(__dirname, "../../uploads")); // Folder, gdzie będą zapisywane pliki
+		cb(null, path.join(process.cwd(), "..", "uploads")); // Folder, gdzie będą zapisywane pliki
 	},
 	filename: function (req, file, cb) {
 		// Unikalna nazwa pliku, np. timestamp + oryginalna nazwa

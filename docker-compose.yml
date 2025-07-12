@@ -17,7 +17,7 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
       args:
-        EXPO_PUBLIC_API_URL: http://localhost:3000
+        EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL}
     ports:
       - "80:80"
     env_file:
