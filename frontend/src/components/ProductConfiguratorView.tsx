@@ -9,7 +9,7 @@ import { Property } from "../../../shared/validators/property";
 import { PropertyVariant } from "../../../shared/validators/propertyVariant";
 import { ProductSku } from "../../../shared/validators/productSku";
 import VisualVariantSelector from "./VisualVariantSelector";
-import HotspotImageView, { HotspotData } from "./HotspotImageView";
+import InteractiveImageView, { HotspotData } from "./InteractiveImageView";
 import { Colors, Fonts, Spacing, BorderRadius } from '../constants/Theme';
 
 interface ProductConfiguratorViewProps {
@@ -81,12 +81,12 @@ const ProductConfiguratorView: React.FC<ProductConfiguratorViewProps> = ({ produ
   }, [currentSku, product.mainImage]);
 
   const hotspots: HotspotData[] = useMemo(() => {
-    return product.properties.map((prop, index) => ({
+    return product.properties.map((prop) => ({
       id: prop.property.id,
       name: prop.property.name,
       value: selectedVariants[prop.property.id],
-      relativeTop: 0.2 + (index * 0.15),
-      relativeLeft: 0.2 + (index * 0.1),
+      relativeTop: prop.hotspotY ?? 0.5, // Fallback to center
+      relativeLeft: prop.hotspotX ?? 0.5, // Fallback to center
     }));
   }, [product.properties, selectedVariants]);
 
@@ -101,9 +101,8 @@ const ProductConfiguratorView: React.FC<ProductConfiguratorViewProps> = ({ produ
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.imageContainer}>
-        <HotspotImageView
+        <InteractiveImageView
           source={{ uri: imageUrl }}
-          aspectRatio={1} // You might need to adjust this
           hotspots={hotspots}
           onHotspotPress={handleHotspotPress}
         />
