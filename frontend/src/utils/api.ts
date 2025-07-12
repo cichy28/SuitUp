@@ -2,6 +2,8 @@
 import axios from "axios";
 import { Product } from "../../../shared/validators/product";
 
+import { Order } from "../../../shared/validators/order";
+
 const API_URL = process.env.EXPO_PUBLIC_API_URL + "/api";
 
 export const api = axios.create({
@@ -16,7 +18,7 @@ export const getProductDetails = async (productId: string): Promise<Product> => 
 	return response.data;
 };
 
-export const placeOrder = async (orderData: any) => {
+export const placeOrder = async (orderData: any): Promise<Order> => {
 	try {
 		const response = await api.post("/orders/place", orderData);
 		return response.data;

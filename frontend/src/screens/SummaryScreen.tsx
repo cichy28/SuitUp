@@ -55,8 +55,8 @@ const SummaryScreen = () => {
 
   const handlePlaceOrder = async () => {
     try {
-      await placeOrder({ product, selectedVariants, customerData });
-      Alert.alert('Success', 'Order placed successfully');
+      const order = await placeOrder({ product, selectedVariants, customerData });
+      navigation.navigate('Confirmation', { order });
     } catch (error: any) {
       Alert.alert('Error', error.message);
     }

@@ -5,15 +5,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import HotspotImageView, { HotspotData } from "@/components/HotspotImageView";
 
 const initialHotspots: HotspotData[] = [
-    { id: "neck", name: "Neck", value: "", relativeTop: 0.1, relativeLeft: 0.5 },
-    { id: "chest", name: "Chest", value: "", relativeTop: 0.25, relativeLeft: 0.5 },
-    { id: "waist", name: "Waist", value: "", relativeTop: 0.4, relativeLeft: 0.5 },
-    { id: "hips", name: "Hips", value: "", relativeTop: 0.55, relativeLeft: 0.5 },
-    { id: "inseam", name: "Inseam", value: "", relativeTop: 0.7, relativeLeft: 0.5 },
-    { id: "sleeve", name: "Sleeve", value: "", relativeTop: 0.3, relativeLeft: 0.2 },
+	{ id: "neck", name: "Neck", value: "", relativeTop: 0.01, relativeLeft: 0.01 },
+	{ id: "chest", name: "Chest", value: "", relativeTop: 0.25, relativeLeft: 0.5 },
+	{ id: "waist", name: "Waist", value: "", relativeTop: 0.4, relativeLeft: 0.5 },
+	{ id: "hips", name: "Hips", value: "", relativeTop: 0.55, relativeLeft: 0.5 },
+	{ id: "inseam", name: "Inseam", value: "", relativeTop: 0.7, relativeLeft: 0.5 },
+	{ id: "sleeve", name: "Sleeve", value: "", relativeTop: 0.3, relativeLeft: 0.2 },
 ];
 import { RootStackParamList } from "@/navigation/AppNavigator";
-import { Colors, Fonts, Spacing, BorderRadius } from '@/constants/Theme';
+import { Colors, Fonts, Spacing, BorderRadius } from "@/constants/Theme";
 
 const IMAGE_ASPECT_RATIO = 750 / 1125;
 const imageSource = require("../../assets/images/body-measurement.jpg");
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
 		fontSize: Fonts.sizes.body,
 		color: Colors.darkGray,
 		marginBottom: Spacing.large,
-		textAlign: 'center',
+		textAlign: "center",
 	},
 	imageContainer: {
 		width: "100%",

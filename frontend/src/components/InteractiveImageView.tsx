@@ -19,7 +19,7 @@ export interface HotspotData {
 }
 
 export const initialHotspots: HotspotData[] = [
-	{ id: 1, name: "Ramiona", value: "", relativeTop: 0.2, relativeLeft: 0.3, displayType: "text", displayText: "+" },
+	{ id: 1, name: "Ramiona", value: "", relativeTop: 0.01, relativeLeft: 0.01, displayType: "text", displayText: "+" },
 	{
 		id: 2,
 		name: "Klatka piersiowa",
@@ -30,6 +30,7 @@ export const initialHotspots: HotspotData[] = [
 		displayText: "+",
 	},
 	{ id: 3, name: "Rękaw", value: "", relativeTop: 0.6, relativeLeft: 0.2, displayType: "text", displayText: "+" },
+	{ id: 4, name: "12313", value: "", relativeTop: 0.1, relativeLeft: 0.1, displayType: "text", displayText: "+" },
 	// Dodaj więcej hotspotów zgodnie z potrzebami
 ];
 

@@ -267,7 +267,7 @@ export const placeOrder = async (req: Request, res: Response) => {
         // Populate customer email template
         customerEmailHtml = customerEmailHtml
             .replace(/{customerName}/g, newOrder.customer?.name || 'Kliencie')
-            .replace(/{orderId}/g, newOrder.id)
+            .replace(/{orderId}/g, newOrder.orderNumber.toString())
             .replace(/{orderDate}/g, (newOrder.createdAt ?? new Date()).toLocaleDateString('pl-PL'))
             .replace(/{producerCompanyName}/g, newOrder.producer?.companyName || 'N/A')
             .replace(/{orderItems}/g, orderItemsHtml)
@@ -280,7 +280,7 @@ export const placeOrder = async (req: Request, res: Response) => {
         // Populate producer email template
         producerEmailHtml = producerEmailHtml
             .replace(/{producerCompanyName}/g, newOrder.producer?.companyName || 'Producencie')
-            .replace(/{orderId}/g, newOrder.id)
+            .replace(/{orderId}/g, newOrder.orderNumber.toString())
             .replace(/{orderDate}/g, (newOrder.createdAt ?? new Date()).toLocaleDateString('pl-PL'))
             .replace(/{customerName}/g, newOrder.customer?.name || 'N/A')
             .replace(/{customerEmail}/g, newOrder.customer?.email || 'N/A')
@@ -294,7 +294,7 @@ export const placeOrder = async (req: Request, res: Response) => {
         if (newOrder.customer?.email) {
             await sendOrderConfirmationEmail(
                 newOrder.customer.email,
-                `Potwierdzenie zamówienia #${newOrder.id}`,
+                `Potwierdzenie zamówienia #${newOrder.orderNumber}`,
                 customerEmailHtml
             );
         }
@@ -303,7 +303,7 @@ export const placeOrder = async (req: Request, res: Response) => {
         if (newOrder.producer?.email) {
             await sendOrderConfirmationEmail(
                 newOrder.producer.email,
-                `Nowe zamówienie #${newOrder.id} od ${newOrder.customer?.name || ''}`,
+                `Nowe zamówienie #${newOrder.orderNumber} od ${newOrder.customer?.name || ''}`,
                 producerEmailHtml
             );
         }

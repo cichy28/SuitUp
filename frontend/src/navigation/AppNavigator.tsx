@@ -10,6 +10,8 @@ import SummaryScreen from "../screens/SummaryScreen";
 import ConfirmationScreen from "../screens/ConfirmationScreen";
 import StylePreferencesScreen from "../screens/StylePreferencesScreen";
 import { BodyShape, StylePreference } from "../../../shared/enums";
+import { Order } from "../../../shared/validators/order";
+import { Product } from "../../../shared/validators/product";
 
 export type RootStackParamList = {
 	Loading: undefined;
@@ -20,7 +22,7 @@ export type RootStackParamList = {
 	ProductConfigurator: { productId: string };
 	Measurement: undefined;
 	Summary: { product: Product; selectedVariants: Record<string, string> };
-	Confirmation: undefined;
+	Confirmation: { order: Order };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

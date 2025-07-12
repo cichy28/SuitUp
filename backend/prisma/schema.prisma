@@ -216,18 +216,21 @@ model ProductSkuPropertyVariant {
 
 model Order {
   id                    String         @id @default(cuid())
+  orderNumber           Int            @unique @default(autoincrement())
   orderDate             DateTime       @default(now())
-  status                OrderStatus    @default(PENDING)      // POPRAWKA: String -> OrderStatus
-  customerData          Json?          @map("customerDataJson") // POPRAWKA: String -> Json
+  status                OrderStatus    @default(PENDING)
+  customerData          Json?          @map("customerDataJson")
   customerId            String?
   producerId            String
-  approvalPolicy        ApprovalPolicy @default(AUTOMATIC)   // POPRAWKA: String -> ApprovalPolicy
-  handlingMethod        HandlingMethod @default(EMAIL)       // POPRAWKA: String -> HandlingMethod
+  approvalPolicy        ApprovalPolicy @default(AUTOMATIC)
+  handlingMethod        HandlingMethod @default(EMAIL)
   confirmationMessage   String?
   handlingEmail         String?
   handlingEmailTemplate String?
   handlingApiUrl        String?
-  
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
   customer              Customer?      @relation(fields: [customerId], references: [id], onDelete: SetNull)
   producer              User           @relation(fields: [producerId], references: [id])
   items                 OrderItem[]
