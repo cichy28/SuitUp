@@ -5,7 +5,7 @@
 	"main": "dist/index.js",
 	"scripts": {
 		"build": "tsc",
-		"import-images": "dotenv -e .env.development -- ts-node scripts/mass-import-images.ts",
+		"import-images": "dotenv -e .env.development -- ts-node scripts/mass-import.ts",
 		"start": "node dist/backend/src/index.js",
 		"dev": "ts-node-dev --respawn --transpile-only src/index.ts",
 		"prisma:generate": "dotenv -e .env.development -- prisma generate",
@@ -16,7 +16,6 @@
 		"test": "jest",
 		"lint": "eslint . --ext .ts",
 		"format": "prettier --write \"src/**/*.ts\"",
-		"seed": "ts-node scripts/mass-import-images.ts",
 		"generate-data": "dotenv -e .env.development -- ts-node scripts/generate-companies-data.ts",
 		"prisma:reset": "dotenv -e .env.development -- prisma migrate reset --force"
 	},
