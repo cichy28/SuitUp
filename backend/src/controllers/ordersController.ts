@@ -5,7 +5,7 @@ import { z } from "zod";
 import { sendOrderConfirmationEmail } from "../services/emailService"; // Import the email service
 import * as fs from 'fs/promises'; // Import fs for reading templates
 import * as path from 'path'; // Import path for resolving template paths
-import { Order, Customer, User, OrderItem, ProductSku, Product } from '@prisma/client'; // Import Prisma types
+import { Order, Customer, User, OrderItem, ProductSku, Product, Prisma } from '@prisma/client'; // Import Prisma types
 
 // Get all orders
 export const getAllOrders = async (req: Request, res: Response) => {
@@ -191,7 +191,7 @@ export const placeOrder = async (req: Request, res: Response) => {
                     name: customerData.name,
                     email: customerData.email,
                     phone: customerData.phone || null,
-                    address: customerData.address ? { street: customerData.address } : null, // Store address as JSON
+                    address: customerData.address ? { street: customerData.address.street, city: customerData.address.city, zipCode: customerData.address.zipCode } : Prisma.JsonNull, // Store address as JSON
                 },
             });
         }
@@ -258,7 +258,7 @@ export const placeOrder = async (req: Request, res: Response) => {
         const orderItemsHtml = newOrder.items.map(item => `
             <tr>
                 <td>${item.productSku.product.name}</td>
-                <td>${item.productSku.name || 'N/A'}</td>
+                <td>${item.productSku.skuCode || 'N/A'}</td>
                 <td>${item.quantity}</td>
                 <td>${item.pricePerUnitAtOrder.toNumber().toFixed(2)}</td>
             </tr>

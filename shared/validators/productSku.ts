@@ -8,7 +8,7 @@ export const ProductSkuSchema = z.object({
 	skuCode: z.string().nullable(),
 	price: z.number().nullable(), // This is the old price field, might be deprecated or used for something else
 	stockQuantity: z.number().int().nonnegative(),
-	priceMultiplier: z.number().optional().nullable(), // Now optional, as it has a default in Prisma
+	priceMultiplier: z.number().optional(), // Now optional, as it has a default in Prisma
 	skuBasePrice: z.number().optional(), // Calculated on backend
 	finalPrice: z.number().optional(), // Calculated on backend
 	createdAt: z.date(),
@@ -23,7 +23,7 @@ export const CreateProductSkuInputSchema = z.object({
 	skuCode: z.string().optional().nullable(), // skuCode can be optional/nullable based on schema
 	price: z.number().optional().nullable(), // Price can be optional/nullable
 	stockQuantity: z.number().int().nonnegative().optional(), // Stock quantity optional, will default in Prisma
-	priceMultiplier: z.number().optional().nullable(), // New field
+	priceMultiplier: z.number().optional(), // New field
 	// Note: Linking PropertyVariants on creation might require a nested structure here
 	// or separate endpoints after SKU creation. We'll handle just basic fields for now.
 });
@@ -33,7 +33,7 @@ export const UpdateProductSkuInputSchema = z
 		skuCode: z.string().optional().nullable(),
 		price: z.number().optional().nullable(),
 		stockQuantity: z.number().int().nonnegative().optional(),
-		priceMultiplier: z.number().optional().nullable(), // New field
+		priceMultiplier: z.number().optional(), // New field
 		// Note: Updating linked PropertyVariants might require a nested structure here
 		// or separate endpoints. We'll handle just basic fields for now.
 	})

@@ -32,9 +32,6 @@ COPY frontend/package*.json ./
 RUN npm install
 
 # Build the web application
-ENV EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL
-
-# Build the web application
 RUN npm run build
 
 # Use a lightweight web server to serve the static files
