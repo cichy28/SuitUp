@@ -17,6 +17,7 @@
 		"lint": "eslint . --ext .ts",
 		"format": "prettier --write \"src/**/*.ts\"",
 		"seed": "ts-node scripts/mass-import-images.ts",
+		"generate-data": "dotenv -e .env.development -- ts-node scripts/generate-companies-data.ts",
 		"prisma:reset": "dotenv -e .env.development -- prisma migrate reset --force"
 	},
 	"keywords": [

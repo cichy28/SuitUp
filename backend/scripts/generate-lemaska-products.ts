@@ -12,17 +12,15 @@ import dotenv from "dotenv";
 dotenv.config({ path: path.resolve(__dirname, "../../.env.development") });
 
 interface ProductMetadata extends Omit<Product, "id" | "ownerId" | "mainImageId" | "createdAt" | "updatedAt"> {
-	skus: {
+	skus: ({
 		skuCode: string;
 		priceMultiplier: number;
 		stockQuantity: number;
-		color: string;
-		size: string;
-	}[];
+	} & Record<string, string | number>)[];
 	properties: {
 		name: string;
-		description: string;
-		displayOrder: number;
+		hotspotX: number;
+	hotspotY: number;
 		variants: {
 			name: string;
 			value: string;
@@ -32,11 +30,53 @@ interface ProductMetadata extends Omit<Product, "id" | "ownerId" | "mainImageId"
 	}[];
 }
 
+interface ProducerMetadata {
+	companyName: string;
+	email: string;
+	description: string;
+	logoUrl?: string;
+	startScreenImageUrl?: string;
+}
+
 // --- CONFIGURATION ---
-const SOURCE_FOLDER = process.env.LEMASKA_SOURCE_FOLDER || path.join(__dirname, "..", "..", "_do_importu", "Lemanska");
 const IMAGE_WIDTH = parseInt(process.env.LEMASKA_IMAGE_WIDTH || "800", 10);
 const IMAGE_HEIGHT = parseInt(process.env.LEMASKA_IMAGE_HEIGHT || "600", 10);
-const NUMBER_OF_PRODUCTS = parseInt(process.env.LEMASKA_NUMBER_OF_PRODUCTS || "5", 10); // Generate 5 new products
+
+interface CompanyConfig {
+	companyName: string;
+	companyFolder: string;
+	productPrefix: string;
+	numberOfProducts: number;
+	email: string;
+	description: string;
+}
+
+const companies: CompanyConfig[] = [
+	{
+		companyName: "GENERATED_Lemanska_A",
+		companyFolder: path.join(__dirname, "..", "..", "_do_importu", "GENERATED_Lemanska_A"),
+		productPrefix: "PRODUCT_GENERATED_A_",
+		numberOfProducts: 3,
+		email: "contact_a@generated.com",
+		description: "High-quality custom suits and clothing from Generated Company A.",
+	},
+	{
+		companyName: "GENERATED_Lemanska_B",
+		companyFolder: path.join(__dirname, "..", "..", "_do_importu", "GENERATED_Lemanska_B"),
+		productPrefix: "PRODUCT_GENERATED_B_",
+		numberOfProducts: 2,
+		email: "contact_b@generated.com",
+		description: "Premium custom wear from Generated Company B.",
+	},
+	{
+		companyName: "GENERATED_Lemanska_C",
+		companyFolder: path.join(__dirname, "..", "..", "_do_importu", "GENERATED_Lemanska_C"),
+		productPrefix: "PRODUCT_GENERATED_C_",
+		numberOfProducts: 4,
+		email: "contact_c@generated.com",
+		description: "Exclusive designs from Generated Company C.",
+	},
+];
 // --------------------
 
 const bodyShapes: Array<z.infer<typeof BodyShape>> = [
@@ -52,8 +92,53 @@ const stylePreferences: Array<z.infer<typeof StylePreference>> = [
 	"RETRO_SHAPES",
 	"MASCULINE_SHAPES",
 ];
-const colors = ["RED", "BLUE", "GREEN", "BLACK", "WHITE"];
-const sizes = ["S", "M", "L", "XL"];
+const allPossibleProperties = [
+    {
+        name: "GENERATED_GUZIKI",
+        hotspotX: 0.2,
+        hotspotY: 0.3,
+        variants: [
+            { name: "G1", value: "G1", priceAdjustment: 3.11, displayOrder: 0 },
+            { name: "G2", value: "G2", priceAdjustment: 16.53, displayOrder: 1 },
+            { name: "G3", value: "G3", priceAdjustment: 5.00, displayOrder: 2 },
+            { name: "G3", value: "G3", priceAdjustment: 5.00, displayOrder: 2 },
+        ],
+    },
+    {
+        name: "GENERATED_NOGAWKI",
+        hotspotX: 0.5,
+        hotspotY: 0.6,
+        variants: [
+            { name: "NG1", value: "NG1", priceAdjustment: 13.14, displayOrder: 0 },
+            { name: "NG2", value: "NG2", priceAdjustment: 4.96, displayOrder: 1 },
+            { name: "NG3", value: "NG3", priceAdjustment: 7.50, displayOrder: 2 },
+            { name: "NG4", value: "NG4", priceAdjustment: 10.00, displayOrder: 3 },
+        ],
+    },
+    {
+        name: "GENERATED_KOLOR",
+        hotspotX: 0.1,
+        hotspotY: 0.1,
+        variants: [
+            { name: "RED", value: "RED", priceAdjustment: 2.00, displayOrder: 0 },
+            { name: "BLUE", value: "BLUE", priceAdjustment: 3.00, displayOrder: 1 },
+            { name: "GREEN", value: "GREEN", priceAdjustment: 2.50, displayOrder: 2 },
+            { name: "BLACK", value: "BLACK", priceAdjustment: 4.00, displayOrder: 3 },
+            { name: "WHITE", value: "WHITE", priceAdjustment: 1.50, displayOrder: 4 },
+        ],
+    },
+    {
+        name: "GENERATED_ROZMIAR",
+        hotspotX: 0.8,
+        hotspotY: 0.8,
+        variants: [
+            { name: "S", value: "S", priceAdjustment: 1.00, displayOrder: 0 },
+            { name: "M", value: "M", priceAdjustment: 2.00, displayOrder: 1 },
+            { name: "L", value: "L", priceAdjustment: 3.00, displayOrder: 2 },
+            { name: "XL", value: "XL", priceAdjustment: 4.00, displayOrder: 3 },
+        ],
+    },
+];
 
 // Function to shuffle an array
 function shuffleArray<T>(array: T[]): T[] {
@@ -87,33 +172,53 @@ async function generateImage(text: string, filePath: string) {
 	console.log(`Generated image: ${filePath}`);
 }
 
-async function cleanGeneratedProducts() {
-	console.log("--- Cleaning up previously generated products ---");
-	try {
-		const entries = await fs.readdir(SOURCE_FOLDER, { withFileTypes: true });
-		for (const entry of entries) {
-			if (entry.isDirectory() && entry.name.startsWith("PRODUCT_LEMANSKA_")) {
-				const productToRemovePath = path.join(SOURCE_FOLDER, entry.name);
-				await fs.rm(productToRemovePath, { recursive: true, force: true });
-				console.log(`Removed: ${productToRemovePath}`);
-			}
+async function generateCompanyData(config: CompanyConfig) {
+	const COMPANY_FOLDER = config.companyFolder;
+	const PRODUCTS_FOLDER = path.join(COMPANY_FOLDER, "PRODUKTY");
+	const PROPERTIES_ROOT_FOLDER = path.join(COMPANY_FOLDER, "WLASCIWOSCI");
+
+	console.log(`--- Starting Product Generation Script for ${config.companyName} ---`);
+	await fs.mkdir(COMPANY_FOLDER, { recursive: true });
+	await fs.mkdir(PRODUCTS_FOLDER, { recursive: true });
+	await fs.mkdir(PROPERTIES_ROOT_FOLDER, { recursive: true });
+
+	// Generate producer.meta.json
+	const logoPath = path.join(COMPANY_FOLDER, "logo.jpg");
+	const startScreenPath = path.join(COMPANY_FOLDER, "startScreen.jpg");
+	await generateImage(`${config.companyName} Logo`, logoPath);
+	await generateImage(`${config.companyName} Start Screen`, startScreenPath);
+
+	const producerMetadata: ProducerMetadata = {
+		companyName: config.companyName,
+		email: config.email,
+		description: config.description,
+		logoUrl: "logo.jpg",
+		startScreenImageUrl: "startScreen.jpg",
+	};
+	await fs.writeFile(path.join(COMPANY_FOLDER, "producer.meta.json"), JSON.stringify(producerMetadata, null, 2));
+	console.log(`Generated producer.meta.json for ${config.companyName}`);
+
+	const companyProperties = [];
+
+	for (const prop of allPossibleProperties) {
+		const propertyPath = path.join(PROPERTIES_ROOT_FOLDER, prop.name);
+		await fs.mkdir(propertyPath, { recursive: true });
+		for (const variant of prop.variants) {
+			await generateImage(`${prop.name}: ${variant.name}`, path.join(propertyPath, `${variant.name}.jpg`));
 		}
-	} catch (error) {
-		console.warn("Error during cleanup (might be first run):", error);
+		companyProperties.push(prop);
 	}
-}
 
-async function generateProducts() {
-	console.log("--- Starting Product Generation Script ---");
-	await fs.mkdir(SOURCE_FOLDER, { recursive: true });
-	await cleanGeneratedProducts(); // Clean up before generating new ones
-
-	for (let i = 1; i <= NUMBER_OF_PRODUCTS; i++) {
-		const productName = `PRODUCT_LEMANSKA_${String(i).padStart(2, "0")}`;
-		const productPath = path.join(SOURCE_FOLDER, productName);
+	for (let i = 1; i <= config.numberOfProducts; i++) {
+		const productName = `${config.productPrefix}${String(i).padStart(2, "0")}`;
+		const productPath = path.join(PRODUCTS_FOLDER, productName);
 
 		await fs.mkdir(productPath, { recursive: true });
 		console.log(`Created product folder: ${productPath}`);
+
+		// Generate main.jpg for the product
+		const mainImagePath = path.join(productPath, "main.jpg");
+		await generateImage(`${config.companyName} - ${productName} - Main`, mainImagePath);
 
 		// Generate product_metadata.json with 2 unique body shapes and 2 unique style preferences
 		const shuffledBodyShapes = shuffleArray([...bodyShapes]);
@@ -123,8 +228,23 @@ async function generateProducts() {
 		const style = shuffledStylePreferences.slice(0, 2);
 
 		const basePrice = parseFloat((Math.random() * (500 - 100) + 100).toFixed(2));
-		const description = `This is a sample description for ${productName}.`;
+		const description = `This is a sample description for ${productName} from ${config.companyName}.`;
 		const isActive = true;
+
+		const selectedProductProperties = [];
+		const shuffledPossibleProperties = shuffleArray([...allPossibleProperties]);
+		const numberOfProperties = Math.floor(Math.random() * shuffledPossibleProperties.length) + 1; // Select 1 to all properties
+
+		for (let p = 0; p < numberOfProperties; p++) {
+			const prop = shuffledPossibleProperties[p];
+			const selectedVariants = shuffleArray([...prop.variants]).slice(0, Math.floor(Math.random() * prop.variants.length) + 1); // Select at least 1 variant
+			if (selectedVariants.length > 0) {
+				selectedProductProperties.push({
+					...prop,
+					variants: selectedVariants,
+				});
+			}
+		}
 
 		const metadata: ProductMetadata = {
 			name: productName,
@@ -134,95 +254,108 @@ async function generateProducts() {
 			suitableFor,
 			style,
 			skus: [],
-			properties: [],
+			properties: selectedProductProperties,
 		};
-		await fs.writeFile(path.join(productPath, "product_metadata.json"), JSON.stringify(metadata, null, 2));
-		console.log(`Generated product_metadata.json for ${productName}: suitableFor=${suitableFor}, style=${style}`);
 
-		// Select two unique colors and two unique sizes for this product's variants
-		const selectedColors = shuffleArray([...colors]).slice(0, 2);
-		const selectedSizes = shuffleArray([...sizes]).slice(0, 2);
-
-		// Create WARIANTY folder and generate SKUs for all combinations
+		// Create WARIANTY folder and generate SKUs for all combinations of selected properties
 		const variantsPath = path.join(productPath, "WARIANTY");
 		await fs.mkdir(variantsPath, { recursive: true });
 
-		const skus = [];
-		for (const color of selectedColors) {
-			for (const size of selectedSizes) {
-				const skuName = `${productName}_${color}_${size}`;
-				const skuImagePath = path.join(variantsPath, `${skuName}.jpg`);
-				await generateImage(`Lemanska - ${productName} - ${color} ${size}`, skuImagePath);
+		const generateSkuCombinations = async (
+			index: number,
+			currentCombination: Record<string, string | number>,
+			propertiesToUse: any[]
+		): Promise<({ skuCode: string; priceMultiplier: number; stockQuantity: number; } & Record<string, string | number>)[]> => {
+			if (index === propertiesToUse.length) {
+				const skuCodeParts = [productName];
+				const skuProperties: Record<string, string | number> = {};
+				for (const prop of propertiesToUse) {
+					skuCodeParts.push(currentCombination[prop.name] as string);
+					skuProperties[prop.name] = currentCombination[prop.name];
+				}
+				const skuCode = skuCodeParts.join("_");
+
+				const skuImagePath = path.join(variantsPath, `${skuCode}.jpg`);
+				await generateImage(`${config.companyName} - ${productName} - ${skuCode}`, skuImagePath);
 
 				const priceMultiplier = parseFloat((Math.random() * (1.5 - 0.5) + 0.5).toFixed(2)); // Random price multiplier between 0.5 and 1.5
 				const stockQuantity = Math.floor(Math.random() * 100) + 1; // Random stock between 1 and 100
 
-				skus.push({
-					skuCode: skuName,
+				return [{
+					skuCode,
 					priceMultiplier,
 					stockQuantity,
-					color,
-					size,
-				});
+					...skuProperties,
+				}];
 			}
-		}
-		metadata.skus = skus;
 
-		// Create WLASCIWOSCI folder and generate properties/variants
-		const properties = [];
-		const propertiesPath = path.join(productPath, "WLASCIWOSCI");
-		await fs.mkdir(propertiesPath, { recursive: true });
+			let allSkus: ({ skuCode: string; priceMultiplier: number; stockQuantity: number; } & Record<string, string | number>)[] = [];
+			const currentProperty = propertiesToUse[index];
+			for (const variant of currentProperty.variants) {
+				const childSkus = await generateSkuCombinations(index + 1, { ...currentCombination, [currentProperty.name]: variant.value }, propertiesToUse);
+				allSkus = allSkus.concat(childSkus);
+			}
+			return allSkus;
+		};
 
-		// Color property (using selectedColors)
-		const colorPropertyPath = path.join(propertiesPath, "KOLOR");
-		await fs.mkdir(colorPropertyPath, { recursive: true });
-		const colorVariants = [];
-		let colorDisplayOrder = 0;
-		for (const color of selectedColors) {
-			await generateImage(`Kolor: ${color}`, path.join(colorPropertyPath, `${color}.jpg`));
-			colorVariants.push({
-				name: color,
-				value: color,
-				priceAdjustment: parseFloat((Math.random() * 20).toFixed(2)),
-				displayOrder: colorDisplayOrder++,
-			});
-		}
-		properties.push({
-			name: "KOLOR",
-			description: "Dostępne kolory produktu.",
-			displayOrder: 0,
-			variants: colorVariants,
-		});
+        metadata.skus = await generateSkuCombinations(0, {}, selectedProductProperties);
+        if (metadata.skus.length > 8) {
+            metadata.skus = shuffleArray(metadata.skus).slice(0, 8);
+        }
 
-		// Size property (using selectedSizes)
-		const sizePropertyPath = path.join(propertiesPath, "ROZMIAR");
-		await fs.mkdir(sizePropertyPath, { recursive: true });
-		const sizeVariants = [];
-		let sizeDisplayOrder = 0;
-		for (const size of selectedSizes) {
-			await generateImage(`Rozmiar: ${size}`, path.join(sizePropertyPath, `${size}.jpg`));
-			sizeVariants.push({
-				name: size,
-				value: size,
-				priceAdjustment: parseFloat((Math.random() * 20).toFixed(2)),
-				displayOrder: sizeDisplayOrder++,
-			});
-		}
-		properties.push({
-			name: "ROZMIAR",
-			description: "Dostępne rozmiary produktu.",
-			displayOrder: 1,
-			variants: sizeVariants,
-		});
-
-		metadata.properties = properties;
 		await fs.writeFile(path.join(productPath, "product_metadata.json"), JSON.stringify(metadata, null, 2));
 		console.log(
 			`Generated product_metadata.json for ${productName}: suitableFor=${suitableFor}, style=${style}, basePrice=${basePrice}, description=${description}, isActive=${isActive}, skus=${metadata.skus.length}, properties=${metadata.properties.length}`
 		);
 	}
 
-	console.log("\n--- Product Generation Finished Successfully ---");
+	console.log(`\n--- Product Generation Finished Successfully for ${config.companyName} ---`);
 }
 
-generateProducts();
+async function cleanGeneratedProducts() {
+	console.log("--- Cleaning up previously generated products for all companies ---");
+	for (const company of companies) {
+		const COMPANY_FOLDER = company.companyFolder;
+		const PRODUCTS_FOLDER = path.join(COMPANY_FOLDER, "PRODUKTY");
+		const PROPERTIES_ROOT_FOLDER = path.join(COMPANY_FOLDER, "WLASCIWOSCI");
+
+		try {
+			// Clean up product folders
+			const productEntries = await fs.readdir(PRODUCTS_FOLDER, { withFileTypes: true });
+			for (const entry of productEntries) {
+				if (entry.isDirectory() && entry.name.startsWith(company.productPrefix)) {
+					const productToRemovePath = path.join(PRODUCTS_FOLDER, entry.name);
+					await fs.rm(productToRemovePath, { recursive: true, force: true });
+					console.log(`Removed product folder: ${productToRemovePath}`);
+				}
+			}
+
+			// Clean up company-level properties folder
+			await fs.rm(PROPERTIES_ROOT_FOLDER, { recursive: true, force: true });
+			console.log(`Removed properties root folder: ${PROPERTIES_ROOT_FOLDER}`);
+
+			// Clean up company folder if empty or only contains producer.meta.json, logo.jpg, startScreen.jpg
+			const companyFolderContents = await fs.readdir(COMPANY_FOLDER);
+			if (companyFolderContents.length === 0 ||
+				(companyFolderContents.length <= 3 &&
+					companyFolderContents.includes("producer.meta.json") &&
+					companyFolderContents.includes("logo.jpg") &&
+					companyFolderContents.includes("startScreen.jpg"))) {
+				await fs.rm(COMPANY_FOLDER, { recursive: true, force: true });
+				console.log(`Removed empty or metadata-only company folder: ${COMPANY_FOLDER}`);
+			}
+
+		} catch (error) {
+			console.warn(`Error during cleanup for ${company.companyName} (might be first run or folder doesn't exist):`, error);
+		}
+	}
+}
+
+async function main() {
+	await cleanGeneratedProducts();
+	for (const company of companies) {
+		await generateCompanyData(company);
+	}
+}
+
+main();
