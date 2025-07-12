@@ -35,7 +35,15 @@ const corsOptions = {
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json()); // Parse JSON request bodies
-const uploadsPath = path.join(process.cwd(), "..", "uploads");
+
+const uploadsPath = '/app/uploads';
+
+// Dodatkowe logowanie dla żądań do /uploads
+app.use("/uploads", (req, res, next) => {
+  const requestedFilePath = path.join(uploadsPath, req.path);
+  console.log(`[Uploads Static] Request for URL: ${req.originalUrl}, Attempting to serve from: ${requestedFilePath}`);
+  next();
+});
 console.log(`Serving static files from: ${uploadsPath}`); // Dodaj tę linię
 app.use("/uploads", express.static(uploadsPath)); // Serwuj pliki z folderu /uploads
 app.use(morgan("dev"));

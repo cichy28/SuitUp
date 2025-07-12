@@ -37,8 +37,7 @@ RUN npm run prisma:generate
 RUN npm run build
 
 # Create uploads directory
-RUN mkdir -p uploads
-RUN chmod -R 777 uploads
+
 
 EXPOSE 3000
 
