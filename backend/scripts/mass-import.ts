@@ -1,10 +1,10 @@
 import dotenv from "dotenv";
-dotenv.config({ path: '.env.development' }); // Load environment variables from .env.development
 import { PrismaClient, User, FileType, Product, Property, BodyShape, StylePreference } from "@prisma/client";
 import fs from "fs/promises";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
+dotenv.config({ path: path.resolve(__dirname, "../.env.development") }); // Load environment variables from .env.development
 
 // --- CONFIGURATION ---
 const SOURCE_FOLDER = path.join(__dirname, "..", "..", "_do_importu");
@@ -74,14 +74,14 @@ async function getOrCreateTestUser(): Promise<User> {
 }
 
 async function getOwner(companyPath: string): Promise<User> {
-	const metadataFilePath = path.join(companyPath, "producer.metadata.json");
+	const metadataFilePath = path.join(companyPath, "producer.meta.json");
 	let producerMetadata: any = {};
 
 	try {
 		producerMetadata = JSON.parse(await fs.readFile(metadataFilePath, "utf-8"));
 		console.log(`Loaded producer metadata for ${producerMetadata.companyName}`);
 	} catch (e) {
-		console.warn(`No producer.metadata.json found or invalid for ${path.basename(companyPath)}. Assigning to test user.`);
+		console.warn(`No producer.meta.json found or invalid for ${path.basename(companyPath)}. Assigning to test user.`);
 		return getOrCreateTestUser();
 	}
 

@@ -33,7 +33,8 @@ This is a full-stack application for a suit/clothing service. It consists of a R
   - `.env.development`, `.env.production`: Environment variables for development and production. During testing, both files contain identical environment variables, pointing to the external Supabase database. For production deployment, these files will be updated with new machine URLs.
   - `src/`: Source code for the backend.
   - `prisma/`: Prisma schema, migrations, and seed scripts.
-  - `scripts/mass-import-images.ts`: A utility script for bulk-importing images into the database.
+  - `scripts/mass-import.ts`: A utility script for bulk-importing images and data from the `_do_importu` directory into the database.
+  - `scripts/generate-companies-data.ts`: A utility script for generating dummy data and images into the `_do_importu` directory for testing and development purposes.
 - `C:/Users/JanCichosz/Downloads/suit-app/frontend/`: Contains the frontend mobile app code.
   - `src/`: Source code for the frontend app.
   - `screens/`: Application screens.
@@ -102,12 +103,12 @@ To clear and re-import all data:
     ```bash
     npm run prisma:reset --workspace=backend
     ```
-    *Note: On Windows, you might encounter an `EPERM` error during this step. This usually indicates a file permission issue with the Prisma client. It often does not prevent the command from succeeding, and you can proceed to the next step.*
+    _Note: On Windows, you might encounter an `EPERM` error during this step. This usually indicates a file permission issue with the Prisma client. It often does not prevent the command from succeeding, and you can proceed to the next step._
 2.  **Apply migrations:** This will re-apply the latest database schema.
     ```bash
     npm run prisma:migrate:dev --workspace=backend
     ```
-    *Note: Similar to `prisma:reset`, an `EPERM` error might occur on Windows but typically does not hinder the migration process.*
+    _Note: Similar to `prisma:reset`, an `EPERM` error might occur on Windows but typically does not hinder the migration process._
 3.  **Import initial data:** This will import data from the `_do_importu` directory.
     ```bash
     npm run import-images --workspace=backend
