@@ -5,9 +5,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import HotspotImageView, { HotspotData } from "@/components/HotspotImageView";
 
 const initialHotspots: HotspotData[] = [
-	{ id: "chest", name: "Chest", value: "", relativeTop: 0.3, relativeLeft: 0.5 },
-	{ id: "waist", name: "Waist", value: "", relativeTop: 0.5, relativeLeft: 0.5 },
-	{ id: "hips", name: "Hips", value: "", relativeTop: 0.7, relativeLeft: 0.5 },
+	{ id: "chest", name: "Chest", value: "", relativeTop: 0.1, relativeLeft: 0.5 },
+	{ id: "waist", name: "Waist", value: "", relativeTop: 0.3, relativeLeft: 0.5 },
+	{ id: "hips", name: "Hips", value: "", relativeTop: 0.5, relativeLeft: 0.5 },
 ];
 import { RootStackParamList } from "@/navigation/AppNavigator";
 import { Colors, Fonts, Spacing, BorderRadius } from "@/constants/Theme";

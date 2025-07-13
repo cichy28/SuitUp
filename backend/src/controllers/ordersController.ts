@@ -248,8 +248,8 @@ export const placeOrder = async (req: Request, res: Response) => {
         const currentYear = new Date().getFullYear();
 
         // Read email templates
-        const customerEmailTemplatePath = path.join(__dirname, '../templates/emails/customerOrderConfirmation.html');
-        const producerEmailTemplatePath = path.join(__dirname, '../templates/emails/producerOrderNotification.html');
+        const customerEmailTemplatePath = path.join(__dirname, '../../templates/emails/customerOrderConfirmation.html');
+        const producerEmailTemplatePath = path.join(__dirname, '../../templates/emails/producerOrderNotification.html');
 
         let customerEmailHtml = await fs.readFile(customerEmailTemplatePath, 'utf8');
         let producerEmailHtml = await fs.readFile(producerEmailTemplatePath, 'utf8');
