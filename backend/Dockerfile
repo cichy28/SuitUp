@@ -24,6 +24,7 @@ COPY backend/src ./src
 COPY backend/prisma ./prisma
 COPY backend/scripts ./scripts
 
+
 # Install build tools for node-gyp
 RUN apk add --no-cache python3 make g++ pkgconf cairo-dev jpeg-dev pango-dev giflib-dev openssl
 

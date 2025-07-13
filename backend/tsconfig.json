@@ -2,8 +2,10 @@
 	"extends": "../tsconfig.base.json",
 	"baseUrl": ".",
 	"compilerOptions": {
-		"outDir": "./dist"
+		"outDir": "./dist",
+		"resolveJsonModule": true,
+		"esModuleInterop": true
 	},
-	"include": ["src/**/*.ts", "scripts/**/*.ts"],
+	"include": ["src/**/*", "scripts/**/*.ts"],
 	"exclude": ["node_modules"]
 }

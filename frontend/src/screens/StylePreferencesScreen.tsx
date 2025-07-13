@@ -14,8 +14,54 @@ const BODY_SHAPE_KEY = "userBodyShape";
 const STYLE_PREFS_KEY = "userStylePreferences";
 
 const classifyBodyShape = (measurements: HotspotData[]): BodyShape => {
-	console.log("Klasyfikacja na podstawie pomiarów:", measurements);
-	return BodyShape.enum.INVERTED_TRIANGLE;
+	const getMeasurement = (id: string) => {
+		const measurement = measurements.find((m) => m.id === id);
+		return measurement ? parseFloat(measurement.value) : 0;
+	};
+
+	const chest = getMeasurement("chest");
+	const waist = getMeasurement("waist");
+	const hips = getMeasurement("hips");
+
+	// Define a small tolerance for comparisons to account for minor variations
+	const tolerance = 0.05; // 5% tolerance
+
+	// Helper to check if A is significantly wider than B
+	const isWider = (a: number, b: number) => a > b * (1 + tolerance);
+
+	// Helper to check if A is significantly narrower than B
+	const isNarrower = (a: number, b: number) => a < b * (1 - tolerance);
+
+	// Helper to check if A and B are roughly similar
+	const isSimilar = (a: number, b: number) => Math.abs(a - b) <= b * tolerance;
+
+	// Triangle (Gruszka): Biodra są wyraźnie szersze od klatki piersiowej.
+	if (isWider(hips, chest)) {
+		return BodyShape.enum.TRIANGLE;
+	}
+
+	// Odwrócony Trójkąt: Klatka piersiowa jest wyraźnie szersza od bioder.
+	if (isWider(chest, hips)) {
+		return BodyShape.enum.INVERTED_TRIANGLE;
+	}
+
+	// Klepsydra: Klatka piersiowa i biodra mają zbliżony wymiar, a talia jest wyraźnie węższa.
+	if (isSimilar(chest, hips) && isNarrower(waist, chest)) {
+		return BodyShape.enum.HOURGLASS;
+	}
+
+	// Owal (Jabłko): Talia jest szersza od klatki piersiowej i bioder.
+	if (isWider(waist, chest) && isWider(waist, hips)) {
+		return BodyShape.enum.OVAL;
+	}
+
+	// Prostokąt: Klatka piersiowa, talia i biodra mają zbliżone wymiary.
+	if (isSimilar(chest, waist) && isSimilar(waist, hips)) {
+		return BodyShape.enum.RECTANGLE;
+	}
+
+	// Default or fallback if no specific shape is clearly identified
+	return BodyShape.enum.RECTANGLE; // Or a more appropriate default
 };
 
 const BODY_SHAPES_OPTIONS = [
@@ -96,10 +142,16 @@ const StylePreferencesScreen = () => {
 				<Text style={styles.header}>YOUR BODY TYPE</Text>
 				<View style={styles.shapeSelector}>
 					{BODY_SHAPES_OPTIONS.map((option) => (
-						<TouchableOpacity key={option.type} style={styles.shapeOption}>
+						<TouchableOpacity
+							key={option.type}
+							style={[
+								styles.shapeOption,
+								bodyShape === option.type && styles.selectedShapeOption,
+							]}
+						>
 							<Image
 								source={option.icon}
-								style={[styles.shapeIcon, bodyShape === option.type && styles.selectedShapeIcon]}
+								style={styles.shapeIcon}
 							/>
 						</TouchableOpacity>
 					))}
@@ -151,6 +203,12 @@ const styles = StyleSheet.create({
 	},
 	shapeOption: {
 		alignItems: "center",
+		padding: Spacing.small, // Add padding to make space for the border
+		borderRadius: BorderRadius.medium, // Match border radius with the image
+	},
+	selectedShapeOption: {
+		borderWidth: 2,
+		borderColor: Colors.primary, // Use a color from your theme
 	},
 	shapeIcon: {
 		width: 50,
