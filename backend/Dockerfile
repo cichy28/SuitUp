@@ -23,6 +23,7 @@ COPY backend/tsconfig.json .
 COPY backend/src ./src
 COPY backend/prisma ./prisma
 COPY backend/scripts ./scripts
+COPY backend/templates ./templates
 
 
 # Install build tools for node-gyp

@@ -4,7 +4,8 @@
 	"description": "Backend dla aplikacji Suit Creator",
 	"main": "dist/index.js",
 	"scripts": {
-		"build": "tsc",
+		"build": "tsc && npm run copy-templates",
+		"copy-templates": "ncp templates dist/templates",
 		"import-images": "dotenv -e .env.development -- ts-node scripts/mass-import.ts",
 		"start": "node dist/backend/src/index.js",
 		"dev": "ts-node-dev --respawn --transpile-only src/index.ts",
@@ -62,6 +63,7 @@
 		"eslint-config-prettier": "^8.8.0",
 		"eslint-plugin-prettier": "^5.0.0",
 		"jest": "^29.6.2",
+		"ncp": "^2.0.0",
 		"prettier": "^3.0.0",
 		"prisma": "^5.22.0",
 		"supertest": "^6.3.3",

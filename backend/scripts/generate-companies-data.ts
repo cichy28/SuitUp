@@ -3,7 +3,7 @@ import { createCanvas, loadImage } from 'canvas';
 import fs from "fs/promises";
 import path from "path";
 
-const ROOT_IMPORT_DIR = path.join(__dirname, "..", "..", "_do_importu");
+const ROOT_IMPORT_DIR = path.join(__dirname, "..", "_do_importu");
 const COMPANIES_TO_GENERATE = ["GENERATED_Lemanska_D"];
 const DUMMY_IMAGE_CONTENT = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=", "base64"); // A 1x1 transparent PNG
 

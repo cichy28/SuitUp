@@ -1,10 +1,43 @@
-[INFO] 15:05:39 Restarting: C:\Users\JanCichosz\Downloads\suit-app\backend\src\controllers\ordersController.ts has been modified
-Serving static files from: C:\Users\JanCichosz\Downloads\suit-app\uploads
-Server is running on port 3000
-GET /api/recommendations?bodyShape=INVERTED_TRIANGLE&styles=FITTED_WEAR&styles=OVERSIZE_WEAR&styles=RETRO_SHAPES&styles=MASCULINE_SHAPES 200 1181.659 ms - 8219
-Error sending email: {
-  statusCode: 422,
-  message: 'Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information.',
-  name: 'validation_error'
-}
-POST /api/orders/place 201 1793.674 ms - 1616
+ => ERROR [backend 16/16] RUN npm run build                                                                                                                        15.9s 
+------
+ > [backend 16/16] RUN npm run build:
+0.808
+0.808 > backend@1.0.0 build
+0.808 > tsc && npm run copy-templates
+0.808
+15.59
+15.59 > backend@1.0.0 copy-templates
+15.59 > ncp templates dist/templates
+15.59
+15.65 There were errors during the copy.
+15.66 Error: ENOENT: no such file or directory, lstat '/app/backend/templates'
+15.68 npm error Lifecycle script `copy-templates` failed with error:
+15.68 npm error code 1
+15.68 npm error path /app/backend
+15.68 npm error workspace backend@1.0.0
+15.68 npm error location /app/backend
+15.68 npm error command failed
+15.68 npm error command sh -c ncp templates dist/templates
+15.71 npm error Lifecycle script `build` failed with error:
+15.71 npm error code 1
+15.71 npm error path /app/backend
+15.71 npm error workspace backend@1.0.0
+15.71 npm error location /app/backend
+15.71 npm error command failed
+15.71 npm error command sh -c tsc && npm run copy-templates
+------
+Dockerfile:38
+--------------------
+  36 |
+  37 |     # Build the backend application
+  38 | >>> RUN npm run build
+  39 |
+  40 |     # Create uploads directory
+--------------------
+target backend: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/j4nve7frabbtqkk2axqq69xu0
+
+ *  The terminal process "C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe -Command npm run docker:dev" terminated with exit code: 1. 
+ *  Terminal will be reused by tasks, press any key to close it. 
+

@@ -6,6 +6,6 @@
 		"resolveJsonModule": true,
 		"esModuleInterop": true
 	},
-	"include": ["src/**/*", "scripts/**/*.ts"],
+	"include": ["src/**/*.ts", "scripts/**/*.ts"],
 	"exclude": ["node_modules"]
 }
