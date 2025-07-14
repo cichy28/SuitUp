@@ -35,11 +35,11 @@ RUN npm install --legacy-peer-deps
 # Generate Prisma client
 RUN npm run prisma:generate
 
+# Create directories for runtime data
+RUN mkdir -p /app/uploads && mkdir -p /app/_do_importu
+
 # Build the backend application
 RUN npm run build
-
-# Create uploads directory
-
 
 EXPOSE 3000
 

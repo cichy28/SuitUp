@@ -10,8 +10,9 @@ services:
     env_file:
       - ./backend/.env.production
     volumes:
-      - ./backend/uploads:/app/backend/dist/backend/uploads
-      - ./backend/_do_importu:/app/backend/dist/backend/_do_importu
+      # Mount to a stable, top-level path, NOT inside dist
+      - ./backend/uploads:/app/uploads
+      - ./backend/_do_importu:/app/_do_importu
   frontend:
     build:
       context: .

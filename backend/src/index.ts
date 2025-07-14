@@ -36,7 +36,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json()); // Parse JSON request bodies
 
-const uploadsPath = path.join(__dirname, '..', 'uploads');
+const uploadsPath = process.env.UPLOAD_PATH || path.join(__dirname, '..', 'uploads');
 
 // Dodatkowe logowanie dla żądań do /uploads
 app.use("/uploads", (req, res, next) => {

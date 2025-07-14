@@ -4,10 +4,12 @@ import path from "path";
 
 const router = Router();
 
+const uploadPath = process.env.UPLOAD_PATH || path.join(__dirname, '..', '..', 'uploads');
+
 // Konfiguracja multer do zapisywania plików na dysku
 const storage = multer.diskStorage({
 	destination: function (req, file, cb) {
-		cb(null, path.join(__dirname, '..', '..', 'uploads')); // Folder, gdzie będą zapisywane pliki
+		cb(null, uploadPath); // Folder, gdzie będą zapisywane pliki
 	},
 	filename: function (req, file, cb) {
 		// Unikalna nazwa pliku, np. timestamp + oryginalna nazwa
