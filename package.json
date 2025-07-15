@@ -11,7 +11,7 @@
 		"build:backend": "npm --workspace backend run build",
 		"build:frontend": "npm --workspace frontend run build",
 		"dev:frontend": "npm --workspace frontend run web",
-		"dev:backend": "npm --workspace backend run dev",
+		"dev:backend": "npm --workspace backend run dev:local",
 		"docker:dev": "docker compose -f docker-compose.yml --env-file ./backend/.env.development --env-file ./frontend/.env.development up -d --build",
 		"docker:prod": "docker compose -f docker-compose.yml --env-file ./backend/.env.production --env-file ./frontend/.env.production up -d --build"
 	},

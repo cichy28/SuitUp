@@ -1,10 +1,8 @@
-import dotenv from "dotenv";
 import { PrismaClient, User, FileType, Product, Property, BodyShape, StylePreference } from "@prisma/client";
 import fs from "fs/promises";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
-dotenv.config({ path: path.resolve(__dirname, "../.env.development") }); // Load environment variables from .env.development
 
 // --- CONFIGURATION ---
 const SOURCE_FOLDER = process.env.IMPORT_PATH || path.join(__dirname, "..", "_do_importu");
