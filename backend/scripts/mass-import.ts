@@ -7,7 +7,7 @@ import bcrypt from "bcrypt";
 // --- CONFIGURATION ---
 const SOURCE_FOLDER = process.env.IMPORT_PATH || path.join(__dirname, "..", "_do_importu");
 const DESTINATION_FOLDER = process.env.UPLOAD_PATH || path.join(__dirname, "..", "uploads");
-const PUBLIC_URL_BASE = "http://localhost:3000/uploads";
+const PUBLIC_URL_BASE = process.env.API_URL + "/uploads";
 const TEST_USER_EMAIL = "test-importer@example.com";
 const TEST_USER_COMPANY_NAME = "Test Importer";
 const TEST_USER_PASSWORD = "password123";
@@ -106,7 +106,10 @@ async function getOwner(companyPath: string): Promise<User> {
 
 	let startScreenImageId: string | null = owner.startScreenImageId;
 	if (producerMetadata.startScreenImage) {
-		startScreenImageId = await getOrCreateMultimedia(path.join(companyPath, producerMetadata.startScreenImage), owner.id);
+		startScreenImageId = await getOrCreateMultimedia(
+			path.join(companyPath, producerMetadata.startScreenImage),
+			owner.id
+		);
 	}
 
 	// Update owner with logo and startScreenImage IDs after they are created
@@ -128,7 +131,12 @@ async function processCompanyProperties(companyPath: string, owner: User) {
 	console.log(`
 --- Processing Company-level Properties from ${propertiesPath} ---`);
 
-	if (!(await fs.stat(propertiesPath).then(s => s.isDirectory()).catch(() => false))) {
+	if (
+		!(await fs
+			.stat(propertiesPath)
+			.then((s) => s.isDirectory())
+			.catch(() => false))
+	) {
 		console.log(`No company-level properties directory found at ${propertiesPath}. Skipping.`);
 		return;
 	}
@@ -140,7 +148,9 @@ async function processCompanyProperties(companyPath: string, owner: User) {
 		const propertyFullPath = path.join(propertiesPath, propertyName);
 		console.log(`  Processing company property: ${propertyName}`);
 
-		let dbProperty = await prisma.property.findFirst({ where: { name: propertyName, ownerId: owner.id, isGlobal: true } });
+		let dbProperty = await prisma.property.findFirst({
+			where: { name: propertyName, ownerId: owner.id, isGlobal: true },
+		});
 		if (!dbProperty) {
 			dbProperty = await prisma.property.create({ data: { name: propertyName, ownerId: owner.id, isGlobal: true } });
 			console.log(`    Created global property: ${dbProperty.name} (ID: ${dbProperty.id})`);
@@ -225,7 +235,9 @@ Processing product: ${productName}`);
 		const hotspotX = propMeta.hotspotX;
 		const hotspotY = propMeta.hotspotY;
 
-		const dbProperty = await prisma.property.findFirst({ where: { name: propertyName, ownerId: owner.id, isGlobal: true } });
+		const dbProperty = await prisma.property.findFirst({
+			where: { name: propertyName, ownerId: owner.id, isGlobal: true },
+		});
 
 		if (!dbProperty) {
 			console.warn(`  Global property "${propertyName}" not found for product ${productName}. Skipping.`);
@@ -237,7 +249,9 @@ Processing product: ${productName}`);
 			update: { hotspotX, hotspotY },
 			create: { productId: product.id, propertyId: dbProperty.id, hotspotX, hotspotY },
 		});
-		console.log(`  Linked property "${propertyName}" to product ${productName} with hotspot: (${hotspotX}, ${hotspotY})`);
+		console.log(
+			`  Linked property "${propertyName}" to product ${productName} with hotspot: (${hotspotX}, ${hotspotY})`
+		);
 
 		// Update price adjustments for variants within this product context
 		if (propMeta.variants) {
@@ -254,9 +268,13 @@ Processing product: ${productName}`);
 						where: { id: dbVariant.id },
 						data: { priceAdjustment: priceAdjustment },
 					});
-					console.log(`    Updated price adjustment for variant ${variantName} of property ${propertyName} to ${priceAdjustment}`);
+					console.log(
+						`    Updated price adjustment for variant ${variantName} of property ${propertyName} to ${priceAdjustment}`
+					);
 				} else {
-					console.warn(`    Variant "${variantName}" not found for property ${propertyName}. Skipping price adjustment.`);
+					console.warn(
+						`    Variant "${variantName}" not found for property ${propertyName}. Skipping price adjustment.`
+					);
 				}
 			}
 		}
@@ -289,10 +307,12 @@ async function processSkus(
 	// Build a map of variant names to their IDs for quick lookup
 	const globalVariantMap = new Map<string, string>();
 	for (const propMeta of productPropertiesMetadata) {
-		const dbProperty = await prisma.property.findFirst({ where: { name: propMeta.name, ownerId: owner.id, isGlobal: true } });
+		const dbProperty = await prisma.property.findFirst({
+			where: { name: propMeta.name, ownerId: owner.id, isGlobal: true },
+		});
 		if (dbProperty) {
 			const dbVariants = await prisma.propertyVariant.findMany({ where: { propertyId: dbProperty.id } });
-			dbVariants.forEach(v => globalVariantMap.set(v.name, v.id));
+			dbVariants.forEach((v) => globalVariantMap.set(v.name, v.id));
 		}
 	}
 
@@ -332,7 +352,9 @@ async function processSkus(
 					imageId: imageId,
 				},
 			});
-			console.log(`    Created SKU: ${dbSku.skuCode} (ID: ${dbSku.id}) with Image ID: ${imageId}, Price: ${finalSkuPrice}`);
+			console.log(
+				`    Created SKU: ${dbSku.skuCode} (ID: ${dbSku.id}) with Image ID: ${imageId}, Price: ${finalSkuPrice}`
+			);
 		} else {
 			await prisma.productSku.update({
 				where: { id: dbSku.id },
@@ -372,7 +394,12 @@ async function massImport() {
 			await processCompanyProperties(companyPath, owner);
 
 			const productsPath = path.join(companyPath, "PRODUKTY");
-			if (!(await fs.stat(productsPath).then(s => s.isDirectory()).catch(() => false))) {
+			if (
+				!(await fs
+					.stat(productsPath)
+					.then((s) => s.isDirectory())
+					.catch(() => false))
+			) {
 				console.warn(`No 'PRODUKTY' directory found for company ${companyFolder.name}. Skipping products.`);
 				continue;
 			}
@@ -385,8 +412,11 @@ async function massImport() {
 		console.log(`
 --- Mass Import Finished Successfully ---`);
 	} catch (error) {
-		console.error(`
-❌ An error occurred during mass import:`, error);
+		console.error(
+			`
+❌ An error occurred during mass import:`,
+			error
+		);
 	} finally {
 		await prisma.$disconnect();
 	}

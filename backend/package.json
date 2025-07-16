@@ -6,7 +6,6 @@
 	"scripts": {
 		"build": "tsc && npm run copy-templates",
 		"copy-templates": "ncp templates dist/templates",
-		"import-images": "dotenv -e .env.development -- ts-node scripts/mass-import.ts",
 		"start": "node dist/backend/src/index.js",
 		"dev": "ts-node-dev --respawn --transpile-only src/index.ts",
 		"dev:local": "dotenv -e .env.development.local -- ts-node-dev --respawn --transpile-only src/index.ts",
@@ -19,6 +18,8 @@
 		"lint": "eslint . --ext .ts",
 		"format": "prettier --write \"src/**/*.ts\"",
 		"generate-data": "dotenv -e .env.development.local -- ts-node scripts/generate-companies-data.ts",
+		"import-images:dev": "dotenv -e .env.development -- ts-node scripts/mass-import.ts",
+		"import-images:prod": "dotenv -e .env.production -- ts-node scripts/mass-import.ts",
 		"prisma:reset": "dotenv -e .env.development.local -- prisma migrate reset --force"
 	},
 	"keywords": [
