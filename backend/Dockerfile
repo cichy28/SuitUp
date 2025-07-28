@@ -1,46 +1,59 @@
+# Etap 1: Budowanie aplikacji
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Instalacja narzędzi potrzebnych do budowania (w tym zależności dla node-gyp)
+RUN apk add --no-cache python3 make g++ pkgconf cairo-dev jpeg-dev pango-dev giflib-dev openssl
+
+# Kopiowanie plików package.json i instalacja zależności
+# Kopiujemy wszystkie pliki package.json, aby poprawnie zainstalować zależności w monorepo
+COPY package*.json ./
+COPY backend/package*.json ./backend/
+COPY shared/package.json ./shared/
+
+# Instalujemy wszystkie zależności (w tym deweloperskie)
+RUN npm install --legacy-peer-deps
+
+# Kopiowanie reszty kodu źródłowego
+COPY . .
+
+# Generowanie klienta Prisma
+RUN npm run prisma:generate --workspace=backend
+
+# Budowanie aplikacji backendowej
+RUN npm run build --workspace=backend
+
+
+# Etap 2: Tworzenie lekkiego obrazu produkcyjnego
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy root package.json and package-lock.json
+# Instalacja tylko tych zależności systemowych, które są potrzebne do uruchomienia aplikacji
+RUN apk add --no-cache cairo jpeg pango giflib openssl
+
+# Kopiowanie plików package.json, aby npm wiedział, jak uruchomić aplikację
 COPY package*.json ./
-COPY tsconfig.base.json ./
+COPY backend/package*.json ./backend/
+COPY shared/package.json ./shared/
 
-# Install root dependencies
-RUN npm install
+# Kopiowanie zainstalowanych i zbudowanych zależności z etapu "builder"
+COPY --from=builder /app/node_modules ./node_modules
 
-# Copy shared directory
-COPY shared ./shared
+# Kopiowanie zbudowanej aplikacji z etapu "builder"
+COPY --from=builder /app/backend/dist ./backend/dist
+COPY --from=builder /app/backend/prisma ./backend/prisma
+COPY --from=builder /app/backend/templates ./backend/templates
+COPY --from=builder /app/shared ./shared
 
-# Set WORKDIR to backend
-WORKDIR /app/backend
-
-# Copy backend specific package.json and package-lock.json
-COPY backend/package*.json .
-COPY backend/tsconfig.json .
-
-# Copy backend source code
-COPY backend/src ./src
-COPY backend/prisma ./prisma
-COPY backend/scripts ./scripts
-COPY backend/templates ./templates
-
-
-# Install build tools for node-gyp
-RUN apk add --no-cache python3 make g++ pkgconf cairo-dev jpeg-dev pango-dev giflib-dev openssl
-
-# Install backend dependencies
-RUN npm install --legacy-peer-deps
-
-# Generate Prisma client
-RUN npm run prisma:generate
-
-# Create directories for runtime data
+# Utworzenie katalogów na dane runtime
 RUN mkdir -p /app/uploads && mkdir -p /app/_do_importu
 
-# Build the backend application
-RUN npm run build
+# Ustawienie katalogu roboczego na backend
+WORKDIR /app/backend
 
 EXPOSE 3000
 
+# Polecenie startowe, które uruchamia zbudowaną aplikację
 CMD ["npm", "start"]

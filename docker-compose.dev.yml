@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env.development
+    volumes:
+      # Mount to a stable, top-level path, NOT inside dist
+      - ./backend/uploads:/app/uploads
+      - ./backend/_do_importu:/app/_do_importu
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL}
+    ports:
+      - "80:80"
+    env_file:
+      - ./frontend/.env.development
+    depends_on:
+      - backend

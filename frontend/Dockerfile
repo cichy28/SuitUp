@@ -4,6 +4,8 @@ ARG EXPO_PUBLIC_API_URL
 
 WORKDIR /app
 
+ENV EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL
+
 # Copy root package.json and package-lock.json for shared dependencies
 COPY package*.json ./
 

@@ -17,11 +17,7 @@ import { router as productSkuRoutes } from "./routes/productSkus";
 import { router as propertyVariantRoutes } from "./routes/propertyVariants"; // Import propertyVariant routes
 import { router as recommendationsRoutes } from "./routes/recommendations";
 import path from "path"; // Upewnij się, że masz import path
-if (process.env.NODE_ENV === "production") {
-	dotenv.config({ path: ".env.production" });
-} else {
-	dotenv.config({ path: ".env.development" });
-}
+
 
 const app = express();
 const port = parseInt(process.env.PORT || "3000", 10);
