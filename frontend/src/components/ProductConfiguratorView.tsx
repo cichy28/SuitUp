@@ -107,19 +107,21 @@ const ProductConfiguratorView: React.FC<ProductConfiguratorViewProps> = ({ produ
           onHotspotPress={handleHotspotPress}
         />
       </View>
-      <View style={styles.optionsContainer}>
-        <Text style={styles.activePropertyTitle}>{activeProperty?.name}</Text>
-        {activeProperty && (
-          <VisualVariantSelector
-            property={activeProperty}
-            selectedValue={selectedVariants[activeProperty.id]}
-            onValueChange={(variantId) => handleVariantChange(activeProperty.id, variantId)}
-          />
-        )}
+      <View style={styles.footer}>
+        <View style={styles.optionsContainer}>
+          <Text style={styles.activePropertyTitle}>{activeProperty?.name}</Text>
+          {activeProperty && (
+            <VisualVariantSelector
+              property={activeProperty}
+              selectedValue={selectedVariants[activeProperty.id]}
+              onValueChange={(variantId) => handleVariantChange(activeProperty.id, variantId)}
+            />
+          )}
+        </View>
+        <TouchableOpacity style={styles.finishButton} onPress={() => navigation.navigate('Summary', { product, selectedVariants })}>
+          <Text style={styles.finishButtonText}>Finish</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.finishButton} onPress={() => navigation.navigate('Summary', { product, selectedVariants })}>
-        <Text style={styles.finishButtonText}>Finish</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -139,12 +141,14 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  optionsContainer: {
-    height: 180,
+  footer: {
     padding: Spacing.medium,
     borderTopWidth: 1,
     borderTopColor: Colors.lightGray,
     backgroundColor: Colors.white,
+  },
+  optionsContainer: {
+    marginBottom: Spacing.medium,
   },
   activePropertyTitle: {
     fontSize: Fonts.sizes.subtitle,
@@ -158,7 +162,6 @@ const styles = StyleSheet.create({
     padding: Spacing.medium,
     borderRadius: BorderRadius.medium,
     alignItems: 'center',
-    margin: Spacing.medium,
   },
   finishButtonText: {
     color: Colors.white,

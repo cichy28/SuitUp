@@ -7,7 +7,7 @@
 		"build": "tsc && npm run copy-templates",
 		"copy-templates": "ncp templates dist/templates",
 		"start": "node dist/backend/src/index.js",
-		"dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+		"dev": "dotenv -e .env.development -- ts-node-dev --respawn --transpile-only src/index.ts",
 		"dev:local": "dotenv -e .env.development.local -- ts-node-dev --respawn --transpile-only src/index.ts",
 		"dev:docker": "dotenv -e .env.development.docker -- ts-node-dev --respawn --transpile-only src/index.ts",
 		"prisma:generate": "dotenv -e .env.development.local -- prisma generate",

@@ -106,6 +106,7 @@ const styles = StyleSheet.create({
 	image: {
 		width: 150, // Fixed width
 		height: 225, // Fixed height
+		resizeMode: "contain",
 	},
 	textContainer: {
 		padding: 12,
