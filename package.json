@@ -13,7 +13,11 @@
 		"dev:frontend": "npm --workspace frontend run web",
 		"dev:backend": "npm --workspace backend run dev:local",
 		"docker:dev": "docker compose -f docker-compose.dev.yml --env-file ./frontend/.env.development up -d --build",
-		"docker:prod": "docker compose -f docker-compose,prod.yml --env-file ./frontend/.env.production up -d --build"
+		"docker:prod": "docker compose -f docker-compose.prod.yml --env-file ./frontend/.env.production up -d --build",
+		"docker:tag:backend": "docker tag suit-app-backend ghcr.io/cichy28/suit-up/backend:latest",
+		"docker:tag:frontend": "docker tag suit-app-frontend ghcr.io/cichy28/suit-up/frontend:latest",
+		"docker:push:backend": "docker push ghcr.io/cichy28/suit-up/backend:latest",
+		"docker:push:frontend": "docker push ghcr.io/cichy28/suit-up/frontend:latest"
 	},
 	"devDependencies": {
 		"concurrently": "^8.0.0"
