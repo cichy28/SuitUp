@@ -1,12 +1,21 @@
 version: "3.8"
 
 services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/certs:/etc/nginx/certs
+    depends_on:
+      - backend
   backend:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    ports:
-      - "3000:3000"
+    
     env_file:
       - ./backend/.env.development
     volumes:
@@ -19,8 +28,6 @@ services:
       dockerfile: frontend/Dockerfile
       args:
         EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL}
-    ports:
-      - "80:80"
     env_file:
       - ./frontend/.env.development
     depends_on:
