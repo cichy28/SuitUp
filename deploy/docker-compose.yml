@@ -7,27 +7,55 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      # Note: These paths are relative to where you run docker-compose from.
-      # You might need to adjust them based on your deployment server's structure.
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/certs:/etc/nginx/certs
     depends_on:
       - backend
       - frontend
+    networks:
+      - app_network
 
   backend:
-    # Pulls the pre-built image from your private GitHub Container Registry.
-    # IMPORTANT: Replace YOUR_USERNAME/YOUR_REPONAME with your actual details.
     image: ghcr.io/cichy28/suit-up/backend:latest
     env_file:
-      # Ensure this env file is present on your deployment server.
       - ./.env.production
     volumes:
-      # These volumes are still needed for persistent data.
       - ./backend/uploads:/app/uploads
       - ./backend/_do_importu:/app/_do_importu
+    depends_on:
+      - postgres
+    networks:
+      - app_network
 
   frontend:
     image: ghcr.io/cichy28/suit-up/frontend:latest
     depends_on:
       - backend
+    networks:
+      - app_network
+
+  postgres:
+    image: postgres:latest
+    env_file:
+      - ./.env.production
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel run SuitApp
+    env_file:
+      - ./.env.production
+    depends_on:
+      - frontend
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
