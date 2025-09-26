@@ -12,12 +12,22 @@ services:
     depends_on:
       - backend
       - frontend
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: suitup
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
   backend:
     build:
       context: .
       dockerfile: backend/Dockerfile
     env_file:
-      - ./backend/.env.production
+      - ./backend/.env.production.docker
+    depends_on:
+      - postgres
     volumes:
       # Mount to a stable, top-level path, NOT inside dist
       - ./backend/uploads:/app/uploads
@@ -32,3 +42,6 @@ services:
       - ./frontend/.env.production
     depends_on:
       - backend
+
+volumes:
+  postgres_data:

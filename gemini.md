@@ -4,7 +4,7 @@ This document provides context for the Gemini AI assistant to understand and eff
 
 ## 1. Project Overview
 
-This is a full-stack application for a suit/clothing service. It consists of a React Native (Expo) frontend, a Node.js (Express) backend, and a shared library for common code.
+This is a full-stack application for a suit/clothing service. It consists of a React Native (Expo) frontend, a Node.js (Express) backend, and a shared library for common code. The application is designed to be run with Docker, using a local PostgreSQL database for development and production.
 
 - **Frontend:** `frontend/` - A mobile application built with React Native and Expo.
 - **Backend:** `backend/` - A Node.js API server using Express.js and Prisma for database interaction.
@@ -22,7 +22,7 @@ This is a full-stack application for a suit/clothing service. It consists of a R
   - Runtime: Node.js
   - Framework: Express.js
   - ORM: Prisma
-  - Database: PostgreSQL (inferred from `docker-compose.yml` and Prisma setup)
+  - Database: PostgreSQL (managed by Docker Compose)
 - **Validation:** `zod` is used for all data validation in the `shared/validators` directory.
 - **Package Manager:** `npm` is used across the monorepo.
 
@@ -30,7 +30,10 @@ This is a full-stack application for a suit/clothing service. It consists of a R
 
 - `C:/Users/JanCichosz/Downloads/suit-app/`: The project root.
 - `C:/Users/JanCichosz/Downloads/suit-app/backend/`: Contains the backend server code.
-  - `.env.development`, `.env.production`: Environment variables for development and production. During testing, both files contain identical environment variables, pointing to the external Supabase database. For production deployment, these files will be updated with new machine URLs.
+  - `.env.development`: Environment variables for local development (outside of Docker).
+  - `.env.development.docker`: Environment variables for development with Docker.
+  - `.env.production`: Environment variables for production (outside of Docker).
+  - `.env.production.docker`: Environment variables for production with Docker.
   - `src/`: Source code for the backend.
   - `prisma/`: Prisma schema, migrations, and seed scripts.
   - `scripts/mass-import.ts`: A utility script for bulk-importing images and data from the `_do_importu` directory into the database.
@@ -53,7 +56,17 @@ This is a full-stack application for a suit/clothing service. It consists of a R
         - `WLASCIWOSCI/{property_name}/{variant_name}.jpg`: Image files representing property variants.
 - `C:/Users/JanCichosz/Downloads/suit-app/uploads/`: This folder stores images that have been imported and are used by the application. File names in this folder should correspond to entries in the database.
 
-## 4. Development Workflow & Conventions
+## 4. Local Development with Docker
+
+To run the application in a local development environment using Docker, follow these steps:
+
+1.  **Start the services:**
+    ```bash
+    docker-compose -f docker-compose.dev.yml up --build
+    ```
+2.  The application will be available at `http://localhost`. The backend API will be at `http://localhost/api`. The PostgreSQL database will be accessible on port `5433`.
+
+## 5. Development Workflow & Conventions
 
 - **Task Management:** Tasks are defined in `.md` files within the `tasks/` directory, following `TEMPLATE.md`.
 - **Commits:** Commits should be linked to a task number (e.g., "feat(T-123): Implement user authentication").
@@ -66,7 +79,7 @@ This is a full-stack application for a suit/clothing service. It consists of a R
 - **API Routes:** Backend routes are defined in `backend/src/routes/` and linked to controllers in `backend/src/controllers/`.
 - **Database:** Database schema is managed by Prisma migrations. Changes should be made in `backend/prisma/schema.prisma` and migrated using `npx prisma migrate dev`.
 
-## 5. Database Interaction
+## 6. Database Interaction
 
 To directly query the database using Prisma, you can use the `query-db.ts` script located in `backend/scripts/`.
 
@@ -91,7 +104,7 @@ SELECT id, url, "fileType" FROM "Multimedia" LIMIT 5;
 
 Then, run the script as shown in the usage section. This script will output the query result in JSON format.
 
-## 6. Database Management (Development)
+## 7. Database Management (Development)
 
 During development, it's safe and often necessary to clear and re-import all data to ensure consistency, especially when making schema changes or dealing with data inconsistencies. This process will reset your development database to a clean state and re-populate it with initial data.
 
@@ -114,7 +127,7 @@ To clear and re-import all data:
     npm run import-images --workspace=backend
     ```
 
-## 7. Reviewing Code Changes
+## 8. Reviewing Code Changes
 
 To review all the changes made to the codebase since the last commit (a relatively stable version), you can use the following Git command. This is useful for understanding what has been modified and can help in diagnosing issues if something goes wrong.
 

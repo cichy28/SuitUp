@@ -11,13 +11,24 @@ services:
       - ./nginx/certs:/etc/nginx/certs
     depends_on:
       - backend
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: suitup
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
   backend:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    
     env_file:
-      - ./backend/.env.development
+      - ./backend/.env.development.docker
+    depends_on:
+      - postgres
     volumes:
       # Mount to a stable, top-level path, NOT inside dist
       - ./backend/uploads:/app/uploads
@@ -32,3 +43,6 @@ services:
       - ./frontend/.env.development
     depends_on:
       - backend
+
+volumes:
+  postgres_data:
