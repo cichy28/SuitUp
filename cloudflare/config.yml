@@ -1,0 +1,6 @@
+ingress:
+  - hostname: suitup.com
+    service: http://frontend:80
+  - hostname: api.suitup.com
+    service: http://backend:3000
+  - service: http_status:404

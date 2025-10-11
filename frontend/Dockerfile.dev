@@ -1,0 +1,27 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy all package.json files
+COPY package*.json ./
+COPY backend/package*.json ./backend/
+COPY shared/package.json ./shared/
+COPY frontend/package*.json ./frontend/
+
+# Install build dependencies for canvas
+RUN apk add --no-cache python3 make g++ pkgconf cairo-dev jpeg-dev pango-dev giflib-dev openssl
+
+# Copy prisma schema
+COPY backend/prisma ./backend/prisma
+
+# Install all dependencies
+RUN npm install --legacy-peer-deps
+
+# Set working directory to frontend
+WORKDIR /app/frontend
+
+# Expose the Expo web development server port
+EXPOSE 8081
+
+# Start the web development server
+CMD ["npm", "run", "web"]

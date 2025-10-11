@@ -1,4 +1,4 @@
-import { PrismaClient, User, FileType, Product, Property, BodyShape, StylePreference } from "@prisma/client";
+import { PrismaClient, User, FileType, Product, Property, PropertyVariant, BodyShape, StylePreference } from "@prisma/client";
 import fs from "fs/promises";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
@@ -312,7 +312,7 @@ async function processSkus(
 		});
 		if (dbProperty) {
 			const dbVariants = await prisma.propertyVariant.findMany({ where: { propertyId: dbProperty.id } });
-			dbVariants.forEach((v) => globalVariantMap.set(v.name, v.id));
+			dbVariants.forEach((v: PropertyVariant) => globalVariantMap.set(v.name, v.id));
 		}
 	}
 

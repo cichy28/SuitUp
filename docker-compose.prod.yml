@@ -1,17 +1,7 @@
 version: "3.8"
 
 services:
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/certs:/etc/nginx/certs
-    depends_on:
-      - backend
-      - frontend
+
   postgres:
     image: postgres:13
     environment:
@@ -22,16 +12,27 @@ services:
       - postgres_data:/var/lib/postgresql/data
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     env_file:
-      - ./backend/.env.production.docker
+      - ./backend/.env.production
     depends_on:
       - postgres
     volumes:
       # Mount to a stable, top-level path, NOT inside dist
       - ./backend/uploads:/app/uploads
       - ./backend/_do_importu:/app/_do_importu
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    command: tunnel --config /etc/cloudflared/config.yml run
+    volumes:
+      - ./cloudflare/config.yml:/etc/cloudflared/config.yml
+    depends_on:
+      - backend
+      - frontend
   frontend:
     build:
       context: .

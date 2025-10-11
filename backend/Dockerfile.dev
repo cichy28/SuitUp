@@ -1,0 +1,30 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy all package.json files
+COPY package*.json ./
+COPY backend/package*.json ./backend/
+COPY shared/package.json ./shared/
+COPY frontend/package*.json ./frontend/
+
+# Install build dependencies for canvas
+RUN apk add --no-cache python3 make g++ pkgconf cairo-dev jpeg-dev pango-dev giflib-dev openssl
+
+# Install all dependencies
+RUN npm install --legacy-peer-deps
+
+# Copy prisma schema
+COPY backend/prisma ./backend/prisma
+
+# Generate Prisma client
+RUN npm run prisma:generate --workspace=backend
+
+# Set working directory to backend
+WORKDIR /app/backend
+
+# Expose the backend port
+EXPOSE 3000
+
+# Start the development server
+CMD ["npm", "run", "dev"]
