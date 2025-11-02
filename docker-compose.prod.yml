@@ -12,8 +12,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     env_file:
       - ./backend/.env.production
     depends_on:
@@ -32,8 +32,8 @@ services:
       - ./cloudflare/config.yml:/etc/cloudflared/config.yml
     depends_on:
       - backend
-      - frontend
-  frontend:
+      - nginx
+  nginx:
     build:
       context: .
       dockerfile: frontend/Dockerfile

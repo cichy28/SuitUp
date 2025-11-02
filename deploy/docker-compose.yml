@@ -1,17 +1,12 @@
 version: "3.8"
 
 services:
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-      - "443:443"
+  postgres:
+    image: postgres:latest
+    env_file:
+      - ./.env.production
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/certs:/etc/nginx/certs
-    depends_on:
-      - backend
-      - frontend
+      - postgres_data:/var/lib/postgresql
     networks:
       - app_network
 
@@ -27,29 +22,30 @@ services:
     networks:
       - app_network
 
-  frontend:
+  # Serwis, który wcześniej nazywał się 'frontend'.
+  # Zmieniam nazwę na 'nginx', aby pasowała do konfiguracji Cloudflare.
+  # Ten kontener zawiera już w sobie Nginx do serwowania aplikacji.
+  nginx:
     image: ghcr.io/cichy28/suit-up/frontend:latest
     depends_on:
       - backend
     networks:
       - app_network
-
-  postgres:
-    image: postgres:latest
-    env_file:
-      - ./.env.production
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - app_network
+    # Opcjonalnie: odkomentuj, jeśli chcesz mieć dostęp do frontendu
+    # bezpośrednio po IP NAS-a na porcie 8080, omijając Cloudflare.
+    # ports:
+    #   - "8080:80"
 
   cloudflared:
     image: cloudflare/cloudflared:latest
-    command: tunnel run SuitApp
+    # Używamy teraz konfiguracji z pliku, aby wskazać na poprawny serwis.
+    command: tunnel --config /etc/cloudflared/config.yml run
+    volumes:
+      - ./cloudflare/config.yml:/etc/cloudflared/config.yml
     env_file:
       - ./.env.production
     depends_on:
-      - frontend
+      - nginx # Zmieniono z 'frontend' na 'nginx'
     networks:
       - app_network
 

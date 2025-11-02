@@ -14,10 +14,14 @@
 		"dev:backend": "npm --workspace backend run dev:local",
 		"docker:dev": "docker compose -f docker-compose.dev.yml --env-file ./frontend/.env.development up -d --build",
 		"docker:prod": "docker compose -f docker-compose.prod.yml --env-file ./frontend/.env.production up -d --build",
-		"docker:tag:backend": "docker tag suit-app-backend ghcr.io/cichy28/suit-up/backend:latest",
-		"docker:tag:frontend": "docker tag suit-app-frontend ghcr.io/cichy28/suit-up/frontend:latest",
+        "docker:login": "docker login ghcr.io -u cichy28 --password-stdin",
+        "docker:build:backend": "docker build -t ghcr.io/cichy28/suit-up/backend:latest -f ./backend/Dockerfile .",
+        "docker:build:frontend": "docker build -t ghcr.io/cichy28/suit-up/frontend:latest -f ./frontend/Dockerfile .",
+        "docker:build": "npm run docker:build:backend && npm run docker:build:frontend",
 		"docker:push:backend": "docker push ghcr.io/cichy28/suit-up/backend:latest",
-		"docker:push:frontend": "docker push ghcr.io/cichy28/suit-up/frontend:latest"
+		"docker:push:frontend": "docker push ghcr.io/cichy28/suit-up/frontend:latest",
+        "docker:push": "npm run docker:push:backend && npm run docker:push:frontend",
+        "deploy": "npm run docker:build && npm run docker:push"
 	},
 	"devDependencies": {
 		"concurrently": "^8.0.0"
