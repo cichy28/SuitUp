@@ -4,6 +4,9 @@
 # UWAGA: Upewnij się, że w panelu Cloudflare Zero Trust dla tego tunelu
 # NIE MA żadnych publicznych reguł hostname. Wszystkie reguły są zarządzane z tego pliku.
 
+tunnel: 6b41a4ce-bd21-42aa-90cb-606c29d6abd0
+credentials-file: /etc/cloudflared/6b41a4ce-bd21-42aa-90cb-606c29d6abd0.json
+
 ingress:
   # Reguła 1: Kieruje ruch API (np. suitapp.jcit.pl/api/products) do kontenera backendu.
   - hostname: suitapp.jcit.pl
