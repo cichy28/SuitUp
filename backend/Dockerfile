@@ -31,12 +31,15 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Instalacja tylko tych zależności systemowych, które są potrzebne do uruchomienia aplikacji
-RUN apk add --no-cache cairo jpeg pango giflib openssl
+RUN apk add --no-cache cairo jpeg pango giflib openssl python3 make pkgconf pixman-dev cairo-dev pango-dev g++ giflib-dev
 
 # Kopiowanie plików package.json, aby npm wiedział, jak uruchomić aplikację
 COPY package*.json ./
 COPY backend/package*.json ./backend/
 COPY shared/package.json ./shared/
+COPY tsconfig.base.json ./
+COPY backend/tsconfig.json ./backend/
+RUN npm install --omit=dev
 
 # Kopiowanie zainstalowanych i zbudowanych zależności z etapu "builder"
 COPY --from=builder /app/node_modules ./node_modules
@@ -45,6 +48,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/backend/dist ./backend/dist
 COPY --from=builder /app/backend/prisma ./backend/prisma
 COPY --from=builder /app/backend/templates ./backend/templates
+COPY --from=builder /app/backend/scripts ./backend/scripts
 COPY --from=builder /app/shared ./shared
 
 # Utworzenie katalogów na dane runtime

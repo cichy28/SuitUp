@@ -1,15 +1,16 @@
 # Wdrożenie aplikacji na serwerze
 
-Ten folder zawiera wszystko, co potrzebne do uruchomienia aplikacji na serwerze docelowym (np. NAS).
+Ten folder zawiera wszystko, co potrzebne do uruchomienia aplikacji na serwerze docelowym.
 
 ## Wymagania
 
-Ten folder jest samowystarczalny. Zawiera wszystko, co potrzebne do uruchomienia aplikacji.
+- Na serwerze musi być zainstalowany Docker i Docker Compose.
 
 **Struktura folderu `deploy`:**
 ```
 deploy/
-├── docker-compose.yml
+├── docker-compose.app.yml
+├── docker-compose.infra.yml
 ├── .env.production
 ├── README.md  (ten plik)
 ├── cloudflare/
@@ -19,14 +20,9 @@ deploy/
     └── uploads/
 ```
 
--   **`.env.production`**: Plik z zmiennymi środowiskowymi dla produkcji (sekrety, konfiguracja bazy danych, itp.).
--   **`cloudflare/config.yml`**: Plik konfiguracyjny dla Cloudflare Tunnel.
--   **`backend/_do_importu/`**: Folder na dane do importu. Musi istnieć, nawet jeśli jest pusty.
--   **`backend/uploads/`**: Folder na wgrane pliki. Musi istnieć, nawet jeśli jest pusty.
-
 ## Proces uruchomienia
 
-Zakładając, że obrazy Docker zostały już wysłane do rejestru `ghcr.io` (za pomocą komendy `npm run deploy` na maszynie deweloperskiej).
+Zakładając, że obrazy Docker zostały już wysłane do rejestru `ghcr.io`.
 
 1.  **Zaloguj się do serwera** (np. przez SSH).
 
@@ -37,12 +33,16 @@ Zakładając, że obrazy Docker zostały już wysłane do rejestru `ghcr.io` (za
 
 3.  **Pobierz najnowsze obrazy z rejestru**:
     ```bash
-    docker-compose pull
+    docker-compose -f docker-compose.app.yml -f docker-compose.infra.yml pull
     ```
-    Ta komenda pobierze obrazy zdefiniowane w `docker-compose.yml` z `ghcr.io`.
 
 4.  **Uruchom aplikację**:
     ```bash
-    docker-compose up -d
+    docker-compose -f docker-compose.app.yml -f docker-compose.infra.yml up -d
     ```
-    Ta komenda uruchomi wszystkie usługi w tle.
+    Ta komenda uruchomi wszystkie usługi w tle. Aplikacja i tunel będą dostępne po chwili. Sieć `proxy-net` zostanie automatycznie utworzona przez `docker-compose.infra.yml`.
+
+## Zarządzanie usługami
+
+- Aby zatrzymać usługi: `docker-compose -f docker-compose.app.yml -f docker-compose.infra.yml down`
+- Aby zaktualizować obrazy i zrestartować aplikację: `docker-compose -f docker-compose.app.yml -f docker-compose.infra.yml pull && docker-compose -f docker-compose.app.yml -f docker-compose.infra.yml up -d`
