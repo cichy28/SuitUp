@@ -1,0 +1,203 @@
+:root {
+    --bg-color: #1a1a1d;
+    --sidebar-bg: #2c2c34;
+    --main-bg: #222226;
+    --card-bg: #2d2d35;
+    --text-color: #c5c6c7;
+    --header-color: #ffffff;
+    --accent-color: #4a90e2;
+    --border-color: #444;
+    --placeholder-bg: #3a3a42;
+}
+
+body {
+    font-family: 'Roboto Mono', monospace;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.container {
+    display: flex;
+    max-width: 1400px;
+    margin: 40px auto;
+    background-color: var(--main-bg);
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.sidebar {
+    width: 300px;
+    background-color: var(--sidebar-bg);
+    padding: 30px;
+    border-right: 1px solid var(--border-color);
+}
+
+.profile {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.profile-pic {
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 3px solid var(--accent-color);
+    margin-bottom: 15px;
+}
+
+.name {
+    color: var(--header-color);
+    font-family: 'Source Code Pro', monospace;
+    font-size: 1.8em;
+    margin: 0;
+}
+
+.title {
+    color: var(--accent-color);
+    font-size: 1.1em;
+    font-weight: 300;
+    margin-top: 5px;
+}
+
+.contact h3, .skills h3 {
+    color: var(--header-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    font-family: 'Source Code Pro', monospace;
+}
+
+.contact p {
+    margin: 5px 0;
+    font-size: 0.9em;
+}
+
+.contact a, .timeline a {
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.contact a:hover, .timeline a:hover {
+    color: var(--header-color);
+}
+
+.skills ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.skills li {
+    background-color: var(--card-bg);
+    padding: 5px 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-size: 0.85em;
+    border-left: 3px solid var(--accent-color);
+}
+
+.main-content {
+    flex: 1;
+    padding: 40px;
+}
+
+section {
+    margin-bottom: 40px;
+}
+
+h2 {
+    color: var(--header-color);
+    font-family: 'Source Code Pro', monospace;
+    font-size: 1.6em;
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.timeline .job {
+    position: relative;
+    padding-left: 30px;
+    border-left: 2px solid var(--border-color);
+    padding-bottom: 30px;
+}
+
+.timeline .job:last-child {
+    border-left: 2px solid transparent;
+    padding-bottom: 0;
+}
+
+.timeline .job::before {
+    content: '';
+    position: absolute;
+    left: -9px;
+    top: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: var(--accent-color);
+    border: 2px solid var(--main-bg);
+}
+
+.job-title {
+    font-size: 1.2em;
+    font-weight: 500;
+    color: var(--header-color);
+}
+
+.job-company-date {
+    color: var(--accent-color);
+    margin-bottom: 10px;
+    font-size: 0.9em;
+}
+
+.job-description {
+    font-size: 0.95em;
+}
+
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.project-card {
+    background-color: var(--card-bg);
+    border-radius: 5px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.project-card h4 {
+    color: var(--accent-color);
+    margin-top: 0;
+    font-family: 'Source Code Pro', monospace;
+}
+
+.project-card a {
+    display: inline-block;
+    margin-top: 15px;
+    background-color: var(--accent-color);
+    color: var(--header-color);
+    padding: 8px 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.project-card a:hover {
+    background-color: #3a7ac2;
+}
+
+.project-card.placeholder {
+    background-color: var(--placeholder-bg);
+    border-style: dashed;
+}

@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflare-tunnel
+    restart: unless-stopped
+    # Polecenie jest teraz prostsze, bo wszystko jest w config.yml
+    command: tunnel run
+    volumes:
+      # Mapujemy cały folder, aby udostępnić config.yml ORAZ plik .json z kluczem
+      - ./cloudflare:/etc/cloudflared/
+    networks:
+      - proxy-net
+
+

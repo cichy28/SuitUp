@@ -1,0 +1,19 @@
+# Główny plik Docker Compose dla środowiska produkcyjnego.
+# Ten plik używa dyrektywy "include", aby połączyć konfigurację aplikacji i infrastruktury.
+#
+# Użycie:
+# docker compose up -d
+# docker compose down
+
+services: {} # Ten pusty wpis jest wymagany przez Docker Compose
+
+include:
+  - docker-compose.app.yml
+  - docker-compose.infra.yml
+  - docker-compose.aboutme.yml
+
+# Definiujemy tutaj globalną sieć, z której będą korzystać wszystkie kontenery.
+networks:
+  proxy-net:
+    name: proxy-net # Jawna nazwa, aby uniknąć prefiksów
+    driver: bridge

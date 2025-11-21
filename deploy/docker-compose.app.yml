@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: suitup-postgres
+    restart: unless-stopped
+    env_file:
+      - ./.env.production
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    networks:
+      - app_internal_network
+
+  backend:
+    image: ghcr.io/cichy28/suit-up/backend:latest
+    container_name: suitup-backend
+    restart: unless-stopped
+    env_file:
+      - ./.env.production
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./backend/_do_importu:/app/_do_importu
+    depends_on:
+      - postgres
+    networks:
+      - app_internal_network # Komunikacja z bazą danych
+      - proxy-net            # Wystawienie na zewnątrz przez tunel
+
+  frontend: # Poprawna nazwa serwisu, który serwuje frontend
+    image: ghcr.io/cichy28/suit-up/frontend:latest
+    container_name: suitup-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - proxy-net # Wystawienie na zewnątrz przez tunel
+
+networks:
+  app_internal_network:
+    driver: bridge # Sieć jest tutaj ZEWNĘTRZNA, oczekuje, że zostanie stworzona gdzie indziej
+
+volumes:
+  postgres_data:

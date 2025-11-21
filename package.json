@@ -17,10 +17,12 @@
         "docker:login": "docker login ghcr.io -u cichy28 --password-stdin",
         "docker:build:backend": "docker build -t ghcr.io/cichy28/suit-up/backend:latest -f ./backend/Dockerfile .",
         "docker:build:frontend": "docker build -t ghcr.io/cichy28/suit-up/frontend:latest -f ./frontend/Dockerfile .",
-        "docker:build": "npm run docker:build:backend && npm run docker:build:frontend",
+        "docker:build:aboutme": "docker build -t ghcr.io/cichy28/suit-up/aboutme:latest -f ./aboutMe/Dockerfile ./aboutMe",
+        "docker:build": "npm run docker:build:backend && npm run docker:build:frontend && npm run docker:build:aboutme",
 		"docker:push:backend": "docker push ghcr.io/cichy28/suit-up/backend:latest",
 		"docker:push:frontend": "docker push ghcr.io/cichy28/suit-up/frontend:latest",
-        "docker:push": "npm run docker:push:backend && npm run docker:push:frontend",
+        "docker:push:aboutme": "docker push ghcr.io/cichy28/suit-up/aboutme:latest",
+        "docker:push": "npm run docker:push:backend && npm run docker:push:frontend && npm run docker:push:aboutme",
         "deploy": "npm run docker:build && npm run docker:push"
 	},
 	"devDependencies": {

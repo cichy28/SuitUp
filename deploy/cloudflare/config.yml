@@ -17,11 +17,9 @@ ingress:
   - hostname: suitapp.jcit.pl
     service: http://frontend:80
 
-  # Reguła 3: Kieruje ruch z domeny głównej jcit.pl na Twoją osobną stronę.
-  # Zmień adres IP na prawidłowy adres Twojej strony.
-  # Jeśli strona jest hostowana gdzie indziej, możesz użyć jej publicznego adresu.
+  # Reguła 3: Kieruje ruch z domeny głównej jcit.pl do serwisu 'aboutme' z CV.
   - hostname: jcit.pl
-    service: http://192.168.1.10:8080 # <-- ZMIEŃ NA WŁAŚCIWY ADRES TWOJEJ STRONY
+    service: http://aboutme:3000
 
   # Reguła 4: Domyślna, łapie cały pozostały ruch i zwraca błąd 404. Musi być na końcu.
   - service: http_status:404
