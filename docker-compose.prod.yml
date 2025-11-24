@@ -1,13 +1,14 @@
 version: "3.8"
 
 services:
-
   postgres:
     image: postgres:13
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: suitup
+    ports:
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
   backend:
@@ -15,34 +16,29 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     env_file:
-      - ./backend/.env.production
+      - ./backend/.env
     depends_on:
       - postgres
     volumes:
-      # Mount to a stable, top-level path, NOT inside dist
-      - ./backend/uploads:/app/uploads
+      - .:/app
+      - /app/node_modules
+      - /app/backend/node_modules
       - ./backend/_do_importu:/app/_do_importu
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    restart: unless-stopped
-    environment:
-      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
-    command: tunnel --config /etc/cloudflared/config.yml run
-    volumes:
-      - ./cloudflare/config.yml:/etc/cloudflared/config.yml
-    depends_on:
-      - backend
-      - nginx
-  nginx:
+    ports:
+      - "3001:3000"
+  frontend:
     build:
       context: .
-      dockerfile: frontend/Dockerfile
-      args:
-        EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL}
+      dockerfile: frontend/Dockerfile.dev
     env_file:
-      - ./frontend/.env.production
+      - ./frontend/.env
     depends_on:
       - backend
+    volumes:
+      - ./frontend:/app/frontend
+      - ./shared:/app/shared
+    ports:
+      - "80:8081"
 
 volumes:
   postgres_data:

@@ -8,14 +8,15 @@
 		"copy-templates": "ncp templates dist/templates",
 		"start": "node dist/backend/src/index.js",
 		"dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-		"prisma:generate": "dotenv -e .env.development -- prisma generate",
-		"prisma:migrate:dev": "dotenv -e .env.development -- prisma migrate dev",
-		"prisma:migrate:prod": "dotenv -e .env.production -- prisma migrate deploy",
-		"generate-data": "dotenv -e .env.development -- ts-node scripts/generate-companies-data.ts",
-		"import-images:dev": "dotenv -e .env.development -- ts-node scripts/mass-import.ts",
-		"import-images:prod": "dotenv -e .env.production -- ts-node scripts/mass-import.ts",
+		"prisma:generate": "dotenv -f .env -- prisma generate",
+		"prisma:migrate:dev": "npx --no-install prisma migrate dev",
+		"prisma:migrate:prod": "dotenv -f .env.production -- prisma migrate deploy",
+		"generate-data": "dotenv -f .env -- ts-node scripts/generate-companies-data.ts",
+		"import-images:dev": "dotenv -f .env -- ts-node scripts/mass-import.ts",
 		"import-images:docker": "ts-node --project tsconfig.json scripts/mass-import.ts",
-		"prisma:reset": "dotenv -e .env.development -- prisma migrate reset --force"
+		"prisma:reset": "npx --no-install prisma migrate reset --force",
+		"import:api": "curl -X POST -H \"x-import-token: a1b2c3d4-e5f6-7890-1234-56789abcdef0\" http://localhost:3001/api/admin/import-data",
+		"db:reset-and-import": "npm run prisma:reset && npm run prisma:migrate:dev && npm run import-images:dev"
 	},
 	"keywords": [
 		"suit",

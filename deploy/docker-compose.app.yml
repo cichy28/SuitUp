@@ -6,7 +6,7 @@ services:
     container_name: suitup-postgres
     restart: unless-stopped
     env_file:
-      - ./.env.production
+      - ./.env
     volumes:
       - postgres_data:/var/lib/postgresql
     networks:
@@ -17,7 +17,7 @@ services:
     container_name: suitup-backend
     restart: unless-stopped
     env_file:
-      - ./.env.production
+      - ./.env
     volumes:
       - ./backend/uploads:/app/uploads
       - ./backend/_do_importu:/app/_do_importu
@@ -25,7 +25,7 @@ services:
       - postgres
     networks:
       - app_internal_network # Komunikacja z bazą danych
-      - proxy-net            # Wystawienie na zewnątrz przez tunel
+      - proxy-net # Wystawienie na zewnątrz przez tunel
 
   frontend: # Poprawna nazwa serwisu, który serwuje frontend
     image: ghcr.io/cichy28/suit-up/frontend:latest

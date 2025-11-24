@@ -16,33 +16,19 @@ import { router as propertyRoutes } from "./routes/properties";
 import { router as productSkuRoutes } from "./routes/productSkus";
 import { router as propertyVariantRoutes } from "./routes/propertyVariants"; // Import propertyVariant routes
 import { router as recommendationsRoutes } from "./routes/recommendations";
-import path from "path"; // Upewnij się, że masz import path
-
+import adminRoutes from "./routes/admin"; // Import admin routes
+import path from "path";
 
 const app = express();
 const port = parseInt(process.env.PORT || "3000", 10);
 
-const corsOptions = {
-	origin: "*", // Pozwól na zapytania z każdego źródła. W produkcji ogranicz to do domeny frontendu.
-	methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Jawnie zezwól na wszystkie popularne metody HTTP.
-	preflightContinue: false,
-	optionsSuccessStatus: 204, // Standardowa odpowiedź sukcesu dla zapytań preflight.
-};
-// Middleware
-app.use(cors(corsOptions));
-app.use(express.json()); // Parse JSON request bodies
-
-const uploadsPath = process.env.UPLOAD_PATH || path.join(__dirname, '..', 'uploads');
-
-// Dodatkowe logowanie dla żądań do /uploads
-app.use("/uploads", (req, res, next) => {
-  const requestedFilePath = path.join(uploadsPath, req.path);
-  console.log(`[Uploads Static] Request for URL: ${req.originalUrl}, Attempting to serve from: ${requestedFilePath}`);
-  next();
-});
-console.log(`Serving static files from: ${uploadsPath}`); // Dodaj tę linię
-app.use("/uploads", express.static(uploadsPath)); // Serwuj pliki z folderu /uploads
+app.use(cors());
+app.use(express.json()); // for parsing application/json
 app.use(morgan("dev"));
+
+// Serwuj pliki statyczne
+app.use("/api/uploads", express.static(path.join(__dirname, "..", "uploads")));
+
 // Routes
 app.use("/api/customers", customerRoutes);
 app.use("/api/users", userRoutes);
@@ -55,6 +41,7 @@ app.use("/api/product-skus", productSkuRoutes);
 app.use("/api/property-variants", propertyVariantRoutes);
 app.use("/api/recommendations", recommendationsRoutes);
 app.use("/api/upload", uploadRoutes); // Dodaj nowy router
+app.use("/api/admin", adminRoutes); // Dodaj admin router
 
 // Simple root route
 app.get("/", (req, res) => {
