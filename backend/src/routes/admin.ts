@@ -17,18 +17,24 @@ router.post("/import-data", verifyImportToken, async (req, res) => {
         // Perform the reset and import in the background
         (async () => {
             try {
-                console.log("--- [1/2] Resetting database ---");
-                // The --workspace flag is needed if you run this from the root,
-                // but since the backend service runs within its own context, it might not be.
-                // However, npx should handle finding the prisma executable.
-                const { stdout, stderr } = await execPromise("npx prisma migrate reset --force", { env: process.env });
-                console.log("Prisma reset stdout:", stdout);
-                if (stderr) {
-                    console.error("Prisma reset stderr:", stderr);
+                console.log("--- [1/3] Resetting database ---");
+                const { stdout: resetStdout, stderr: resetStderr } = await execPromise("npx prisma migrate reset --force", { env: process.env });
+                console.log("Prisma reset stdout:", resetStdout);
+                if (resetStderr) {
+                    console.error("Prisma reset stderr:", resetStderr);
                 }
                 console.log("--- Database reset complete ---");
 
-                console.log("--- [2/2] Starting Mass Import ---");
+                console.log("--- [2/3] Applying migrations ---");
+                // Using 'migrate dev' as it's consistent with other project scripts for development.
+                const { stdout: migrateStdout, stderr: migrateStderr } = await execPromise("npx prisma migrate dev", { env: process.env });
+                console.log("Prisma migrate stdout:", migrateStdout);
+                if (migrateStderr) {
+                    console.error("Prisma migrate stderr:", migrateStderr);
+                }
+                console.log("--- Migrations applied ---");
+
+                console.log("--- [3/3] Starting Mass Import ---");
                 await runMassImport();
                 console.log("--- Mass import finished successfully ---");
 

@@ -1,3 +1,50 @@
+# Local Development Setup
+
+This section describes how to set up and run the application for local development using Docker.
+
+## Starting the Environment
+
+To start all services (backend, frontend, database) for local development, run the following command from the project root:
+
+```bash
+docker-compose up -d --build
+```
+* `--build` forces a rebuild of the images if there are changes in the Dockerfile or source code.
+* `-d` runs the containers in detached mode (in the background).
+
+The services will be available at:
+- **Frontend:** `http://localhost:80`
+- **Backend API:** `http://localhost:3001`
+- **Adminer (Database GUI):** `http://localhost:8080`
+
+## Database Management
+
+The development database can be reset and re-populated with initial data from the `_do_importu` directory.
+
+### Recommended Method: Using the Import API
+
+The easiest and recommended way to reset the database and import data is to use the `import:api` script. This triggers a process inside the running backend container that correctly handles the entire reset, migration, and import flow.
+
+From your local machine (in the project root), run:
+```bash
+npm run import:api --workspace=backend
+```
+This process runs in the background. You can monitor its progress by checking the container logs:
+```bash
+docker-compose logs -f backend
+```
+
+### Manual Database Operations
+
+If you need to perform manual database operations, such as creating a new migration after changing `schema.prisma`, you **must** run the command inside the backend container. Running it on your local machine will fail because it won't be able to connect to the database.
+
+**Example: Creating a new migration**
+```bash
+docker-compose exec backend npm run prisma:migrate:dev -- --name your-migration-name
+```
+
+---
+
 # Wdrożenie aplikacji w Dockerze
 
 Ten dokument zawiera instrukcje dotyczące budowania, wypychania (push) obrazów Docker oraz wdrażania aplikacji na serwerze NAS.
