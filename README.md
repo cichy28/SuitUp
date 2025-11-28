@@ -9,12 +9,14 @@ To start all services (backend, frontend, database) for local development, run t
 ```bash
 docker-compose up -d --build
 ```
-* `--build` forces a rebuild of the images if there are changes in the Dockerfile or source code.
-* `-d` runs the containers in detached mode (in the background).
+
+- `--build` forces a rebuild of the images if there are changes in the Dockerfile or source code.
+- `-d` runs the containers in detached mode (in the background).
 
 The services will be available at:
+
 - **Frontend:** `http://localhost:80`
-- **Backend API:** `http://localhost:3001`
+- **Backend API:** `http://localhost:3000`
 - **Adminer (Database GUI):** `http://localhost:8080`
 
 ## Database Management
@@ -26,10 +28,13 @@ The development database can be reset and re-populated with initial data from th
 The easiest and recommended way to reset the database and import data is to use the `import:api` script. This triggers a process inside the running backend container that correctly handles the entire reset, migration, and import flow.
 
 From your local machine (in the project root), run:
+
 ```bash
 npm run import:api --workspace=backend
 ```
+
 This process runs in the background. You can monitor its progress by checking the container logs:
+
 ```bash
 docker-compose logs -f backend
 ```
@@ -39,6 +44,7 @@ docker-compose logs -f backend
 If you need to perform manual database operations, such as creating a new migration after changing `schema.prisma`, you **must** run the command inside the backend container. Running it on your local machine will fail because it won't be able to connect to the database.
 
 **Example: Creating a new migration**
+
 ```bash
 docker-compose exec backend npm run prisma:migrate:dev -- --name your-migration-name
 ```
@@ -61,9 +67,9 @@ Aby zbudować i wypchnąć obrazy Docker do GitHub Container Registry (GHCR), po
 4.  **Przejdź do Personal Access Tokens:** W menu po lewej stronie wybierz `Personal access tokens`, a następnie `Tokens (classic)`.
 5.  **Wygeneruj nowy token:** Kliknij przycisk `Generate new token`.
 6.  **Skonfiguruj token:**
-    *   **Note (Nazwa):** Wpisz nazwę, np. `Docker Deploy`.
-    *   **Expiration (Ważność):** Ustaw okres ważności tokena.
-    *   **Select scopes (Wybierz uprawnienia):** Zaznacz pole przy `write:packages`. Jest to kluczowe uprawnienie.
+    - **Note (Nazwa):** Wpisz nazwę, np. `Docker Deploy`.
+    - **Expiration (Ważność):** Ustaw okres ważności tokena.
+    - **Select scopes (Wybierz uprawnienia):** Zaznacz pole przy `write:packages`. Jest to kluczowe uprawnienie.
 7.  **Wygeneruj i skopiuj token:** Kliknij `Generate token`. **Skopiuj token od razu, nie będzie już ponownie widoczny.**
 
 ### Logowanie do rejestru Docker (na swoim komputerze deweloperskim):
@@ -85,6 +91,7 @@ Aby zbudować i wypchnąć obrazy Docker do GitHub Container Registry (GHCR), po
 Po zalogowaniu możesz użyć skryptu `deploy` z pliku `package.json`, aby zbudować oba obrazy (`backend` i `frontend`) i wypchnąć je do GitHub Container Registry.
 
 **W terminalu (PowerShell, po ustawieniu tokena):**
+
 ```bash
 npm run deploy
 ```
@@ -93,16 +100,18 @@ npm run deploy
 
 1.  **Skopiuj niezbędne pliki na NAS:**
     Upewnij się, że następujące foldery i pliki są na Twoim NAS-ie w odpowiednich lokalizacjach:
-    *   `deploy/` (zawierający `docker-compose.yml` i `.env.production`)
-    *   `cloudflare/` (zawierający `config.yml`)
-    *   Puste foldery `backend/_do_importu/` i `backend/uploads/` (muszą istnieć na NAS-ie, aby kontener je zamontował).
+    - `deploy/` (zawierający `docker-compose.yml` i `.env.production`)
+    - `cloudflare/` (zawierający `config.yml`)
+    - Puste foldery `backend/_do_importu/` i `backend/uploads/` (muszą istnieć na NAS-ie, aby kontener je zamontował).
 
 2.  **Połącz się z NAS-em przez SSH.**
 
 3.  **Przejdź do katalogu `deploy` na NAS-ie:**
+
     ```bash
     cd /sciezka/do/folderu/deploy/na_nas
     ```
+
     (Zastąp `/sciezka/do/folderu/deploy/na_nas` rzeczywistą ścieżką).
 
 4.  **Pobierz najnowsze obrazy i uruchom aplikację:**
@@ -110,7 +119,7 @@ npm run deploy
     docker-compose pull
     docker-compose up -d
     ```
-    Komenda `pull` pobierze najnowsze obrazy Docker z GHCR. `up -d` uruchomi usługi w tle. 
+    Komenda `pull` pobierze najnowsze obrazy Docker z GHCR. `up -d` uruchomi usługi w tle.
 
 ## Krok 4: Uruchamianie skryptu importu danych (opcjonalnie)
 

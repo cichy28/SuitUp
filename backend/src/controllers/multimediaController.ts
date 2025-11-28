@@ -3,6 +3,16 @@ import prisma from "../db";
 import { CreateMultimediaInputSchema, UpdateMultimediaInputSchema } from "../../../shared/validators/multimedia";
 import { z } from "zod";
 
+const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000"; // Base URL for the backend API
+
+// Helper function to prepend API_BASE_URL if the URL is relative
+const formatMultimediaUrl = (multimedia: any) => {
+    if (multimedia && multimedia.url && multimedia.url.startsWith('/uploads/')) {
+        return { ...multimedia, url: `${API_BASE_URL}${multimedia.url}` };
+    }
+    return multimedia;
+};
+
 // Get all multimedia
 export const getAllMultimedia = async (req: Request, res: Response) => {
 	try {
@@ -14,7 +24,8 @@ export const getAllMultimedia = async (req: Request, res: Response) => {
 				},
 			},
 		});
-		res.status(200).json(multimedia);
+		const formattedMultimedia = multimedia.map(formatMultimediaUrl); // Format URLs
+		res.status(200).json(formattedMultimedia);
 	} catch (error: any) {
 		console.error("Error fetching multimedia:", error);
 		res.status(500).json({ message: "Error fetching multimedia", error: error.message });
@@ -38,7 +49,8 @@ export const getMultimediaById = async (req: Request, res: Response) => {
 			return res.status(404).json({ message: "Multimedia not found" });
 		}
 
-		res.status(200).json(multimedia);
+		const formattedMultimedia = formatMultimediaUrl(multimedia); // Format URL
+		res.status(200).json(formattedMultimedia);
 	} catch (error: any) {
 		console.error(`Error fetching multimedia with ID ${id}:`, error);
 		res.status(500).json({ message: `Error fetching multimedia with ID ${id}`, error: error.message });

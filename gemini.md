@@ -51,7 +51,7 @@ To run the application in a local development environment using Docker, follow t
     ```
 2.  The application will be available at:
     - **Frontend:** `http://localhost:80`
-    - **Backend API:** `http://localhost:3001`
+    - **Backend API:** `http://localhost:3000`
     - **Adminer (Database GUI):** `http://localhost:8080`
 
 ## 5. Development Workflow & Conventions
@@ -66,26 +66,30 @@ To run the application in a local development environment using Docker, follow t
 The recommended way to reset the database and import data is to use the `import:api` script. This triggers a process inside the running backend container that correctly handles the entire reset, migration, and import flow.
 
 **From your local machine (in the project root), run:**
+
 ```bash
 npm run import:api --workspace=backend
 ```
+
 This process runs in the background. You can monitor its progress by checking the container logs:
+
 ```bash
 docker-compose logs -f backend
 ```
 
 ## 7. Common Pitfalls & Solutions
 
--   **Problem 1: `canvas` dependency:** The `canvas` package causes significant installation issues on Windows due to its native dependencies. It's only used by a non-essential development script (`generate-companies-data.ts`).
-    -   **Solution:** `canvas` was removed from `package.json` dependencies. The script was modified to use a placeholder image instead of generating one, allowing the project to build successfully.
--   **Problem 2: `prisma migrate` context:** Running `prisma` commands that need a database connection (like `migrate`, `reset`) from the host machine fails because the hostname `postgres` is only resolvable within the Docker network.
-    -   **Solution:** All such commands must be executed *inside* the backend container using `docker-compose exec backend <command>`.
--   **Problem 3: Corrupted Migrations:** The `migrations` folder can get into a broken state (e.g., empty migration subfolder), causing `prisma migrate reset` to fail with error `P3015`.
-    -   **Solution:** The corrupted `migrations` directory was deleted, and a new initial migration was created using `docker-compose exec backend npm run prisma:migrate:dev -- --name <name>`.
--   **Problem 4: Flawed `import:api` script:** The original `/api/admin/import-data` endpoint was buggy. It ran `prisma migrate reset` but did not run `prisma migrate dev` afterwards, leading to a database with no tables.
-    -   **Solution:** The endpoint in `backend/src/routes/admin.ts` was fixed to include the `prisma migrate dev` step, ensuring a correct database setup.
+- **Problem 1: `canvas` dependency:** The `canvas` package causes significant installation issues on Windows due to its native dependencies. It's only used by a non-essential development script (`generate-companies-data.ts`).
+  - **Solution:** `canvas` was removed from `package.json` dependencies. The script was modified to use a placeholder image instead of generating one, allowing the project to build successfully.
+- **Problem 2: `prisma migrate` context:** Running `prisma` commands that need a database connection (like `migrate`, `reset`) from the host machine fails because the hostname `postgres` is only resolvable within the Docker network.
+  - **Solution:** All such commands must be executed _inside_ the backend container using `docker-compose exec backend <command>`.
+- **Problem 3: Corrupted Migrations:** The `migrations` folder can get into a broken state (e.g., empty migration subfolder), causing `prisma migrate reset` to fail with error `P3015`.
+  - **Solution:** The corrupted `migrations` directory was deleted, and a new initial migration was created using `docker-compose exec backend npm run prisma:migrate:dev -- --name <name>`.
+- **Problem 4: Flawed `import:api` script:** The original `/api/admin/import-data` endpoint was buggy. It ran `prisma migrate reset` but did not run `prisma migrate dev` afterwards, leading to a database with no tables.
+  - **Solution:** The endpoint in `backend/src/routes/admin.ts` was fixed to include the `prisma migrate dev` step, ensuring a correct database setup.
 
 ## 8. Correct Development Workflow Summary:
+
 1.  **Start:** `docker-compose up -d --build`
 2.  **Reset/Import:** `npm run import:api --workspace=backend` (from host)
 3.  **Manual Migrations:** `docker-compose exec backend npm run prisma:migrate:dev -- --name <name>`

@@ -20,14 +20,16 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+const UPLOADS_BASE_PATH = "/uploads/"; // Define a constant for the base path
+
 // Endpoint do uploadu pojedynczego pliku
 router.post("/", upload.single("productImage"), (req, res) => {
 	if (!req.file) {
 		return res.status(400).send("No file uploaded.");
 	}
-	// Zwróć publiczny URL do zapisanego pliku
-	const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
-	res.status(200).json({ url: fileUrl });
+	// Zwróć względną ścieżkę do zapisanego pliku
+	const relativeFileUrl = `${UPLOADS_BASE_PATH}${req.file.filename}`;
+	res.status(200).json({ url: relativeFileUrl }); // Zwracamy względny URL
 });
 
 export { router as uploadRoutes };

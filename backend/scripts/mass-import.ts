@@ -3,11 +3,13 @@ import fs from "fs/promises";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
+import fetch from "node-fetch"; // Import fetch
+import FormData from "form-data"; // Import FormData
 
 // --- CONFIGURATION ---
 const SOURCE_FOLDER = process.env.IMPORT_PATH || path.join(__dirname, "..", "_do_importu");
-const DESTINATION_FOLDER = process.env.UPLOAD_PATH || path.join(__dirname, "..", "uploads");
-const PUBLIC_URL_BASE = process.env.API_URL + "/uploads";
+const DESTINATION_FOLDER = process.env.UPLOAD_PATH || path.join(__dirname, "..", "uploads"); // Still needed for mass-import to copy files from SOURCE_FOLDER to DESTINATION_FOLDER
+const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000"; // Base URL for the backend API
 const TEST_USER_EMAIL = "test-importer@example.com";
 const TEST_USER_COMPANY_NAME = "Test Importer";
 const TEST_USER_PASSWORD = "password123";
@@ -28,29 +30,49 @@ function getFileTypeEnum(extension: string): FileType {
 async function getOrCreateMultimedia(filePath: string, ownerId: string): Promise<string> {
 	const originalFilename = path.basename(filePath);
 	const fileExtension = path.extname(originalFilename).replace(".", "");
-	const uniqueFilename = `${uuidv4()}.${fileExtension}`;
-	const destinationPath = path.join(DESTINATION_FOLDER, uniqueFilename);
+
+	// Read the file content
+	const fileBuffer = await fs.readFile(filePath);
+
+	// Create FormData
+	const formData = new FormData();
+	formData.append("productImage", fileBuffer, {
+		filename: originalFilename,
+		contentType: `image/${fileExtension}`, // Adjust content type as needed
+	});
 
 	try {
-		// Ensure the destination directory exists
-		await fs.mkdir(DESTINATION_FOLDER, { recursive: true });
-		await fs.copyFile(filePath, destinationPath);
-		console.log(`  -> Successfully copied ${originalFilename} to ${destinationPath}`);
-	} catch (error) {
-		console.error(`  ❌ Error copying file ${originalFilename} to ${destinationPath}:`, error);
-		throw error; // Re-throw to stop the process if file copy fails
-	}
+		console.log(`  -> Uploading ${originalFilename} to ${API_BASE_URL}/api/upload`);
+		const response = await fetch(`${API_BASE_URL}/api/upload`, {
+			method: "POST",
+			body: formData,
+			// headers: formData.getHeaders() // FormData from 'form-data' package might need this
+		});
 
-	const newMultimedia = await prisma.multimedia.create({
-		data: {
-			url: `${PUBLIC_URL_BASE}/${uniqueFilename}`,
-			altText: originalFilename,
-			fileType: getFileTypeEnum(fileExtension),
-			ownerId: ownerId,
-		},
-	});
-	console.log(`  -> Saved multimedia record for ID: ${newMultimedia.id}`);
-	return newMultimedia.id;
+		if (!response.ok) {
+			const errorText = await response.text();
+			throw new Error(`Upload failed: ${response.status} ${response.statusText} - ${errorText}`);
+		}
+
+		const uploadResponse = await response.json();
+		const relativeFileUrl = uploadResponse.url; // This will be like /uploads/unique-filename.jpg
+
+		console.log(`  -> Upload successful, relative URL: ${relativeFileUrl}`);
+
+		const newMultimedia = await prisma.multimedia.create({
+			data: {
+				url: relativeFileUrl, // Store the relative URL returned by the upload endpoint
+				altText: originalFilename,
+				fileType: getFileTypeEnum(fileExtension),
+				ownerId: ownerId,
+			},
+		});
+		console.log(`  -> Saved multimedia record for ID: ${newMultimedia.id}`);
+		return newMultimedia.id;
+	} catch (error) {
+		console.error(`  ❌ Error processing file ${originalFilename}:`, error);
+		throw error;
+	}
 }
 
 async function getOrCreateTestUser(): Promise<User> {

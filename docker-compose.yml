@@ -24,8 +24,9 @@ services:
       - /app/node_modules
       - /app/backend/node_modules
       - ./backend/_do_importu:/app/_do_importu
+      - ./uploads:/app/backend/uploads
     ports:
-      - "3001:3000"
+      - "3000:3000"
   frontend:
     build:
       context: .
@@ -36,6 +37,7 @@ services:
       - backend
     volumes:
       - ./frontend:/app/frontend
+      - /app/frontend/node_modules
       - ./shared:/app/shared
     ports:
       - "80:8081"
