@@ -12,5 +12,13 @@ services:
       - ./cloudflare:/etc/cloudflared/
     networks:
       - proxy-net
-
-
+  adminer:
+    image: adminer
+    depends_on:
+      - postgres
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    ports:
+      - "8080:8080"
+    networks:
+      - proxy-net

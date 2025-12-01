@@ -13,7 +13,7 @@ COPY backend/package*.json ./backend/
 COPY shared/package.json ./shared/
 
 # Instalujemy wszystkie zależności (w tym deweloperskie)
-RUN npm install --legacy-peer-deps
+RUN npm ci
 
 # Kopiowanie reszty kodu źródłowego
 COPY . .
@@ -39,7 +39,7 @@ COPY backend/package*.json ./backend/
 COPY shared/package.json ./shared/
 COPY tsconfig.base.json ./
 COPY backend/tsconfig.json ./backend/
-RUN npm install --omit=dev
+RUN npm ci --omit=dev
 
 # Kopiowanie zainstalowanych i zbudowanych zależności z etapu "builder"
 COPY --from=builder /app/node_modules ./node_modules

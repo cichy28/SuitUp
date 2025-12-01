@@ -49,6 +49,16 @@ If you need to perform manual database operations, such as creating a new migrat
 docker-compose exec backend npm run prisma:migrate:dev -- --name your-migration-name
 ```
 
+## Known Issues
+
+### Forced Dependency Installation
+
+The Dockerfiles for both the `frontend` and `backend` services use the `--force` flag during `npm install`.
+
+**Reasoning:** This is a Proof of Concept (PoC) project, and some npm packages have conflicting peer dependencies. The `--force` flag is used as a temporary workaround to bypass these conflicts and allow the application to build.
+
+**Implication:** This can lead to potential instability or unexpected behavior at runtime if packages rely on incompatible dependency versions. This issue should be properly resolved in a production-ready version by addressing the underlying dependency conflicts.
+
 ---
 
 # Wdrożenie aplikacji w Dockerze

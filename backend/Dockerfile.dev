@@ -12,7 +12,7 @@ COPY frontend/package*.json ./frontend/
 RUN apk add --no-cache python3 make g++ pkgconf cairo-dev jpeg-dev pango-dev giflib-dev openssl
 
 # Install all dependencies
-RUN npm install --legacy-peer-deps
+RUN npm ci
 
 # Copy prisma schema
 COPY backend/prisma ./backend/prisma

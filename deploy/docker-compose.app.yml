@@ -11,6 +11,7 @@ services:
       - postgres_data:/var/lib/postgresql
     networks:
       - app_internal_network
+      - proxy-net
 
   backend:
     image: ghcr.io/cichy28/suit-up/backend:latest
@@ -19,10 +20,11 @@ services:
     env_file:
       - ./.env
     volumes:
-      - ./backend/uploads:/app/uploads
+      - ./backend/uploads:/app/backend/uploads
       - ./backend/_do_importu:/app/_do_importu
     depends_on:
       - postgres
+    command: sh -c "npx prisma migrate deploy && node dist/backend/src/index.js"
     networks:
       - app_internal_network # Komunikacja z bazą danych
       - proxy-net # Wystawienie na zewnątrz przez tunel

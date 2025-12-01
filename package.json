@@ -23,7 +23,8 @@
 		"docker:push:frontend": "docker push ghcr.io/cichy28/suit-up/frontend:latest",
 		"docker:push:aboutme": "docker push ghcr.io/cichy28/suit-up/aboutme:latest",
 		"docker:push": "npm run docker:push:backend && npm run docker:push:frontend && npm run docker:push:aboutme",
-		"deploy": "npm run docker:build && npm run docker:push"
+		"deploy": "npm run docker:build && npm run docker:push",
+		"import:api:prod": "curl -X POST -H \"x-import-token: a1b2c3d4-e5f6-7890-1234-56789abcdef0\"  https://suitapp.jcit.pl/api/admin/import-data"
 	},
 	"devDependencies": {
 		"concurrently": "^8.0.0"

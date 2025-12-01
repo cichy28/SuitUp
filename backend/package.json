@@ -17,6 +17,8 @@
 		"import:api": "curl -X POST -H \"x-import-token: a1b2c3d4-e5f6-7890-1234-56789abcdef0\" http://localhost:3000/api/admin/import-data",
 		"db:reset-and-import": "npm run prisma:reset && npm run prisma:migrate:dev && npm run import-images:dev",
 		"docker:init:prisma": "docker-compose exec backend npm run prisma:migrate:dev -- --name init"
+
+		
 	},
 	"keywords": [
 		"suit",

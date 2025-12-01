@@ -15,7 +15,7 @@ RUN apk add --no-cache python3 make g++ pkgconf cairo-dev jpeg-dev pango-dev gif
 COPY backend/prisma ./backend/prisma
 
 # Install all dependencies
-RUN npm install --legacy-peer-deps --timeout=600000
+RUN npm ci --timeout=600000
 
 # Set working directory to frontend
 WORKDIR /app/frontend

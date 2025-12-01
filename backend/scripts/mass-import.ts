@@ -54,7 +54,7 @@ async function getOrCreateMultimedia(filePath: string, ownerId: string): Promise
 			throw new Error(`Upload failed: ${response.status} ${response.statusText} - ${errorText}`);
 		}
 
-		const uploadResponse = await response.json();
+		const uploadResponse = (await response.json()) as { url: string };
 		const relativeFileUrl = uploadResponse.url; // This will be like /uploads/unique-filename.jpg
 
 		console.log(`  -> Upload successful, relative URL: ${relativeFileUrl}`);

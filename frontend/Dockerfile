@@ -12,8 +12,7 @@ COPY package*.json ./
 # Copy shared directory
 COPY shared ./shared
 
-# Install root dependencies (including shared)
-RUN npm install --timeout=600000
+RUN npm ci --timeout=600000
 
 # Copy frontend specific package.json and package-lock.json
 # Copy the rest of the frontend application code
@@ -31,7 +30,7 @@ WORKDIR /app/frontend
 COPY frontend/package*.json ./
 
 # Install frontend dependencies
-RUN npm install --timeout=600000
+RUN npm ci --timeout=600000
 
 # Build the web application
 RUN npm run build
