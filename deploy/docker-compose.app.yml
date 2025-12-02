@@ -20,11 +20,11 @@ services:
     env_file:
       - ./.env
     volumes:
-      - ./backend/uploads:/app/backend/uploads
+      - ../uploads:/app/uploads
       - ./backend/_do_importu:/app/_do_importu
     depends_on:
       - postgres
-    command: sh -c "npx prisma migrate deploy && node dist/backend/src/index.js"
+    command: sh -c "node dist/backend/src/index.js"
     networks:
       - app_internal_network # Komunikacja z bazą danych
       - proxy-net # Wystawienie na zewnątrz przez tunel

@@ -27,7 +27,7 @@ app.use(express.json()); // for parsing application/json
 app.use(morgan("dev"));
 
 // Serwuj pliki statyczne
-app.use("/api/uploads", express.static(path.join(__dirname, "..", "uploads")));
+app.use("/api/uploads", express.static("/app/uploads"));
 
 // Routes
 app.use("/api/customers", customerRoutes);
