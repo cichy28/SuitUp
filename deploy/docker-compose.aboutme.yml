@@ -1,7 +1,5 @@
 services:
   aboutme:
-    build:
-      context: ../aboutMe
     image: jancichosz/suitup-aboutme:latest
     container_name: aboutme
     restart: unless-stopped

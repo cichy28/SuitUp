@@ -1,19 +1,99 @@
-# Główny plik Docker Compose dla środowiska produkcyjnego.
-# Ten plik używa dyrektywy "include", aby połączyć konfigurację aplikacji i infrastruktury.
-#
-# Użycie:
-# docker compose up -d
-# docker compose down
+version: "3.8"
 
-services: {} # Ten pusty wpis jest wymagany przez Docker Compose
+# This file is a merged version of docker-compose.app.yml, docker-compose.infra.yml, and docker-compose.aboutme.yml
+# It was created to support older versions of docker-compose that do not have the 'include' directive.
 
-include:
-  - docker-compose.app.yml
-  - docker-compose.infra.yml
-  - docker-compose.aboutme.yml
+services:
+  # From docker-compose.app.yml
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_internal_network
+      - proxy-net
 
-# Definiujemy tutaj globalną sieć, z której będą korzystać wszystkie kontenery.
+  backend:
+    image: ghcr.io/cichy28/suit-up/backend:latest
+    container_name: suitup-backend
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    volumes:
+      - ../uploads:/app/uploads
+      - ./backend/_do_importu:/app/_do_importu
+    depends_on:
+      - postgres
+    command: sh -c "node dist/backend/src/index.js"
+    networks:
+      - app_internal_network
+      - proxy-net
+
+  frontend:
+    image: ghcr.io/cichy28/suit-up/frontend:latest
+    container_name: suitup-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - proxy-net
+
+  # From docker-compose.infra.yml
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflare-tunnel
+    restart: unless-stopped
+    command: tunnel run
+    volumes:
+      - ./cloudflare:/etc/cloudflared/
+    networks:
+      - proxy-net
+
+  adminer:
+    image: adminer
+    container_name: suitup-adminer
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    ports:
+      - "8080:8080"
+    networks:
+      - proxy-net
+
+  # From docker-compose.aboutme.yml
+  aboutme:
+    image: ghcr.io/cichy28/suit-up/aboutme:latest
+    container_name: aboutme
+    restart: unless-stopped
+    networks:
+      - proxy-net
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - "9443:9443"
+      - "9000:9000"
+    networks:
+      - proxy-net
 networks:
   proxy-net:
-    name: proxy-net # Jawna nazwa, aby uniknąć prefiksów
+    name: proxy-net
     driver: bridge
+  app_internal_network:
+    driver: bridge
+
+volumes:
+  postgres_data: {}
+  portainer_data:

@@ -1,18 +1,6 @@
 version: "3.8"
 
 services:
-  postgres:
-    image: postgres:latest
-    container_name: suitup-postgres
-    restart: unless-stopped
-    env_file:
-      - ./.env
-    volumes:
-      - postgres_data:/var/lib/postgresql
-    networks:
-      - app_internal_network
-      - proxy-net
-
   backend:
     image: ghcr.io/cichy28/suit-up/backend:latest
     container_name: suitup-backend
