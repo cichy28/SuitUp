@@ -1,117 +1,248 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jan Cichosz - CV</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JCIT – Jan Cichosz | Consulting BMS / BEMS / EMOS</title>
+  <meta name="description" content="Consulting systemów sterowania budynków — tłumaczę co naprawdę dzieje się w Twoim obiekcie, gdzie tracisz pieniądze i jak to zmienić.">
+  <meta property="og:title" content="JCIT – Jan Cichosz | Consulting BMS / BEMS / EMOS">
+  <meta property="og:description" content="Niezależny konsultant BMS, BEMS i EMOS. Od diagnozy przez projekt techniczny po nadzór odbioru.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pl_PL">
+  <meta property="og:locale:alternate" content="en_US">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230d1117'/><text x='4' y='23' font-family='monospace' font-weight='700' font-size='14' fill='%2310b981'>JC</text></svg>">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <aside class="sidebar">
-            <div class="profile">
-                <img src="https://via.placeholder.com/150" alt="Zdjęcie profilowe" class="profile-pic">
-                <h1 class="name">Jan Cichosz</h1>
-                <h2 class="title">Architekt Systemów IT/OT</h2>
-            </div>
-            <div class="contact">
-                <h3>Kontakt</h3>
-                <p>Email: <a href="mailto:j.i.cichosz@gmail.com">j.i.cichosz@gmail.com</a></p>
-                <p>LinkedIn: <a href="https://www.linkedin.com/in/jan-cichosz-853891233/" target="_blank">linkedin.com/in/jan-cichosz</a></p>
-                <p>GitHub: <a href="https://github.com/jancichosz" target="_blank">github.com/jancichosz</a></p>
-            </div>
-            <div class="skills">
-                <h3>Umiejętności</h3>
-                <ul id="skills-list">
-                    <li>Node.js</li>
-                    <li>TypeScript</li>
-                    <li>JavaScript</li>
-                    <li>Python</li>
-                    <li>React.js</li>
-                    <li>Docker</li>
-                    <li>Prometheus</li>
-                    <li>Grafana</li>
-                    <li>Power BI</li>
-                    <li>MQTT</li>
-                    <li>MODBUS</li>
-                    <li>BACnet</li>
-                    <li>Git</li>
-                    <li>Jira</li>
-                </ul>
-            </div>
-        </aside>
-        <main class="main-content">
-            <section id="about">
-                <h2>O mnie</h2>
-                <p>
-                    Inżynier automatyk (OT) z praktycznym doświadczeniem w energetyce i automatyce, który ewoluował w kierunku Architekta Systemów IT/IoT. Specjalizuje się w tworzeniu skalowalnych rozwiązań na granicy elektrotechniki, automatyki i IT - projektowanie całościowej architektury rozwiazania uwzględniającej elektrykę, konfigurację sieciową, założenia funkcjonalne i dokumentacje softwarową. Realizuje projekty od pierwszego kontaktu z klientem przez ofertę i realizację aż po utrzymanie.
-                </p>
-            </section>
-            <section id="experience">
-                <h2>Doświadczenie zawodowe</h2>
-                <div class="timeline">
-                    <div class="job">
-                        <h3 class="job-title">Architekt Systemów Sterowania</h3>
-                        <div class="job-company-date">Solwena Sp. z o.o. | 01.2021 - obecnie</div>
-                        <ul class="job-description">
-                            <li>Wybudowanie od podstaw wieloprocesowej platformy edge (Node.js, Redis, Docker) z konwersją protokołów MODBUS, MQTT, BACnet.</li>
-                            <li>Wybudowanie i utrzymanie kompletnego stacku monitoringu (Grafana, Prometheus, VictoriaMetrics).</li>
-                            <li>Wybudowanie i utrzymanie architektury połączeń VPN (wireguard + netmaker).</li>
-                            <li>Projektowanie i wdrażanie algorytmów oszczędnościowych redukujących zużycie energii o 20-50%.</li>
-                            <li>Tworzenie dedykowanych aplikacji biznesowych i skryptów automatyzujących.</li>
-                            <li>Tech lead projektu PnP - standaryzacja procesu wdrożeń.</li>
-                        </ul>
-                    </div>
-                    <div class="job">
-                        <h3 class="job-title">Inżynier Automatyk</h3>
-                        <div class="job-company-date">Solwena | 01.2019 - 01.2021</div>
-                        <ul class="job-description">
-                            <li>Projektowanie i programowanie systemów zarządzania energią (PLC: Wago, Mitsubishi, Beckhoff).</li>
-                            <li>Inspekcje techniczne i przygotowywanie ofert.</li>
-                            <li>Automatyzacja procesów wdrożenia (VBA).</li>
-                        </ul>
-                    </div>
-                    <div class="job">
-                        <h3 class="job-title">Inżynier Automatyk</h3>
-                        <div class="job-company-date">Elsa | 09.2017 - 01.2019</div>
-                        <ul class="job-description">
-                            <li>Projektowanie systemów BMS - WsCad + AutoCad.</li>
-                            <li>Programowanie sterowników PLC - Schneider Electric EBO.</li>
-                        </ul>
-                    </div>
-                     <div class="job">
-                        <h3 class="job-title">Inżynier Automatyk</h3>
-                        <div class="job-company-date">Enamor | 03.2017 - 09.2017</div>
-                        <ul class="job-description">
-                            <li>Programowanie systemu EMOS - przygotowanie do certyfikacji SAT i FAT.</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-            <section id="projects">
-                <h2>Projekty i Dema</h2>
-                <div class="project-grid">
-                    <div class="project-card">
-                        <h4>SuitUp Aplikacja</h4>
-                        <p>Aplikacja mobilna i webowa do konfiguracji garniturów.</p>
-                        <a href="https://suitapp.jcit.pl" target="_blank">Zobacz Demo</a>
-                    </div>
-                    <div class="project-card placeholder">
-                        <h4>Placeholder Projektu 2</h4>
-                        <p>Opis przyszłego projektu lub aplikacji demo.</p>
-                        <a href="#" target="_blank">Zobacz Demo</a>
-                    </div>
-                    <div class="project-card placeholder">
-                        <h4>Placeholder Projektu 3</h4>
-                        <p>Opis przyszłego projektu lub aplikacji demo.</p>
-                        <a href="#" target="_blank">Zobacz Demo</a>
-                    </div>
-                </div>
-            </section>
-        </main>
+
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#" class="logo">JCIT<span class="logo-sub">Jan Cichosz</span></a>
+      <div class="nav-links" id="navLinks">
+        <a href="#how"     data-pl="Jak działam" data-en="How I work">Jak działam</a>
+        <a href="#forwhom" data-pl="Dla kogo"    data-en="For whom">Dla kogo</a>
+        <a href="#about"   data-pl="O mnie"      data-en="About">O mnie</a>
+        <a href="#contact" class="nav-cta" data-pl="Bezpłatna rozmowa" data-en="Free call">Bezpłatna rozmowa</a>
+      </div>
+      <div class="nav-right">
+        <button class="lang-toggle" id="langToggle" aria-label="Switch language">EN</button>
+        <button class="nav-burger" id="navBurger" aria-label="Menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
     </div>
+    <div class="nav-mobile" id="navMobile">
+      <a href="#how"     data-pl="Jak działam" data-en="How I work">Jak działam</a>
+      <a href="#forwhom" data-pl="Dla kogo"    data-en="For whom">Dla kogo</a>
+      <a href="#about"   data-pl="O mnie"      data-en="About">O mnie</a>
+      <a href="#contact" data-pl="Kontakt"     data-en="Contact">Kontakt</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="container hero-inner">
+      <h1 data-pl="Powiem Ci, co naprawdę<br>dzieje się w Twoim obiekcie." data-en="I'll tell you what's really<br>happening in your facility." data-html="true">Powiem Ci, co naprawdę<br>dzieje się w Twoim obiekcie.</h1>
+      <p class="hero-sub" data-pl="Niezależny konsultant BMS, BEMS i EMOS. Od diagnozy przez projekt techniczny po nadzór odbioru." data-en="Independent BMS, BEMS and EMOS consultant. From diagnosis through technical design to handover supervision.">Niezależny konsultant BMS, BEMS i EMOS. Od diagnozy przez projekt techniczny po nadzór odbioru.</p>
+      <div class="hero-proof">
+        <span>9 lat doświadczenia</span>
+        <span class="hero-proof-dot"></span>
+        <span>200+ obiektów</span>
+        <span class="hero-proof-dot"></span>
+        <span data-pl="20–50% redukcji kosztów energii" data-en="20–50% energy cost reduction">20–50% redukcji kosztów energii</span>
+      </div>
+      <div class="hero-cta">
+        <a href="#contact" class="btn btn-primary" data-pl="Umów bezpłatną rozmowę" data-en="Book a free call">Umów bezpłatną rozmowę</a>
+      </div>
+    </div>
+    <a href="#how" class="hero-scroll" aria-label="Scroll down">
+      <svg width="20" height="28" viewBox="0 0 20 28" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="1" y="1" width="18" height="26" rx="9" />
+        <line x1="10" y1="6" x2="10" y2="12" class="hero-scroll-dot" />
+      </svg>
+    </a>
+  </section>
+
+
+  <!-- HOW I WORK -->
+  <section id="how">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-pl="Jak działam" data-en="How I work">Jak działam</span>
+        <h2 data-pl="Trzy etapy. Jeden punkt kontaktu." data-en="Three stages. One point of contact.">Trzy etapy. Jeden punkt kontaktu.</h2>
+        <p data-pl="Zakres dobieramy razem — możemy zacząć od audytu i zatrzymać się na raporcie, albo przejść przez wszystko do gotowego projektu technicznego." data-en="We define the scope together — we can start with an audit and stop at a report, or go all the way through to a finished technical design.">Zakres dobieramy razem — możemy zacząć od audytu i zatrzymać się na raporcie, albo przejść przez wszystko do gotowego projektu technicznego.</p>
+      </div>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-num">01</div>
+          <div class="how-body">
+            <h3 data-pl="Przychodzę i patrzę" data-en="I come and look">Przychodzę i patrzę</h3>
+            <p data-pl="Zaczynam od słuchania — Twoich ludzi, Twoich dokumentów, Twoich systemów. Przegląd dokumentacji projektowej, weryfikacja konfiguracji, rozmowy z obsługą techniczną i zarządzającymi. Po tym etapie wiem o Twoim obiekcie więcej niż większość jego użytkowników." data-en="I start by listening — to your people, your documents, your systems. Review of design documentation, configuration verification, interviews with technical staff and managers. After this stage I know your facility better than most of its users.">Zaczynam od słuchania — Twoich ludzi, Twoich dokumentów, Twoich systemów. Przegląd dokumentacji projektowej, weryfikacja konfiguracji, rozmowy z obsługą techniczną i zarządzającymi. Po tym etapie wiem o Twoim obiekcie więcej niż większość jego użytkowników.</p>
+            <div class="how-covers">
+              <span data-pl="Analiza dokumentacji" data-en="Documentation review">Analiza dokumentacji</span>
+              <span data-pl="Wizja lokalna" data-en="Site visit">Wizja lokalna</span>
+              <span data-pl="Wywiad z obsługą" data-en="Staff interview">Wywiad z obsługą</span>
+            </div>
+          </div>
+        </div>
+        <div class="how-step">
+          <div class="how-num">02</div>
+          <div class="how-body">
+            <h3 data-pl="Tłumaczę i oceniam" data-en="I translate and assess">Tłumaczę i oceniam</h3>
+            <p data-pl="Raport to nie materiał sprzedażowy. To techniczny dokument napisany zrozumiale — konkretne ustalenia, zidentyfikowane problemy, wyliczone straty, rekomendacje wystarczająco szczegółowe, żeby wykonawca mógł na ich podstawie przygotować ofertę. Gdzie branżyści się kłócą, dostajesz pisemną diagnozę z oceną kto ma rację i dlaczego. Znam temat od środka — nie ma tu miejsca na lanie wody." data-en="The report is not a sales document. It's a technical document written in plain language — concrete findings, identified problems, quantified losses, recommendations detailed enough for a contractor to base a quote on. Where specialists disagree, you get a written diagnosis with an assessment of who's right and why. I know the field from the inside — there's no room for padding.">Raport to nie materiał sprzedażowy. To techniczny dokument napisany zrozumiale — konkretne ustalenia, zidentyfikowane problemy, wyliczone straty, rekomendacje wystarczająco szczegółowe, żeby wykonawca mógł na ich podstawie przygotować ofertę. Gdzie branżyści się kłócą, dostajesz pisemną diagnozę z oceną kto ma rację i dlaczego. Znam temat od środka — nie ma tu miejsca na lanie wody.</p>
+            <div class="how-covers">
+              <span data-pl="Raport z diagnozą" data-en="Diagnostic report">Raport z diagnozą</span>
+              <span data-pl="Priorytety i koszty" data-en="Priorities and costs">Priorytety i koszty</span>
+              <span data-pl="Szacunek ROI" data-en="ROI estimate">Szacunek ROI</span>
+            </div>
+          </div>
+        </div>
+        <div class="how-step">
+          <div class="how-num">03</div>
+          <div class="how-body">
+            <h3 data-pl="Pomagam wdrożyć" data-en="I help implement">Pomagam wdrożyć</h3>
+            <p data-pl="Jeśli potrzebujesz więcej — przygotowuję projekt techniczny gotowy dla wykonawcy: schematy, specyfikacje, wytyczne programowe, protokoły odbioru SAT/FAT. Pomagam też wybrać firmę realizacyjną i uczestniczę w odbiorach. Albo po prostu stoję za Twoimi plecami gdy rozmawiasz z branżystami." data-en="If you need more — I prepare technical documentation ready for the contractor: diagrams, specifications, programming guidelines, SAT/FAT acceptance protocols. I also help select an implementation company and participate in handovers. Or I simply stand behind you when you talk to specialists.">Jeśli potrzebujesz więcej — przygotowuję projekt techniczny gotowy dla wykonawcy: schematy, specyfikacje, wytyczne programowe, protokoły odbioru SAT/FAT. Pomagam też wybrać firmę realizacyjną i uczestniczę w odbiorach. Albo po prostu stoję za Twoimi plecami gdy rozmawiasz z branżystami.</p>
+            <div class="how-covers">
+              <span data-pl="Projekt techniczny" data-en="Technical design">Projekt techniczny</span>
+              <span data-pl="Dobór wykonawcy" data-en="Contractor selection">Dobór wykonawcy</span>
+              <span data-pl="Wsparcie przy odbiorze" data-en="Handover support">Wsparcie przy odbiorze</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOR WHOM -->
+  <section id="forwhom" class="section-alt">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-pl="Dla kogo" data-en="For whom">Dla kogo</span>
+        <h2 data-pl="Czy to brzmi znajomo?" data-en="Does this sound familiar?">Czy to brzmi znajomo?</h2>
+      </div>
+      <div class="situations-grid">
+        <div class="situation-card">
+          <div class="situation-q" data-pl="Masz umowę na utrzymanie BMS — ale nie wiesz, czy działa tak jak powinien, ani czy przepłacasz." data-en="You have a BMS maintenance contract — but don't know if it works as it should, or whether you're overpaying.">Masz umowę na utrzymanie BMS — ale nie wiesz, czy działa tak jak powinien, ani czy przepłacasz.</div>
+          <div class="situation-a" data-pl="Audyt systemu z oceną wartości kontraktu." data-en="System audit with contract value assessment.">Audyt systemu z oceną wartości kontraktu.</div>
+        </div>
+        <div class="situation-card">
+          <div class="situation-q" data-pl="Twoi branżyści kłócą się, kto jest winny problemu. Nie wiesz kto ma rację — i kto powinien zapłacić." data-en="Your specialists argue about who's to blame for the problem. You don't know who's right — or who should pay.">Twoi branżyści kłócą się, kto jest winny problemu. Nie wiesz kto ma rację — i kto powinien zapłacić.</div>
+          <div class="situation-a" data-pl="Niezależna diagnoza i mediacja." data-en="Independent diagnosis and mediation.">Niezależna diagnoza i mediacja.</div>
+        </div>
+        <div class="situation-card">
+          <div class="situation-q" data-pl="Wiesz, że obiekt ma potencjał do oszczędności. Nie wiesz ile, gdzie ani od czego zacząć." data-en="You know the facility has savings potential. You don't know how much, where, or where to start.">Wiesz, że obiekt ma potencjał do oszczędności. Nie wiesz ile, gdzie ani od czego zacząć.</div>
+          <div class="situation-a" data-pl="Analiza zużycia z mapą oszczędności i priorytetami." data-en="Consumption analysis with a savings map and priorities.">Analiza zużycia z mapą oszczędności i priorytetami.</div>
+        </div>
+        <div class="situation-card">
+          <div class="situation-q" data-pl="Dostajesz oferty modernizacji od kilku firm — wszystkie różne. Nie wiesz którą wybrać ani jak ocenić." data-en="You're getting modernisation quotes from several companies — all different. You don't know which to choose or how to evaluate them.">Dostajesz oferty modernizacji od kilku firm — wszystkie różne. Nie wiesz którą wybrać ani jak ocenić.</div>
+          <div class="situation-a" data-pl="Niezależna ocena ofert i rekomendacja." data-en="Independent offer evaluation and recommendation.">Niezależna ocena ofert i rekomendacja.</div>
+        </div>
+        <div class="situation-card">
+          <div class="situation-q" data-pl="Masz dane z liczników i sterowników — ale żaden raport nie mówi Ci czy to dobrze czy źle i co z tym robić." data-en="You have data from meters and controllers — but no report tells you whether it's good or bad, or what to do about it.">Masz dane z liczników i sterowników — ale żaden raport nie mówi Ci czy to dobrze czy źle i co z tym robić.</div>
+          <div class="situation-a" data-pl="Integracja danych i dashboardy KPI dla zarządzania." data-en="Data integration and KPI dashboards for management.">Integracja danych i dashboardy KPI dla zarządzania.</div>
+        </div>
+        <div class="situation-card">
+          <div class="situation-q" data-pl="Planujesz rozbudowę, nowy system lub integrację — i chcesz to zrobić dobrze za pierwszym razem." data-en="You're planning an expansion, a new system or an integration — and want to get it right the first time.">Planujesz rozbudowę, nowy system lub integrację — i chcesz to zrobić dobrze za pierwszym razem.</div>
+          <div class="situation-a" data-pl="Projekt techniczny i specyfikacja przed ogłoszeniem przetargu." data-en="Technical design and specification before the tender.">Projekt techniczny i specyfikacja przed ogłoszeniem przetargu.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-pl="O mnie" data-en="About me">O mnie</span>
+        <h2>Jan Cichosz</h2>
+        <p class="about-role" data-pl="Inżynier automatyk · Konsultant BMS/BEMS/EMOS" data-en="Automation Engineer · BMS/BEMS/EMOS Consultant">Inżynier automatyk · Konsultant BMS/BEMS/EMOS</p>
+      </div>
+      <div class="about-body">
+        <p data-pl="Jestem inżynierem automatykiem. Przez 9 lat projektowałem i wdrażałem systemy BMS, BEMS i EMOS — programowałem sterowniki PLC, pisałem projekty techniczne, uczestniczyłem w odbiorach FAT i SAT. Większość tego czasu spędziłem bezpośrednio na obiektach, w bardzo różnych kontekstach: szpitale, fabryki, więzienia, szkoły, urzędy, oczyszczalnie ścieków, galerie handlowe, miasteczka kontenerowe. Nowe inwestycje i retrofity instalacji sprzed kilkudziesięciu lat. Zdarzało się walczyć z konserwatorem zabytków o to, co wolno dotknąć. Zdarzały się obiekty, gdzie dokumentacja nie zgadzała się z rzeczywistością od lat i nikt już nie pamiętał dlaczego." data-en="I'm an automation engineer. For 9 years I designed and implemented BMS, BEMS and EMOS systems — programming PLC controllers, writing technical designs, participating in FAT and SAT handovers. Most of that time I spent directly on-site, in very different contexts: hospitals, factories, prisons, schools, government offices, sewage treatment plants, shopping centres, container camps. New investments and retrofits of installations decades old. I've argued with heritage conservation officers about what could be touched. I've worked on facilities where documentation hadn't matched reality for years and nobody remembered why.">Jestem inżynierem automatykiem. Przez 9 lat projektowałem i wdrażałem systemy BMS, BEMS i EMOS — programowałem sterowniki PLC, pisałem projekty techniczne, uczestniczyłem w odbiorach FAT i SAT. Większość tego czasu spędziłem bezpośrednio na obiektach, w bardzo różnych kontekstach: szpitale, fabryki, więzienia, szkoły, urzędy, oczyszczalnie ścieków, galerie handlowe, miasteczka kontenerowe. Nowe inwestycje i retrofity instalacji sprzed kilkudziesięciu lat. Zdarzało się walczyć z konserwatorem zabytków o to, co wolno dotknąć. Zdarzały się obiekty, gdzie dokumentacja nie zgadzała się z rzeczywistością od lat i nikt już nie pamiętał dlaczego.</p>
+
+        <p data-pl="Znam większość sytuacji, z którymi klienci do mnie przychodzą — nie z opisu, tylko z własnego doświadczenia. Wiem jak wygląda obiekt, którym nikt nie zarządzał technicznie od dekady. Wiem też jak wygląda nowa instalacja, która na papierze jest kompletna, a w praktyce nie robi tego, do czego ją zaprojektowano." data-en="I know most of the situations clients bring to me — not from reading about them, but from direct experience. I know what a facility looks like when nobody has managed it technically for a decade. I also know what a new installation looks like when it's complete on paper but doesn't do what it was designed to do in practice.">Znam większość sytuacji, z którymi klienci do mnie przychodzą — nie z opisu, tylko z własnego doświadczenia. Wiem jak wygląda obiekt, którym nikt nie zarządzał technicznie od dekady. Wiem też jak wygląda nowa instalacja, która na papierze jest kompletna, a w praktyce nie robi tego, do czego ją zaprojektowano.</p>
+
+        <p data-pl="Pracuję jako niezależny konsultant — bez umów z producentami systemów ani udziału w projektach realizacyjnych, które mógłbym Ci polecać. To znaczy, że mówię co faktycznie widzę." data-en="I work as an independent consultant — no agreements with system manufacturers, no stake in the implementation projects I might recommend. That means I say what I actually see.">Pracuję jako niezależny konsultant — bez umów z producentami systemów ani udziału w projektach realizacyjnych, które mógłbym Ci polecać. To znaczy, że mówię co faktycznie widzę.</p>
+
+        <div class="about-stats">
+          <div class="stat">
+            <span class="stat-num">9+</span>
+            <span class="stat-label" data-pl="lat w branży" data-en="years in the field">lat w branży</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">200+</span>
+            <span class="stat-label" data-pl="obiektów" data-en="facilities">obiektów</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">20–50%</span>
+            <span class="stat-label" data-pl="redukcja kosztów energii" data-en="energy cost reduction">redukcja kosztów energii</span>
+          </div>
+        </div>
+
+        <div class="ref-projects">
+          <span class="ref-label" data-pl="Wybrane realizacje" data-en="Selected projects">Wybrane realizacje</span>
+          <div class="ref-tags">
+            <span>Biedronka <em data-pl="2000+ sklepów" data-en="2000+ stores">2000+ sklepów</em></span>
+            <span>Colliers <em data-pl="200+ obiektów" data-en="200+ facilities">200+ obiektów</em></span>
+            <span>Forum Gdańsk</span>
+            <span>CMN Gdańsk</span>
+            <span>Fabryka SHARP</span>
+            <span>Warsztaty SCANIA</span>
+            <span>X-kom</span>
+            <span>DAKO Lublin</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="section-alt">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-pl="Kontakt" data-en="Contact">Kontakt</span>
+        <h2 data-pl="Zacznijmy od rozmowy" data-en="Let's start with a conversation">Zacznijmy od rozmowy</h2>
+        <p data-pl="Opisz mi w kilku zdaniach swój obiekt i największy problem. Pierwsza rozmowa — bez kosztów, bez zobowiązań." data-en="Describe your facility and biggest challenge in a few sentences. First call — no cost, no commitment.">Opisz mi w kilku zdaniach swój obiekt i największy problem. Pierwsza rozmowa — bez kosztów, bez zobowiązań.</p>
+      </div>
+      <div class="contact-centered">
+        <form class="contact-form" id="contactForm" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="fname" data-pl="Imię i nazwisko / firma" data-en="Name / company">Imię i nazwisko / firma</label>
+              <input type="text" id="fname" name="name" autocomplete="name" required>
+            </div>
+            <div class="form-group">
+              <label for="femail" data-pl="Adres email" data-en="Email address">Adres email</label>
+              <input type="email" id="femail" name="email" autocomplete="email" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="fmessage" data-pl="Opisz obiekt i problem — im więcej szczegółów, tym lepiej" data-en="Describe the facility and problem — the more detail, the better">Opisz obiekt i problem — im więcej szczegółów, tym lepiej</label>
+            <textarea id="fmessage" name="message" rows="5" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" id="contactSubmit" data-pl="Wyślij wiadomość" data-en="Send message">Wyślij wiadomość</button>
+          <div class="form-feedback" id="formFeedback" hidden></div>
+        </form>
+        <a href="https://www.linkedin.com/in/jancichosz" target="_blank" rel="noopener" class="contact-linkedin">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+          <span>LinkedIn — Jan Cichosz</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container footer-inner">
+      <span class="logo">JCIT<span class="logo-sub">Jan Cichosz</span></span>
+      <p class="footer-copy" data-pl="© 2025–2026 JCIT Jan Cichosz. Wszelkie prawa zastrzeżone." data-en="© 2025–2026 JCIT Jan Cichosz. All rights reserved.">© 2025–2026 JCIT Jan Cichosz. Wszelkie prawa zastrzeżone.</p>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
 </body>
 </html>
