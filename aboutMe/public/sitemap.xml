@@ -2,11 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://jsit.pl/</loc>
+    <loc>https://jcit.pl/</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="pl" href="https://jsit.pl/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://jsit.pl/"/>
+    <xhtml:link rel="alternate" hreflang="pl" href="https://jcit.pl/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://jcit.pl/"/>
   </url>
 </urlset>

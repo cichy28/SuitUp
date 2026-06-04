@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://jsit.pl/sitemap.xml
+Sitemap: https://jcit.pl/sitemap.xml
