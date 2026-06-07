@@ -21,5 +21,9 @@ ingress:
   - hostname: jcit.pl
     service: http://aboutme:3000
 
-  # Reguła 4: Domyślna, łapie cały pozostały ruch i zwraca błąd 404. Musi być na końcu.
+  # Reguła 4: Backup Confluence (Solwena) - chroniony przez Cloudflare Access + WARP.
+  - hostname: solold.jcit.pl
+    service: http://solold:80
+
+  # Reguła 5: Domyślna, łapie cały pozostały ruch i zwraca błąd 404. Musi być na końcu.
   - service: http_status:404

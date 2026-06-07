@@ -66,6 +66,15 @@ services:
     networks:
       - proxy-net
 
+  solold:
+    image: nginx:alpine
+    container_name: solold
+    volumes:
+      - /Main/Praca_Dane/Solwena/Apki/CFBackup/site:/usr/share/nginx/html:ro
+    networks:
+      - proxy-net
+    restart: unless-stopped
+
   # From docker-compose.aboutme.yml
   aboutme:
     image: ghcr.io/cichy28/suit-up/aboutme:latest
